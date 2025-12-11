@@ -27,7 +27,7 @@
             <div class="mb-6">
                 <h4 class="text-lg font-medium text-gray-900 mb-4">Plan Features</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @foreach($activePlanPurchase->plan->capabilities ?? [] as $key => $value)
+                    @foreach($combinedCapabilities as $key => $value)
                         <div class="flex items-center space-x-3">
                             <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -46,7 +46,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-600">Properties Listed</p>
-                                <p class="text-2xl font-bold text-primary">{{ auth()->user()->properties()->count() }} / {{ $activePlanPurchase->plan->capabilities['max_listings'] ?? 'Unlimited' }}</p>
+                                <p class="text-2xl font-bold text-primary">{{ auth()->user()->properties()->count() }} / {{ $combinedCapabilities['max_listings'] ?? 'Unlimited' }}</p>
                             </div>
                             <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
                                 <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">

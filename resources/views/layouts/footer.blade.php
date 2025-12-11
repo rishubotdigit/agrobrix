@@ -20,6 +20,8 @@
                 <a href="/terms" class="text-gray-700 hover:text-emerald-600 transition-colors font-medium">Terms of Service</a>
                 <a href="/privacy" class="text-gray-700 hover:text-emerald-600 transition-colors font-medium">Privacy Policy</a>
                 <a href="/faq" class="text-gray-700 hover:text-emerald-600 transition-colors font-medium">FAQ</a>
+                <a href="{{ route('contact') }}" class="text-gray-700 hover:text-emerald-600 transition-colors font-medium">Contact Us</a>
+                <a href="{{ route('refund') }}" class="text-gray-700 hover:text-emerald-600 transition-colors font-medium">Refund/Cancellation Policy</a>
             </div>
         </div>
     </div>

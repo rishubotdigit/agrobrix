@@ -43,13 +43,13 @@
                         </a>
                     @else
                         @auth
-                            <button onclick="openPurchaseModal({{ $plan->id }}, '{{ $plan->name }}', {{ $plan->price }})"
+                            <a href="{{ route('plans.purchase', $plan->id) }}"
                                     class="block w-full text-center {{ $plan->name === 'Pro' ? 'gradient-bg text-white hover:opacity-90' : 'bg-primary text-white hover:bg-emerald-700' }} px-6 py-3 rounded-lg font-semibold transition">
                                 <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13l-1.1-5m1.1 5l1.1 5M9 21a1 1 0 11-2 0 1 1 0 012 0zm10 0a1 1 0 11-2 0 1 1 0 012 0z"/>
                                 </svg>
                                 Purchase Plan
-                            </button>
+                            </a>
                         @else
                             <div class="space-y-2">
                                 <button onclick="openAuthModal({{ $plan->id }}, '{{ $plan->name }}')"
@@ -101,22 +101,29 @@
                     @php
                         $paymentService = app(\App\Services\PaymentService::class);
                         $availableGateways = $paymentService->getAvailableGateways();
+                        $gatewayInfo = [
+                            'razorpay' => [
+                                'name' => 'Razorpay',
+                                'description' => 'Credit/Debit Card, UPI, Net Banking',
+                            ],
+                            'phonepe' => [
+                                'name' => 'PhonePe',
+                                'description' => 'UPI, Cards, Net Banking',
+                            ],
+                            'upi_static' => [
+                                'name' => 'UPI Payment',
+                                'description' => 'Scan QR code or use UPI ID',
+                            ],
+                        ];
                     @endphp
 
                     @if(count($availableGateways) > 0)
-                        @if($paymentService->isRazorpayEnabled())
+                        @foreach($availableGateways as $index => $gateway)
                         <label class="flex items-center">
-                            <input type="radio" name="payment_method" value="razorpay" checked class="text-primary focus:ring-primary">
-                            <span class="ml-2 text-sm">Razorpay (Credit/Debit Card, UPI, Net Banking)</span>
+                            <input type="radio" name="payment_method" value="{{ $gateway }}" {{ $index === 0 ? 'checked' : '' }} class="text-primary focus:ring-primary">
+                            <span class="ml-2 text-sm">{{ $gatewayInfo[$gateway]['name'] }} ({{ $gatewayInfo[$gateway]['description'] }})</span>
                         </label>
-                        @endif
-
-                        @if($paymentService->isPhonePeEnabled())
-                        <label class="flex items-center">
-                            <input type="radio" name="payment_method" value="phonepe" {{ !$paymentService->isRazorpayEnabled() ? 'checked' : '' }} class="text-primary focus:ring-primary">
-                            <span class="ml-2 text-sm">PhonePe (UPI, Cards, Net Banking)</span>
-                        </label>
-                        @endif
+                        @endforeach
                     @else
                         <p class="text-sm text-gray-500">Payment gateway is currently not available. Please try again later.</p>
                     @endif

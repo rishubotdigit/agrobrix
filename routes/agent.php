@@ -65,4 +65,7 @@ Route::prefix('agent')->middleware(['auth', 'role:agent'])->group(function () {
     // Plan details
     Route::get('/plan', [DashboardController::class, 'plan'])->name('agent.plan');
 
+    // Payments
+    Route::get('/payments', [DashboardController::class, 'payments'])->name('agent.payments');
+
 });

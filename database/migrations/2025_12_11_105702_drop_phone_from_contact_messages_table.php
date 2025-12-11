@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('payments', function (Blueprint $table) {
-            $table->string('transaction_id')->nullable()->after('signature');
+        Schema::table('contact_messages', function (Blueprint $table) {
+            $table->dropColumn('phone');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('payments', function (Blueprint $table) {
-            $table->dropColumn('transaction_id');
+        Schema::table('contact_messages', function (Blueprint $table) {
+            $table->string('phone');
         });
     }
 };

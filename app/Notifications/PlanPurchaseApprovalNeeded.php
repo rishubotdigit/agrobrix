@@ -37,13 +37,37 @@ class PlanPurchaseApprovalNeeded extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $payment = $this->planPurchase->payment;
+        $user = $this->planPurchase->user;
+        $plan = $this->planPurchase->plan;
+
         return (new MailMessage)
-            ->subject('New Plan Purchase Requires Approval')
-            ->line('A user has purchased a plan and requires approval.')
-            ->line('User: ' . $this->planPurchase->user->name)
-            ->line('Plan: ' . $this->planPurchase->plan->name)
-            ->action('Review Purchase', url('/admin/plan-purchases/' . $this->planPurchase->id))
-            ->line('Please review and approve the purchase.');
+            ->subject('New Plan Purchase Requires Approval - ' . $plan->name)
+            ->greeting('New Plan Purchase Requires Approval')
+            ->line('A user has submitted a plan purchase payment that requires your approval.')
+            ->line('')
+            ->line('**Invoice Details:**')
+            ->line('**Customer:** ' . $user->name)
+            ->line('**Email:** ' . $user->email)
+            ->line('**Plan:** ' . $plan->name)
+            ->line('**Amount:** ₹' . number_format($payment->amount))
+            ->line('**Payment Method:** UPI Static QR')
+            ->line('**Transaction ID:** ' . $payment->transaction_id)
+            ->line('**Submission Date:** ' . $payment->updated_at->format('M d, Y \a\t h:i A'))
+            ->line('')
+            ->line('**Plan Features:**')
+            ->when($plan->max_contacts > 0, function ($mail) use ($plan) {
+                return $mail->line('• Contact Views: ' . $plan->max_contacts);
+            })
+            ->when($plan->max_featured_listings > 0, function ($mail) use ($plan) {
+                return $mail->line('• Featured Listings: ' . $plan->max_featured_listings);
+            })
+            ->when($plan->validity_period_days > 0, function ($mail) use ($plan) {
+                return $mail->line('• Validity Period: ' . $plan->validity_period_days . ' days');
+            })
+            ->line('')
+            ->action('Review & Approve Purchase', url('/admin/plan-purchases/' . $this->planPurchase->id))
+            ->line('Please verify the payment details and approve or reject the purchase accordingly.');
     }
 
     /**

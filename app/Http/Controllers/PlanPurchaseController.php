@@ -38,7 +38,7 @@ class PlanPurchaseController extends Controller
 
         // Validate gateway parameter
         $request->validate([
-            'gateway' => 'nullable|string|in:razorpay,phonepe',
+            'gateway' => 'nullable|string|in:razorpay,phonepe,upi_static',
         ]);
 
         $gateway = $request->gateway;

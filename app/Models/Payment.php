@@ -1,4 +1,3 @@
-// Modified for UPI static gateway
 <?php
 
 namespace App\Models;
@@ -18,6 +17,9 @@ class Payment extends Model
         'payment_id',
         'signature',
         'transaction_id',
+        'transaction_submitted_at',
+        'transaction_submitted_ip',
+        'transaction_submitted_user_agent',
         'type',
         'metadata',
         'gateway',

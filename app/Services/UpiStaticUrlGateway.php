@@ -1,4 +1,3 @@
-// Modified for UPI static gateway
 <?php
 
 namespace App\Services;

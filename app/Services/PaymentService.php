@@ -1,4 +1,3 @@
-// Modified for UPI static gateway
 <?php
 
 namespace App\Services;
@@ -220,9 +219,33 @@ class PaymentService
      */
     private function handlePlanPurchasePayment(Payment $payment): void
     {
+        Log::info('Handling plan purchase payment', [
+            'payment_id' => $payment->id,
+            'plan_purchase_id' => $payment->plan_purchase_id,
+            'gateway' => $payment->gateway
+        ]);
+
         // Activate the plan purchase
         if ($payment->planPurchase) {
+            Log::info('Plan purchase found, activating', [
+                'plan_purchase_id' => $payment->planPurchase->id,
+                'current_status' => $payment->planPurchase->status
+            ]);
+
+            // For UPI static payments, approve the plan purchase before activation
+            if ($payment->gateway === 'upi_static') {
+                $payment->planPurchase->update(['status' => 'approved']);
+                Log::info('Plan purchase status set to approved for UPI static', ['plan_purchase_id' => $payment->planPurchase->id]);
+            }
+
             $payment->planPurchase->activate();
+            Log::info('Plan purchase activated', [
+                'plan_purchase_id' => $payment->planPurchase->id,
+                'new_status' => $payment->planPurchase->status,
+                'expires_at' => $payment->planPurchase->expires_at
+            ]);
+        } else {
+            Log::error('No plan purchase found for payment', ['payment_id' => $payment->id]);
         }
     }
 
@@ -231,11 +254,22 @@ class PaymentService
      */
     public function handlePaymentApproval(Payment $payment): void
     {
+        Log::info('Payment approval handling started', [
+            'payment_id' => $payment->id,
+            'status' => $payment->status,
+            'approval_status' => $payment->approval_status,
+            'gateway' => $payment->gateway,
+            'plan_purchase_id' => $payment->plan_purchase_id
+        ]);
+
         if (!$payment->isApproved()) {
+            Log::warning('Payment not approved, skipping activation', ['payment_id' => $payment->id]);
             return;
         }
 
         // Handle successful payment processing
         $this->handleSuccessfulPayment($payment);
+
+        Log::info('Payment approval handling completed', ['payment_id' => $payment->id]);
     }
 }

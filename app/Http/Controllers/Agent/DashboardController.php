@@ -44,4 +44,25 @@ class DashboardController extends Controller
             'totalCommission' => $totalCommission,
         ]);
     }
+
+    public function payments()
+    {
+        $user = auth()->user();
+        $gatewayInfo = [
+            'razorpay' => ['name' => 'Razorpay'],
+            'phonepe' => ['name' => 'PhonePe'],
+            'upi_static' => ['name' => 'UPI Static'],
+        ];
+        $payments = Payment::where('user_id', $user->id)
+            ->with(['planPurchase.plan', 'property'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($payment) use ($gatewayInfo) {
+                $payment->gateway_name = $gatewayInfo[$payment->gateway]['name'] ?? ucfirst($payment->gateway);
+                $payment->payment_mode = ucfirst(str_replace('_', ' ', $payment->type));
+                return $payment;
+            });
+
+        return view('agent.payments', compact('payments'));
+    }
 }

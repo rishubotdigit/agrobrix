@@ -79,11 +79,11 @@ class PlanPurchaseController extends Controller
             return redirect()->back()->with('error', 'Only pending purchases can be approved');
         }
 
-        $planPurchase->update(['status' => 'approved']);
+        $planPurchase->activate();
 
-        Log::info('Plan purchase approved', ['purchase_id' => $planPurchase->id, 'admin_id' => auth()->id()]);
+        Log::info('Plan purchase approved and activated', ['purchase_id' => $planPurchase->id, 'admin_id' => auth()->id()]);
 
-        return redirect()->back()->with('success', 'Plan purchase approved successfully');
+        return redirect()->back()->with('success', 'Plan purchase approved and activated successfully');
     }
 
     /**

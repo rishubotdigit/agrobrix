@@ -1,4 +1,3 @@
-// Modified for UPI static gateway
 <?php
 
 use Illuminate\Database\Migrations\Migration;

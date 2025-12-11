@@ -84,6 +84,12 @@ class HomeController extends Controller
         $plans = Plan::all();
         return view('pages.pricing', compact('plans'));
     }
+
+    public function refund()
+    {
+        return view('refund');
+    }
+
     public function forBuyers()
     {
         return view('pages.for-buyers');

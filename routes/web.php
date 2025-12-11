@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\Buyer\SearchController;
 use App\Http\Controllers\PlanController;
@@ -14,6 +15,9 @@ Route::get('/search', [SearchController::class, 'advanced'])->name('search.advan
 Route::get('/plans', [PlanController::class, 'index'])->name('plans.index');
 Route::get('/plans/{plan}/purchase', [PlanController::class, 'purchase'])->name('plans.purchase')->middleware('auth');
 Route::post('/payment/verify', [PlanController::class, 'verifyPayment'])->name('payment.verify')->middleware('auth');
+Route::get('/payment/success/{payment}', [\App\Http\Controllers\PaymentController::class, 'success'])->name('payment.success')->middleware('auth');
+Route::get('/payment/static-success/{payment}', [\App\Http\Controllers\PaymentController::class, 'staticSuccess'])->name('payment.static.success')->middleware('auth');
+Route::get('/payment/failure', [\App\Http\Controllers\PaymentController::class, 'failure'])->name('payment.failure')->middleware('auth');
 
 Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/careers', [HomeController::class, 'careers'])->name('careers');
@@ -27,6 +31,9 @@ Route::get('/for-sellers', [HomeController::class, 'forSellers'])->name('for-sel
 Route::get('/post-property', [HomeController::class, 'postProperty'])->name('post-property');
 Route::get('/roles', [HomeController::class, 'roles'])->name('roles');
 Route::get('/pricing', [HomeController::class, 'pricing'])->name('pricing');
+Route::get('/contact', [ContactController::class, 'contact'])->name('contact');
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.submit');
+Route::get('/refund', [HomeController::class, 'refund'])->name('refund');
 
 Route::middleware('guest')->group(function () {
     Route::get('/forgot-password', [ForgotPasswordController::class, 'showForgotPasswordForm'])->name('password.request');

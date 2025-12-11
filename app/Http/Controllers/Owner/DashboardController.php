@@ -52,6 +52,33 @@ class DashboardController extends Controller
         $activePlanPurchases = $user->activePlanPurchases();
         $combinedCapabilities = $user->getCombinedCapabilities();
 
+        \Illuminate\Support\Facades\Log::info('Owner plan page loaded', [
+            'user_id' => $user->id,
+            'active_plan_purchases_count' => $activePlanPurchases->count(),
+            'combined_capabilities' => $combinedCapabilities
+        ]);
+
         return view('owner.plan', compact('activePlanPurchases', 'combinedCapabilities'));
+    }
+
+    public function payments()
+    {
+        $user = auth()->user();
+        $gatewayInfo = [
+            'razorpay' => ['name' => 'Razorpay'],
+            'phonepe' => ['name' => 'PhonePe'],
+            'upi_static' => ['name' => 'UPI Static'],
+        ];
+        $payments = Payment::where('user_id', $user->id)
+            ->with(['planPurchase.plan', 'property'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($payment) use ($gatewayInfo) {
+                $payment->gateway_name = $gatewayInfo[$payment->gateway]['name'] ?? ucfirst($payment->gateway);
+                $payment->payment_mode = ucfirst(str_replace('_', ' ', $payment->type));
+                return $payment;
+            });
+
+        return view('owner.payments', compact('payments'));
     }
 }

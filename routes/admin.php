@@ -1,4 +1,3 @@
-// Modified for UPI static gateway
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -13,6 +12,7 @@ use App\Http\Controllers\Admin\PaymentGatewayController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\SmsGatewayController;
 use App\Http\Controllers\Admin\PlanPurchaseController;
+use App\Http\Controllers\Admin\AdminContactController;
 
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('admin.dashboard');
@@ -60,6 +60,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::post('plan-purchases/{planPurchase}/approve', [PlanPurchaseController::class, 'approve'])->name('admin.plan-purchases.approve');
     Route::post('plan-purchases/{planPurchase}/reject', [PlanPurchaseController::class, 'reject'])->name('admin.plan-purchases.reject');
 
+    // Payments Management
+    Route::get('payments', [PaymentController::class, 'index'])->name('admin.payments.index');
+    Route::get('payments/{payment}', [PaymentController::class, 'show'])->name('admin.payments.show');
+
     // Payment Gateways
     Route::get('payment-gateways', [PaymentGatewayController::class, 'index'])->name('admin.payment-gateways.index');
     Route::post('payment-gateways', [PaymentGatewayController::class, 'update'])->name('admin.payment-gateways.update');
@@ -76,5 +80,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     // SMS Gateways
     Route::get('sms-gateways', [SmsGatewayController::class, 'index'])->name('admin.sms-gateways.index');
     Route::post('sms-gateways', [SmsGatewayController::class, 'update'])->name('admin.sms-gateways.update');
+    // Contact Messages
+    Route::get('contact-messages', [AdminContactController::class, 'index'])->name('admin.contact-messages.index');
+    Route::delete('contact-messages/{contactMessage}', [AdminContactController::class, 'destroy'])->name('admin.contact-messages.destroy');
 
 });

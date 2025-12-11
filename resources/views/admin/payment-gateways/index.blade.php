@@ -243,6 +243,95 @@
                         </div>
                     </div>
 
+                    <!-- UPI Static URL Configuration Card -->
+                    <div class="bg-white shadow-lg rounded-xl border border-gray-200 overflow-hidden">
+                        <div class="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-semibold text-white">UPI Static URL</h3>
+                                        <p class="text-green-100 text-sm">Manual UPI payment with static URL</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    @if($settings['upi_static_enabled'] == '1')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                            </svg>
+                                            Enabled
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                            </svg>
+                                            Disabled
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="px-6 py-6">
+                            <div class="mb-6">
+                                <div class="flex items-start">
+                                    <div class="flex items-center h-5">
+                                        <input type="checkbox" id="upi_static_enabled" name="upi_static_enabled" value="1" {{ $settings['upi_static_enabled'] == '1' ? 'checked' : '' }} class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                                    </div>
+                                    <div class="ml-3 text-sm">
+                                        <label for="upi_static_enabled" class="font-medium text-gray-700">Enable UPI Static URL Gateway</label>
+                                        <p class="text-gray-500">Allow customers to make payments through static UPI URL. Payments require manual approval.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="upi_static_merchant_name" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Merchant Name <span class="text-red-500">*</span>
+                                        </label>
+                                        <input type="text" id="upi_static_merchant_name" name="upi_static_merchant_name" value="{{ $settings['upi_static_merchant_name'] }}" class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm @error('upi_static_merchant_name') border-red-300 @enderror" placeholder="Your business name">
+                                        <p class="mt-1 text-xs text-gray-500">Name displayed to customers</p>
+                                        @error('upi_static_merchant_name')
+                                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div>
+                                        <label for="upi_static_upi_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                            UPI ID <span class="text-red-500">*</span>
+                                        </label>
+                                        <input type="text" id="upi_static_upi_id" name="upi_static_upi_id" value="{{ $settings['upi_static_upi_id'] }}" class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm @error('upi_static_upi_id') border-red-300 @enderror" placeholder="merchant@upi">
+                                        <p class="mt-1 text-xs text-gray-500">Your UPI ID for receiving payments</p>
+                                        @error('upi_static_upi_id')
+                                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="upi_static_description" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Payment Description
+                                        </label>
+                                        <textarea id="upi_static_description" name="upi_static_description" rows="4" class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm @error('upi_static_description') border-red-300 @enderror" placeholder="Payment for services">{{ $settings['upi_static_description'] }}</textarea>
+                                        <p class="mt-1 text-xs text-gray-500">Description shown in UPI app</p>
+                                        @error('upi_static_description')
+                                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Gateway Settings Card -->
                     <div class="bg-white shadow-lg rounded-xl border border-gray-200 overflow-hidden">
                         <div class="bg-gradient-to-r from-gray-700 to-gray-800 px-6 py-4">
@@ -269,6 +358,7 @@
                                     <select id="default_gateway" name="default_gateway" class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm @error('default_gateway') border-red-300 @enderror">
                                         <option value="razorpay" {{ $settings['default_gateway'] == 'razorpay' ? 'selected' : '' }}>Razorpay</option>
                                         <option value="phonepe" {{ $settings['default_gateway'] == 'phonepe' ? 'selected' : '' }}>PhonePe</option>
+                                        <option value="upi_static" {{ $settings['default_gateway'] == 'upi_static' ? 'selected' : '' }}>UPI Static URL</option>
                                     </select>
                                     <p class="mt-1 text-xs text-gray-500">Primary gateway for all new payments</p>
                                     @error('default_gateway')
@@ -283,6 +373,7 @@
                                     <select id="fallback_gateway" name="fallback_gateway" class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm @error('fallback_gateway') border-red-300 @enderror">
                                         <option value="razorpay" {{ $settings['fallback_gateway'] == 'razorpay' ? 'selected' : '' }}>Razorpay</option>
                                         <option value="phonepe" {{ $settings['fallback_gateway'] == 'phonepe' ? 'selected' : '' }}>PhonePe</option>
+                                        <option value="upi_static" {{ $settings['fallback_gateway'] == 'upi_static' ? 'selected' : '' }}>UPI Static URL</option>
                                     </select>
                                     <p class="mt-1 text-xs text-gray-500">Used when the default gateway fails</p>
                                     @error('fallback_gateway')

@@ -35,4 +35,7 @@ Route::prefix('owner')->middleware(['auth', 'role:owner'])->group(function () {
 
     // Plan details
     Route::get('/plan', [DashboardController::class, 'plan'])->name('owner.plan');
+
+    // Payments
+    Route::get('/payments', [DashboardController::class, 'payments'])->name('owner.payments');
 });
