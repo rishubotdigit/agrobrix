@@ -1,0 +1,124 @@
+@extends('layouts.admin.app')
+
+@section('title', 'Plan Purchases Management')
+
+@section('content')
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Plan Purchases Management</h1>
+    </div>
+
+    @if(session('success'))
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <!-- Filters -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+        <form method="GET" class="flex flex-wrap gap-4">
+            <div>
+                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                <select name="status" id="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-emerald-200 focus:ring-opacity-50">
+                    <option value="">All Statuses</option>
+                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
+                    <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                    <option value="purchased" {{ request('status') == 'purchased' ? 'selected' : '' }}>Purchased</option>
+                    <option value="activated" {{ request('status') == 'activated' ? 'selected' : '' }}>Activated</option>
+                    <option value="expired" {{ request('status') == 'expired' ? 'selected' : '' }}>Expired</option>
+                </select>
+            </div>
+            <div>
+                <label for="date_from" class="block text-sm font-medium text-gray-700">Date From</label>
+                <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-emerald-200 focus:ring-opacity-50">
+            </div>
+            <div>
+                <label for="date_to" class="block text-sm font-medium text-gray-700">Date To</label>
+                <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-emerald-200 focus:ring-opacity-50">
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="bg-primary hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
+                    Filter
+                </button>
+                <a href="{{ route('admin.plan-purchases.index') }}" class="ml-2 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                    Clear
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @forelse($purchases as $purchase)
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $purchase->id }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ $purchase->user->name }}<br>
+                                <span class="text-gray-500">{{ $purchase->user->email }}</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $purchase->plan->name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹{{ number_format($purchase->payment->amount ?? 0, 2) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                    @if($purchase->status == 'pending') bg-yellow-100 text-yellow-800
+                                    @elseif($purchase->status == 'approved') bg-green-100 text-green-800
+                                    @elseif($purchase->status == 'rejected') bg-red-100 text-red-800
+                                    @elseif($purchase->status == 'activated') bg-blue-100 text-blue-800
+                                    @elseif($purchase->status == 'expired') bg-gray-100 text-gray-800
+                                    @else bg-gray-100 text-gray-800
+                                    @endif">
+                                    {{ ucfirst($purchase->status) }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $purchase->created_at->format('M d, Y') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <a href="{{ route('admin.plan-purchases.show', $purchase) }}" class="text-primary hover:text-emerald-700 mr-2">View</a>
+                                @if($purchase->status == 'pending')
+                                    <form method="POST" action="{{ route('admin.plan-purchases.approve', $purchase) }}" class="inline">
+                                        @csrf
+                                        @method('POST')
+                                        <button type="submit" class="text-green-600 hover:text-green-900 mr-2" onclick="return confirm('Are you sure you want to approve this purchase?')">Approve</button>
+                                    </form>
+                                    <form method="POST" action="{{ route('admin.plan-purchases.reject', $purchase) }}" class="inline">
+                                        @csrf
+                                        @method('POST')
+                                        <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure you want to reject this purchase?')">Reject</button>
+                                    </form>
+                                @elseif($purchase->status == 'approved' || $purchase->status == 'purchased')
+                                    <form method="POST" action="{{ route('admin.plan-purchases.activate', $purchase) }}" class="inline">
+                                        @csrf
+                                        @method('POST')
+                                        <button type="submit" class="bg-primary hover:bg-emerald-700 text-white px-3 py-1 rounded text-xs mr-2" onclick="return confirm('Are you sure you want to activate this purchase?')">Activate</button>
+                                    </form>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-6 py-4 text-center text-gray-500">No plan purchases found</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+@endsection

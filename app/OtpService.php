@@ -1,0 +1,281 @@
+<?php
+
+namespace App;
+
+use Twilio\Rest\Client;
+use App\Models\User;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
+use App\Models\Setting;
+use Illuminate\Support\Facades\Session;
+
+class OtpService
+{
+    protected $twilio;
+
+    public function __construct()
+    {
+        $sid = config('services.twilio.sid');
+        $token = config('services.twilio.token');
+
+        if (!$sid || !$token) {
+            $this->twilio = null;
+            return;
+        }
+
+        $this->twilio = new Client($sid, $token);
+    }
+
+    public function generateOtp(): string
+    {
+        return str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+    }
+
+    public function sendOtp(string $mobile, string $otp): array
+    {
+        if (!$this->twilio) {
+            Log::error('Twilio client not initialized: missing credentials');
+            return ['success' => false, 'response' => null, 'error' => 'Twilio client not initialized: missing credentials'];
+        }
+
+        try {
+            $message = $this->twilio->messages->create(
+                $mobile,
+                [
+                    'from' => config('services.twilio.from'),
+                    'body' => "Your OTP code is: {$otp}. Valid for 5 minutes."
+                ]
+            );
+            return ['success' => true, 'response' => $message->toArray(), 'error' => null];
+        } catch (\Exception $e) {
+            dd($e);
+            Log::error('OTP sending failed: ' . $e->getMessage());
+            return ['success' => false, 'response' => null, 'error' => $e->getMessage()];
+        }
+    }
+
+    public function verifyOtp(User $user, string $otp): bool
+    {
+        if (Setting::get('otp_verification_enabled') != '1') {
+            return false;
+        }
+
+        $gateway = $this->getGateway();
+        if ($gateway === '2factor') {
+            if ($this->verifyOtp2Factor($user->otp_session_id, $otp)) {
+                $user->update(['verified_at' => now()]);
+                return true;
+            }
+            return false;
+        } else {
+            if ($user->otp_code === $otp && !$user->isOtpExpired()) {
+                $user->update([
+                    'otp_code' => null,
+                    'otp_expiry' => null,
+                    'verified_at' => now(),
+                ]);
+                return true;
+            }
+            return false;
+        }
+    }
+
+    public function getGateway(): string
+    {
+        return Setting::get('sms_gateway', 'twilio');
+    }
+
+    public function sendOtp2Factor(string $mobile, string $otp): array
+    {
+        $template = Setting::get('otp_template', '{otp} is Your OTP for Mobile Number verification');
+        $msg = str_replace('{otp}', $otp, $template);
+        try {
+            $response = Http::post('https://2factor.in/API/R1/', [
+                'module' => 'TRANS_SMS',
+                'apikey' => Setting::get('2factor_api_key'),
+                'to' => $mobile,
+                'from' => Setting::get('sender_id'),
+                'msg' => $msg,
+                'peid' => Setting::get('entity_id'),
+                'ctid' => Setting::get('template_id'),
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $success = isset($data['Status']) && $data['Status'] === 'Success';
+                return ['success' => $success, 'response' => $data, 'error' => null];
+            } else {
+                return ['success' => false, 'response' => $response->json() ?? null, 'error' => 'HTTP error'];
+            }
+        } catch (\Exception $e) {
+            Log::error('2Factor OTP sending failed: ' . $e->getMessage());
+            return ['success' => false, 'response' => null, 'error' => $e->getMessage()];
+        }
+    }
+
+    public function verifyOtp2Factor(string $session_id, string $otp): bool
+    {
+        try {
+            $response = Http::get("https://2factor.in/API/V1/" . Setting::get('2factor_api_key') . "/SMS/VERIFY/{$session_id}/{$otp}");
+
+            if ($response->successful()) {
+                $data = $response->json();
+                return isset($data['Status']) && $data['Status'] === 'Success';
+            }
+            return false;
+        } catch (\Exception $e) {
+            Log::error('2Factor OTP verification failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function canResendOtp(User $user): bool
+    {
+        $now = now();
+        $resendLimit = Setting::get('otp_resend_limit', 3);
+        if ($user->last_otp_resend_at && $user->last_otp_resend_at->diffInHours($now) >= 1) {
+            $user->update(['otp_resend_count' => 0]);
+        }
+        return (!$user->last_otp_resend_at || $user->last_otp_resend_at->diffInMinutes($now) >= 1) && $user->otp_resend_count < $resendLimit;
+    }
+
+    public function sendOtpToUser(User $user): array
+    {
+        if (Setting::get('otp_verification_enabled') != '1') {
+            return ['success' => false, 'response' => null, 'error' => 'OTP verification not enabled'];
+        }
+
+        $isResend = !is_null($user->otp_code);
+        $otp = $isResend ? $user->otp_code : $this->generateOtp();
+        $gateway = $this->getGateway();
+
+        $result = null;
+        if ($gateway === '2factor') {
+            $result = $this->sendOtp2Factor($user->mobile, $otp);
+        } else {
+            $result = $this->sendOtp($user->mobile, $otp);
+        }
+
+        if ($result['success']) {
+            if ($gateway === '2factor') {
+                $user->otp_session_id = $result['response']['Details'] ?? null;
+                $user->save();
+            }
+            if (!$isResend) {
+                $user->update([
+                    'otp_code' => $otp,
+                    'otp_expiry' => now()->addMinutes(Setting::get('otp_expiry_time', 5)),
+                    'otp_resend_count' => 1,
+                    'last_otp_resend_at' => now(),
+                ]);
+            } else {
+                $user->increment('otp_resend_count');
+                $user->update(['last_otp_resend_at' => now()]);
+            }
+        }
+
+        return $result;
+    }
+
+    public function sendOtpToMobile(string $mobile, string $otp): array
+    {
+        if (Setting::get('otp_verification_enabled') != '1') {
+            return ['success' => false, 'response' => null, 'error' => 'OTP verification not enabled'];
+        }
+
+        $gateway = $this->getGateway();
+      
+        $result = null;
+        if ($gateway === '2factor') {
+            $result = $this->sendOtp2Factor($mobile, $otp);
+            if ($result['success']) {
+                Session::put('otp_session_id', $result['response']['Details'] ?? null);
+            }
+        } else {
+            $result = $this->sendOtp($mobile, $otp);
+            if ($result['success']) {
+                Session::put('otp_code', $otp);
+                Session::put('otp_expiry', now()->addMinutes(Setting::get('otp_expiry_time', 5)));
+            }
+        }
+        return $result;
+    }
+
+    public function verifyOtpFromSession(string $otp): bool
+    {
+        if (Setting::get('otp_verification_enabled') != '1') {
+            return false;
+        }
+
+        $gateway = $this->getGateway();
+        if ($gateway === '2factor') {
+            $session_id = Session::get('otp_session_id');
+            if ($session_id && $this->verifyOtp2Factor($session_id, $otp)) {
+                Session::forget('otp_session_id');
+                return true;
+            }
+        } else {
+            $stored_otp = Session::get('otp_code');
+            $expiry = Session::get('otp_expiry');
+            if ($stored_otp === $otp && $expiry && now()->lessThanOrEqualTo($expiry)) {
+                Session::forget(['otp_code', 'otp_expiry']);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function canResendOtpFromSession(): bool
+    {
+        $now = now();
+        $resendLimit = Setting::get('otp_resend_limit', 3);
+        $lastResendAt = Session::get('last_otp_resend_at');
+        $resendCount = Session::get('otp_resend_count', 0);
+
+        if ($lastResendAt && $lastResendAt->diffInHours($now) >= 1) {
+            Session::put('otp_resend_count', 0);
+            $resendCount = 0;
+        }
+
+        return (!$lastResendAt || $lastResendAt->diffInMinutes($now) >= 1) && $resendCount < $resendLimit;
+    }
+
+    public function resendOtpFromSession(string $mobile): bool
+    {
+        if (Setting::get('otp_verification_enabled') != '1') {
+            return false;
+        }
+
+        if (!$this->canResendOtpFromSession()) {
+            return false;
+        }
+
+        $gateway = $this->getGateway();
+        $otp = Session::get('otp_code'); // Reuse the same OTP for resend
+        if (!$otp) {
+            $otp = $this->generateOtp();
+            Session::put('otp_code', $otp);
+            Session::put('otp_expiry', now()->addMinutes(Setting::get('otp_expiry_time', 5)));
+        }
+
+        $sent = false;
+        if ($gateway === '2factor') {
+            $result = $this->sendOtp2Factor($mobile, $otp);
+            if ($result['success']) {
+                Session::put('otp_session_id', $result['response']['Details'] ?? null);
+                $sent = true;
+            }
+        } else {
+            $result = $this->sendOtp($mobile, $otp);
+            $sent = $result['success'];
+        }
+
+        if ($sent) {
+            $resendCount = Session::get('otp_resend_count', 0) + 1;
+            Session::put('otp_resend_count', $resendCount);
+            Session::put('last_otp_resend_at', now());
+        }
+
+        return $sent;
+    }
+}
