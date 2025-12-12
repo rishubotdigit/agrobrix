@@ -20,6 +20,10 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Buying Purpose</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timeline</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Buyer Type</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Site Visit</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
@@ -27,26 +31,31 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 @forelse($leads as $lead)
                 <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $lead->name ?? 'N/A' }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $lead->email ?? 'N/A' }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $lead->phone ?? 'N/A' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $lead->buyer_name ?? 'N/A' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $lead->buyer_email ?? 'N/A' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $lead->buyer_phone ?? 'N/A' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $lead->buying_purpose ?? 'N/A' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $lead->buying_timeline ?? 'N/A' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $lead->buyer_type ?? 'N/A' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $lead->interested_in_site_visit ? 'Yes' : 'No' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
                             @if(($lead->status ?? '') == 'new') bg-blue-100 text-blue-800
                             @elseif(($lead->status ?? '') == 'contacted') bg-yellow-100 text-yellow-800
-                            @elseif(($lead->status ?? '') == 'qualified') bg-green-100 text-green-800
+                            @elseif(($lead->status ?? '') == 'interested') bg-green-100 text-green-800
+                            @elseif(($lead->status ?? '') == 'closed') bg-red-100 text-red-800
                             @else bg-gray-100 text-gray-800 @endif">
                             {{ ucfirst($lead->status ?? 'unknown') }}
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <a href="#" class="text-primary hover:text-emerald-700 mr-3">View</a>
-                        <a href="#" class="text-primary hover:text-emerald-700">Edit</a>
+                        <a href="{{ route('agent.leads.show', $lead->id) }}" class="text-primary hover:text-emerald-700 mr-3">View</a>
+                        <a href="{{ route('agent.leads.edit', $lead->id) }}" class="text-primary hover:text-emerald-700">Edit</a>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                    <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500">
                         No leads found. Start by adding some leads to your system.
                     </td>
                 </tr>

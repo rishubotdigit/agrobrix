@@ -203,21 +203,9 @@
                                     View Details
                                 </a>
 
-                                @auth
-                                    @if(Auth::user()->role === 'buyer')
-                                        <button onclick="viewContact({{ $property->id }})" class="w-full py-2 px-4 border-2 border-emerald-500 text-emerald-600 rounded-lg font-semibold hover:bg-emerald-50 transition-colors">
-                                            Unlock Contact
-                                        </button>
-                                    @else
-                                        <a href="{{ route('plans.index') }}" class="w-full py-2 px-4 border-2 border-orange-500 text-orange-600 rounded-lg font-semibold hover:bg-orange-50 transition-colors text-center block">
-                                            Unlock Contact
-                                        </a>
-                                    @endif
-                                @else
-                                    <a href="{{ route('plans.index') }}" class="w-full py-2 px-4 border-2 border-orange-500 text-orange-600 rounded-lg font-semibold hover:bg-orange-50 transition-colors text-center block">
-                                        Unlock Contact
-                                    </a>
-                                @endauth
+                                <button onclick="handleContactClick({{ $property->id }})" class="w-full py-2 px-4 border-2 border-emerald-500 text-emerald-600 rounded-lg font-semibold hover:bg-emerald-50 transition-colors">
+                                    Contact
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -342,21 +330,9 @@
                                     View Details
                                 </a>
 
-                                @auth
-                                    @if(Auth::user()->role === 'buyer')
-                                        <button onclick="viewContact({{ $property->id }})" class="w-full py-2 px-4 border-2 border-emerald-500 text-emerald-600 rounded-lg font-semibold hover:bg-emerald-50 transition-colors">
-                                            Unlock Contact
-                                        </button>
-                                    @else
-                                        <a href="{{ route('plans.index') }}" class="w-full py-2 px-4 border-2 border-orange-500 text-orange-600 rounded-lg font-semibold hover:bg-orange-50 transition-colors text-center block">
-                                            Unlock Contact
-                                        </a>
-                                    @endif
-                                @else
-                                    <a href="{{ route('plans.index') }}" class="w-full py-2 px-4 border-2 border-orange-500 text-orange-600 rounded-lg font-semibold hover:bg-orange-50 transition-colors text-center block">
-                                        Unlock Contact
-                                    </a>
-                                @endauth
+                                <button onclick="handleContactClick({{ $property->id }})" class="w-full py-2 px-4 border-2 border-emerald-500 text-emerald-600 rounded-lg font-semibold hover:bg-emerald-50 transition-colors">
+                                    Contact
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -469,105 +445,6 @@
 
    
 
-    <!-- Contact Modal -->
-    <div id="contactModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
-            <div class="mt-3">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Contact Details</h3>
-                <div id="contactDetails" class="text-sm text-gray-700">
-                    <!-- Contact details will be loaded here -->
-                </div>
-                <div class="flex justify-end mt-4">
-                    <button onclick="closeContactModal()" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        function viewContact(propertyId) {
-            fetch(`/buyer/properties/${propertyId}/contact`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                    'Accept': 'application/json',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.contact) {
-                    showContactDetails(data.contact);
-                } else {
-                    alert(data.error || 'An error occurred');
-                }
-            })
-            .catch(error => {
-                console.error('Error viewing contact:', error);
-                alert('An error occurred while viewing contact');
-            });
-        }
-
-        function showContactDetails(contact) {
-            const contactHtml = `
-                <p><strong>Name:</strong> ${contact.owner_name}</p>
-                <p><strong>Email:</strong> ${contact.owner_email}</p>
-                <p><strong>Mobile:</strong> ${contact.owner_mobile}</p>
-            `;
-            document.getElementById('contactDetails').innerHTML = contactHtml;
-            document.getElementById('contactModal').classList.remove('hidden');
-        }
-
-        function closeContactModal() {
-            document.getElementById('contactModal').classList.add('hidden');
-        }
-
-        // Close modal when clicking outside
-        document.getElementById('contactModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeContactModal();
-            }
-        });
-
-        function toggleWishlist(propertyId, buttonElement) {
-            const heartIcon = buttonElement.querySelector('svg');
-            const isInWishlist = heartIcon.classList.contains('fill-current');
-
-            const url = isInWishlist ? `/buyer/wishlist/remove/${propertyId}` : '/buyer/wishlist/add';
-            const method = isInWishlist ? 'DELETE' : 'POST';
-            const body = isInWishlist ? null : JSON.stringify({ property_id: propertyId });
-
-            fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                    'Accept': 'application/json',
-                },
-                body: body
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Toggle the heart appearance
-                    if (isInWishlist) {
-                        heartIcon.classList.remove('text-red-500', 'fill-current');
-                        heartIcon.classList.add('text-white');
-                        heartIcon.setAttribute('fill', 'none');
-                    } else {
-                        heartIcon.classList.remove('text-white');
-                        heartIcon.classList.add('text-red-500', 'fill-current');
-                        heartIcon.setAttribute('fill', 'currentColor');
-                    }
-                } else {
-                    alert(data.error || 'An error occurred');
-                }
-            })
-            .catch(error => {
-                console.error('Error toggling wishlist:', error);
-                alert('An error occurred while updating wishlist');
-            });
-        }
-    </script>
+@include('components.contact-inquiry-modal', ['propertyId' => null])
 
 @endsection

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\ViewedContact;
 use App\Models\Property;
 use App\Models\Payment;
+use App\Models\Lead;
 
 class DashboardController extends Controller
 {
@@ -80,5 +81,14 @@ class DashboardController extends Controller
             });
 
         return view('owner.payments', compact('payments'));
+    }
+
+    public function leads()
+    {
+        $leads = Lead::whereHas('property', function($q) {
+            $q->where('user_id', auth()->id());
+        })->with('property')->orderBy('created_at', 'desc')->get();
+
+        return view('owner.leads.index', compact('leads'));
     }
 }

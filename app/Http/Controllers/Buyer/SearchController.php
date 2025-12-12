@@ -6,10 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Lead;
 use App\Models\PlanPurchase;
 use App\Models\Property;
+use App\Models\Setting;
 use App\Models\Wishlist;
+use App\OtpService;
 use App\Traits\CapabilityTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 
 class SearchController extends Controller
 {
@@ -172,23 +176,26 @@ class SearchController extends Controller
     {
         $user = Auth::user();
 
-        // Get owner's active plan purchases
-        $activePurchases = $property->owner->activePlanPurchases();
+        // Bypass owner contact limit checks for buyers - they have unlimited free access
+        if ($user->role !== 'buyer') {
+            // Get owner's active plan purchases
+            $activePurchases = $property->owner->activePlanPurchases();
 
-        if ($activePurchases->isEmpty()) {
-            return response()->json([
-                'error' => 'Owner has no active plan.'
-            ], 403);
-        }
+            if ($activePurchases->isEmpty()) {
+                return response()->json([
+                    'error' => 'Owner has no active plan.'
+                ], 403);
+            }
 
-        // Check max_contacts capability
-        $maxContacts = $this->getCapabilityValue($property->owner, 'max_contacts');
-        $totalUsedContacts = $activePurchases->sum('used_contacts');
+            // Check max_contacts capability
+            $maxContacts = $this->getCapabilityValue($property->owner, 'max_contacts');
+            $totalUsedContacts = $activePurchases->sum('used_contacts');
 
-        if ($totalUsedContacts >= $maxContacts) {
-            return response()->json([
-                'error' => 'Owner has reached contact limit, please try later.'
-            ], 403);
+            if ($totalUsedContacts >= $maxContacts) {
+                return response()->json([
+                    'error' => 'Owner has reached contact limit, please try later.'
+                ], 403);
+            }
         }
 
         // Check if lead already exists
@@ -209,8 +216,11 @@ class SearchController extends Controller
                 'buyer_phone' => $user->mobile ?? '',
             ]);
 
-            // Increment used_contacts on the first active purchase
-            $activePurchases->first()->increment('used_contacts');
+            // Only increment used_contacts if not a buyer (buyers have free unlimited access)
+            if ($user->role !== 'buyer') {
+                $activePurchases = $property->owner->activePlanPurchases();
+                $activePurchases->first()->increment('used_contacts');
+            }
         }
 
         // Return contact information
@@ -220,6 +230,133 @@ class SearchController extends Controller
                 'owner_email' => $property->owner->email,
                 'owner_mobile' => $property->owner->mobile,
             ]
+        ]);
+    }
+
+    public function submitInquiry(Request $request, Property $property)
+    {
+        $validator = Validator::make($request->all(), [
+            'buyer_name' => 'required|string|max:255',
+            'buyer_email' => 'nullable|email|max:255',
+            'buyer_phone' => 'required|string|max:15',
+            'buyer_type' => 'required|in:agent,buyer',
+            'buying_purpose' => 'nullable|string|max:255',
+            'buying_timeline' => 'nullable|in:3 months,6 months,More than 6 months',
+            'interested_in_site_visit' => 'nullable|boolean',
+            'additional_message' => 'nullable|string|max:1000',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Store inquiry data in session
+        Session::put('inquiry_data', [
+            'property_id' => $property->id,
+            'buyer_name' => $request->buyer_name,
+            'buyer_email' => $request->buyer_email,
+            'buyer_phone' => $request->buyer_phone,
+            'buyer_type' => $request->buyer_type,
+            'buying_purpose' => $request->buying_purpose,
+            'buying_timeline' => $request->buying_timeline,
+            'interested_in_site_visit' => $request->interested_in_site_visit ?? false,
+            'additional_message' => $request->additional_message,
+        ]);
+
+        // Check if OTP is enabled
+        if (Setting::get('otp_verification_enabled') == '1') {
+            $otpService = new OtpService();
+            $otp = $otpService->generateOtp();
+            $result = $otpService->sendOtpToMobile($request->buyer_phone, $otp);
+
+            if (!$result['success']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to send OTP. Please try again.'
+                ], 500);
+            }
+
+            return response()->json([
+                'success' => true,
+                'otp_required' => true,
+                'message' => 'Inquiry submitted. Please verify your phone number with the OTP sent.'
+            ]);
+        }
+
+        // If OTP not enabled, proceed to create lead
+        return $this->createLeadFromSession($property);
+    }
+
+    public function verifyOtp(Request $request, Property $property)
+    {
+        $validator = Validator::make($request->all(), [
+            'otp' => 'required|string|size:6',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $otpService = new OtpService();
+        if (!$otpService->verifyOtpFromSession($request->otp)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired OTP.'
+            ], 400);
+        }
+
+        return $this->createLeadFromSession($property);
+    }
+
+    private function createLeadFromSession(Property $property)
+    {
+        $inquiryData = Session::get('inquiry_data');
+
+        if (!$inquiryData || $inquiryData['property_id'] != $property->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Inquiry data not found.'
+            ], 400);
+        }
+
+        // Check if lead already exists
+        $existingLead = Lead::where('property_id', $property->id)
+            ->where('buyer_email', $inquiryData['buyer_email'])
+            ->first();
+
+        if ($existingLead) {
+            // Update existing lead
+            $existingLead->update(array_merge($inquiryData, [
+                'agent_id' => $property->agent_id ?? null,
+            ]));
+        } else {
+            // Create new lead
+            Lead::create(array_merge($inquiryData, [
+                'agent_id' => $property->agent_id ?? null,
+            ]));
+        }
+
+        // Capture inquiry data before clearing session
+        $inquiry = $inquiryData;
+
+        // Clear session data
+        Session::forget('inquiry_data');
+
+        // Return contact information and inquiry data
+        return response()->json([
+            'success' => true,
+            'contact' => [
+                'owner_name' => $property->owner->name,
+                'owner_email' => $property->owner->email,
+                'owner_mobile' => $property->owner->mobile,
+            ],
+            'inquiry' => $inquiry
         ]);
     }
 }

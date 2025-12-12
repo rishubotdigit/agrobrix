@@ -19,26 +19,68 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         $contactsViewed = $user->viewedContacts()->count();
-        $maxContacts = $this->getCapabilityValue($user, 'max_contacts');
         $savedProperties = Wishlist::where('user_id', auth()->id())->count();
         $totalSpent = Payment::where('user_id', auth()->id())->where('status', 'completed')->sum('amount');
         $activeSearches = ViewedContact::where('user_id', auth()->id())->count();
 
-        return view('buyer.dashboard', compact('contactsViewed', 'maxContacts', 'savedProperties', 'totalSpent', 'activeSearches'));
+        // Fetch recent activities
+        $recentViewedContacts = ViewedContact::where('buyer_id', $user->id)
+            ->with('property')
+            ->orderBy('viewed_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function($item) {
+                return [
+                    'type' => 'viewed_contact',
+                    'date' => $item->viewed_at,
+                    'property' => $item->property,
+                ];
+            });
+
+        $recentWishlist = Wishlist::where('user_id', $user->id)
+            ->with('property')
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function($item) {
+                return [
+                    'type' => 'wishlist_addition',
+                    'date' => $item->created_at,
+                    'property' => $item->property,
+                ];
+            });
+
+        $recentLeads = Lead::where('buyer_email', $user->email)
+            ->with('property')
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function($item) {
+                return [
+                    'type' => 'lead',
+                    'date' => $item->created_at,
+                    'property' => $item->property,
+                ];
+            });
+
+        $recentActivities = collect([$recentViewedContacts, $recentWishlist, $recentLeads])
+            ->flatten(1)
+            ->sortByDesc('date')
+            ->take(10);
+
+        return view('buyer.dashboard', compact('contactsViewed', 'savedProperties', 'totalSpent', 'activeSearches', 'recentActivities'));
     }
 
     public function getStats()
     {
         $user = auth()->user();
         $contactsViewed = $user->viewedContacts()->count();
-        $maxContacts = $this->getCapabilityValue($user, 'max_contacts');
         $savedProperties = Wishlist::where('user_id', auth()->id())->count();
         $totalSpent = Payment::where('user_id', auth()->id())->where('status', 'completed')->sum('amount');
         $activeSearches = ViewedContact::where('user_id', auth()->id())->count();
 
         return response()->json([
             'contactsViewed' => $contactsViewed,
-            'maxContacts' => $maxContacts,
             'savedProperties' => $savedProperties,
             'totalSpent' => $totalSpent,
             'activeSearches' => $activeSearches,
@@ -48,25 +90,10 @@ class DashboardController extends Controller
     public function inquiries()
     {
         $user = auth()->user();
-        $viewedContacts = ViewedContact::where('buyer_id', $user->id)
-            ->with(['property.owner', 'property.agent'])
-            ->orderBy('viewed_at', 'desc')
+        $inquiries = Lead::where('buyer_email', $user->email)
+            ->with('property')
+            ->orderBy('created_at', 'desc')
             ->get();
-
-        $inquiries = $viewedContacts->map(function($viewedContact) {
-            $property = $viewedContact->property;
-            $contact = $property->agent ?? $property->owner;
-            $lead = Lead::where('property_id', $property->id)->first();
-
-            return [
-                'property' => $property,
-                'unlock_date' => $viewedContact->viewed_at,
-                'contact_name' => $contact->name,
-                'contact_email' => $contact->email,
-                'contact_mobile' => $contact->mobile,
-                'status' => $lead ? $lead->status : 'Contact Unlocked'
-            ];
-        });
 
         return view('buyer.inquiries.index', compact('inquiries'));
     }

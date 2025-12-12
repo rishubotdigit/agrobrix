@@ -31,6 +31,12 @@ class PaymentController extends Controller
     {
         $user = Auth::user();
 
+        if ($user->role === 'buyer') {
+            return response()->json([
+                'error' => 'Buyers cannot initiate contact payments'
+            ], 403);
+        }
+
         // Validate gateway parameter
         $request->validate([
             'gateway' => 'nullable|string|in:razorpay,phonepe,upi_static',
@@ -49,14 +55,16 @@ class PaymentController extends Controller
             ], 400);
         }
 
-        // Check if user has reached limit
-        $currentContactsViewed = $user->viewedContacts()->count();
-        $maxContactsViewed = $this->getCapabilityValue($user, 'max_contacts');
-
-        if ($currentContactsViewed < $maxContactsViewed) {
-            return response()->json([
-                'error' => 'User has not reached contact limit yet'
-            ], 400);
+        // Check if user has reached limit (skip for buyers)
+        if ($user->role !== 'buyer') {
+            $currentContactsViewed = $user->viewedContacts()->count();
+            $maxContactsViewed = $this->getCapabilityValue($user, 'max_contacts');
+        
+            if ($currentContactsViewed < $maxContactsViewed) {
+                return response()->json([
+                    'error' => 'User has not reached contact limit yet'
+                ], 400);
+            }
         }
 
         // Check if gateway is enabled

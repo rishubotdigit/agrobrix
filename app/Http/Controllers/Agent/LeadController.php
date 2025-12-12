@@ -32,6 +32,11 @@ class LeadController extends Controller
             'buyer_email' => 'required|email|max:255',
             'buyer_phone' => 'required|string|max:20',
             'status' => 'required|in:new,contacted,interested,closed',
+            'buying_purpose' => 'sometimes|string|max:255',
+            'buying_timeline' => 'sometimes|in:3 months,6 months,More than 6 months',
+            'interested_in_site_visit' => 'sometimes|boolean',
+            'additional_message' => 'sometimes|string',
+            'buyer_type' => 'sometimes|in:agent,buyer',
         ]);
 
         // Check if property is assigned to the agent
@@ -50,6 +55,11 @@ class LeadController extends Controller
             'buyer_email' => $request->buyer_email,
             'buyer_phone' => $request->buyer_phone,
             'status' => $request->status,
+            'buying_purpose' => $request->buying_purpose,
+            'buying_timeline' => $request->buying_timeline,
+            'interested_in_site_visit' => $request->interested_in_site_visit,
+            'additional_message' => $request->additional_message,
+            'buyer_type' => $request->buyer_type,
         ]);
 
         return redirect()->route('agent.leads.index')->with('success', 'Lead created successfully.');
@@ -89,6 +99,11 @@ class LeadController extends Controller
             'buyer_email' => 'required|email|max:255',
             'buyer_phone' => 'required|string|max:20',
             'status' => 'required|in:new,contacted,interested,closed',
+            'buying_purpose' => 'sometimes|string|max:255',
+            'buying_timeline' => 'sometimes|in:3 months,6 months,More than 6 months',
+            'interested_in_site_visit' => 'sometimes|boolean',
+            'additional_message' => 'sometimes|string',
+            'buyer_type' => 'sometimes|in:agent,buyer',
         ]);
 
         // Check if property is assigned to the agent
@@ -106,6 +121,11 @@ class LeadController extends Controller
             'buyer_email',
             'buyer_phone',
             'status',
+            'buying_purpose',
+            'buying_timeline',
+            'interested_in_site_visit',
+            'additional_message',
+            'buyer_type',
         ]));
 
         return redirect()->route('agent.leads.index')->with('success', 'Lead updated successfully.');

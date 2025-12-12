@@ -248,9 +248,14 @@
             <div class="flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
 
                 <!-- Left Text Section -->
-                <div class="space-y-2">
-                    <h2 class="text-2xl font-bold text-gray-900">Interested in this property?</h2>
-                    <p class="text-gray-600">Contact the owner for more details and schedule a visit.</p>
+                <div class="space-y-4">
+                    <div class="space-y-2">
+                        <h2 class="text-2xl font-bold text-gray-900">Interested in this property?</h2>
+                        <p class="text-gray-600">Contact the owner for more details and schedule a visit.</p>
+                    </div>
+                    <button id="viewContactBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">
+                        View Contact
+                    </button>
                 </div>
 
                 <!-- Right: Owner Profile Image -->
@@ -273,7 +278,8 @@
             </div>
         </div>
 
-
     </div>
 </div>
+
+@include('components.contact-inquiry-modal', ['propertyId' => $property->id])
 @endsection

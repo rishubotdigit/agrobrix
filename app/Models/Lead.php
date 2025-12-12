@@ -19,7 +19,12 @@ class Lead extends Model
         'buyer_name',
         'buyer_email',
         'buyer_phone',
-        'status'
+        'status',
+        'buying_purpose',
+        'buying_timeline',
+        'interested_in_site_visit',
+        'additional_message',
+        'buyer_type'
     ];
 
     public function property()

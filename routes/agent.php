@@ -19,8 +19,12 @@ Route::prefix('agent')->middleware(['auth', 'role:agent'])->group(function () {
 
     // Leads
     Route::get('/leads', [LeadController::class, 'index'])->name('agent.leads.index');
+    Route::get('/leads/create', [LeadController::class, 'create'])->name('agent.leads.create');
+    Route::post('/leads', [LeadController::class, 'store'])->name('agent.leads.store');
     Route::get('/leads/{id}', [LeadController::class, 'show'])->name('agent.leads.show');
+    Route::get('/leads/{id}/edit', [LeadController::class, 'edit'])->name('agent.leads.edit');
     Route::put('/leads/{id}', [LeadController::class, 'update'])->name('agent.leads.update');
+    Route::delete('/leads/{id}', [LeadController::class, 'destroy'])->name('agent.leads.destroy');
 
     // Properties
     Route::get('/properties', [PropertyController::class, 'index'])->name('agent.properties.index');

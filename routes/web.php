@@ -33,6 +33,10 @@ Route::get('/roles', [HomeController::class, 'roles'])->name('roles');
 Route::get('/pricing', [HomeController::class, 'pricing'])->name('pricing');
 Route::get('/contact', [ContactController::class, 'contact'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.submit');
+Route::get('/contact/redirect-login', function () {
+    session()->flash('message', 'Please login to view the contact details.');
+    return redirect()->route('login');
+})->name('contact.redirect.login');
 Route::get('/refund', [HomeController::class, 'refund'])->name('refund');
 
 Route::middleware('guest')->group(function () {

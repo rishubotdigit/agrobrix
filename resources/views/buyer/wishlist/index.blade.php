@@ -87,21 +87,9 @@
                             View Details
                         </a>
 
-                        @auth
-                            @if(Auth::user()->role === 'buyer')
-                                <button onclick="viewContact({{ $property->id }})" class="w-full py-2 px-4 border-2 border-emerald-500 text-emerald-600 rounded-lg font-semibold hover:bg-emerald-50 transition-colors">
-                                    Unlock Contact
-                                </button>
-                            @else
-                                <a href="{{ route('plans.index') }}" class="w-full py-2 px-4 border-2 border-orange-500 text-orange-600 rounded-lg font-semibold hover:bg-orange-50 transition-colors text-center block">
-                                    Unlock Contact
-                                </a>
-                            @endif
-                        @else
-                            <a href="{{ route('plans.index') }}" class="w-full py-2 px-4 border-2 border-orange-500 text-orange-600 rounded-lg font-semibold hover:bg-orange-50 transition-colors text-center block">
-                                Unlock Contact
-                            </a>
-                        @endauth
+                        <button onclick="handleContactClick({{ $property->id }})" class="w-full py-2 px-4 border-2 border-emerald-500 text-emerald-600 rounded-lg font-semibold hover:bg-emerald-50 transition-colors">
+                            Contact
+                        </button>
                     </div>
                 </div>
             </div>
@@ -139,6 +127,27 @@ function removeFromWishlist(propertyId, buttonElement) {
         })
         .then(response => response.json())
         .then(data => {
+const routes = {
+    plans: '{{ route("plans.index") }}',
+    login: '{{ route("login") }}'
+};
+
+const auth = {
+    loggedIn: {{ auth()->check() ? 'true' : 'false' }},
+    role: '{{ auth()->check() ? auth()->user()->role : "" }}'
+};
+
+function handleContactClick(propertyId) {
+    if (auth.loggedIn) {
+        if (auth.role === 'buyer') {
+            viewContact(propertyId);
+        } else {
+            window.location.href = routes.plans;
+        }
+    } else {
+        window.location.href = '{{ route("contact.redirect.login") }}';
+    }
+}
             if (data.success) {
                 // Remove the property card from DOM
                 const card = buttonElement.closest('.card-hover');
