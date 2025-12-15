@@ -12,8 +12,8 @@ class HomeController extends Controller
     public function index()
     {
         $plans = Plan::all();
-        $featuredProperties = Property::with(['owner', 'agent', 'amenities'])->where('status', 'approved')->where('featured', true)->limit(8)->get();
-        $latestProperties = Property::with(['owner', 'agent', 'amenities'])->where('status', 'approved')->orderBy('created_at', 'desc')->limit(10)->get();
+        $featuredProperties = Property::with(['owner', 'agent', 'amenities'])->where('status', 'approved')->where('featured', true)->limit(4)->get();
+        $latestProperties = Property::with(['owner', 'agent', 'amenities'])->where('status', 'approved')->orderBy('created_at', 'desc')->limit(4)->get();
 
         // Add wishlist status for authenticated buyers
         if (Auth::check() && Auth::user()->role === 'buyer') {

@@ -20,9 +20,6 @@ Route::prefix('buyer')->middleware(['auth', 'role:buyer'])->group(function () {
     Route::get('/properties', [SearchController::class, 'properties'])->name('buyer.properties');
     Route::get('/api/properties', [SearchController::class, 'getPropertiesApi'])->name('buyer.api.properties');
     Route::get('/api/property-options', [SearchController::class, 'getPropertyOptions'])->name('buyer.api.property-options');
-    Route::post('/properties/{property}/contact', [SearchController::class, 'viewContact'])->name('buyer.viewContact');
-    Route::post('/properties/{property}/inquiry/submit', [SearchController::class, 'submitInquiry'])->name('buyer.inquiry.submit');
-    Route::post('/properties/{property}/inquiry/verify-otp', [SearchController::class, 'verifyOtp'])->name('buyer.inquiry.verifyOtp');
     Route::get('/search', [SearchController::class, 'index'])->name('buyer.search.index');
 
     // Wishlist

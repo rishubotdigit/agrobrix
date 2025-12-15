@@ -52,13 +52,13 @@ class DashboardController extends Controller
 
         $recentLeads = Lead::where('buyer_email', $user->email)
             ->with('property')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->limit(10)
             ->get()
             ->map(function($item) {
                 return [
                     'type' => 'lead',
-                    'date' => $item->created_at,
+                    'date' => $item->updated_at,
                     'property' => $item->property,
                 ];
             });
@@ -92,7 +92,7 @@ class DashboardController extends Controller
         $user = auth()->user();
         $inquiries = Lead::where('buyer_email', $user->email)
             ->with('property')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->get();
 
         return view('buyer.inquiries.index', compact('inquiries'));

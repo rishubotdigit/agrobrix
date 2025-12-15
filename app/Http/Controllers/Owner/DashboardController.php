@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
 use App\Traits\CapabilityTrait;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ViewedContact;
 use App\Models\Property;
@@ -20,9 +21,9 @@ class DashboardController extends Controller
         $properties = $user->properties()->count();
         $maxListings = $this->getCapabilityValue($user, 'max_listings');
 
-        $totalInquiries = ViewedContact::whereHas('property', function($q) { $q->where('user_id', auth()->id()); })->count();
-        $activeListings = Property::where('user_id', auth()->id())->where('status', 'active')->count();
-        $totalEarnings = Payment::whereHas('property', function($q) { $q->where('user_id', auth()->id()); })->where('status', 'completed')->sum('amount');
+        $totalInquiries = ViewedContact::whereHas('property', function($q) { $q->where('owner_id', auth()->id()); })->count();
+        $activeListings = Property::where('owner_id', auth()->id())->where('status', 'active')->count();
+        $totalEarnings = Payment::whereHas('property', function($q) { $q->where('owner_id', auth()->id()); })->where('status', 'completed')->sum('amount');
         $recentProperties = Property::where('user_id', auth()->id())->orderBy('created_at', 'desc')->limit(5)->get();
 
         return view('owner.dashboard', compact('properties', 'maxListings', 'totalInquiries', 'activeListings', 'totalEarnings', 'recentProperties'));
@@ -34,9 +35,9 @@ class DashboardController extends Controller
         $properties = $user->properties()->count();
         $maxListings = $this->getCapabilityValue($user, 'max_listings');
 
-        $totalInquiries = ViewedContact::whereHas('property', function($q) { $q->where('user_id', auth()->id()); })->count();
-        $activeListings = Property::where('user_id', auth()->id())->where('status', 'active')->count();
-        $totalEarnings = Payment::whereHas('property', function($q) { $q->where('user_id', auth()->id()); })->where('status', 'completed')->sum('amount');
+        $totalInquiries = ViewedContact::whereHas('property', function($q) { $q->where('owner_id', auth()->id()); })->count();
+        $activeListings = Property::where('owner_id', auth()->id())->where('status', 'active')->count();
+        $totalEarnings = Payment::whereHas('property', function($q) { $q->where('owner_id', auth()->id()); })->where('status', 'completed')->sum('amount');
 
         return response()->json([
             'properties' => $properties,
@@ -86,9 +87,22 @@ class DashboardController extends Controller
     public function leads()
     {
         $leads = Lead::whereHas('property', function($q) {
-            $q->where('user_id', auth()->id());
+            $q->where('owner_id', auth()->id());
         })->with('property')->orderBy('created_at', 'desc')->get();
 
         return view('owner.leads.index', compact('leads'));
     }
+
+    public function showLead($id)
+    {
+        $lead = Lead::where('id', $id)
+            ->whereHas('property', function($q) {
+                $q->where('owner_id', auth()->id());
+            })
+            ->with(['property', 'visits', 'followUps'])
+            ->firstOrFail();
+
+        return view('owner.leads.show', compact('lead'));
+    }
+
 }

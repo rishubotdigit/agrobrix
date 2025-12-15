@@ -35,7 +35,7 @@
                                 <div class="text-sm text-gray-500">{{ $inquiry->property->city }}, {{ $inquiry->property->state }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ $inquiry->created_at->format('M d, Y') }}
+                                {{ $inquiry->updated_at->format('M d, Y') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 {{ $inquiry->buying_purpose ?? 'N/A' }}

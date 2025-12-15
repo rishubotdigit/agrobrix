@@ -116,7 +116,12 @@
         @if($property->property_video)
         <div class="mb-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-3">Property Video</h3>
-            <a href="{{ $property->property_video }}" target="_blank" class="text-blue-600 hover:text-blue-800">View Video</a>
+            <div class="w-full">
+                <video controls class="w-full max-w-4xl mx-auto rounded-lg shadow-md">
+                    <source src="{{ asset('storage/' . $property->property_video) }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
         </div>
         @endif
 

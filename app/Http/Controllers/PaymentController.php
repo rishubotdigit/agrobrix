@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\PaymentCreated;
+use App\Events\PaymentSubmittedForApproval;
 use App\Models\Payment;
 use App\Models\Property;
 use App\Models\ViewedContact;
@@ -87,6 +89,8 @@ class PaymentController extends Controller
                 ['property_title' => $property->title],
                 $gateway
             );
+
+            PaymentCreated::dispatch($payment);
 
             // Create order using specified gateway
             $orderData = $this->paymentService->createOrder($amount, 'INR', [], $gateway);
@@ -310,6 +314,8 @@ class PaymentController extends Controller
             $payment->status = 'pending_approval';
             $payment->approval_status = 'pending';
             $payment->save();
+
+            PaymentSubmittedForApproval::dispatch($payment);
 
             // Clear rate limit on success
             \Illuminate\Support\Facades\Cache::forget($rateLimitKey);

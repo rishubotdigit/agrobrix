@@ -7,6 +7,7 @@ use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\Buyer\SearchController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\InquiryController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
@@ -45,6 +46,15 @@ Route::middleware('guest')->group(function () {
     Route::post('/forgot-password/verify-otp', [ForgotPasswordController::class, 'verifyForgotPasswordOtp'])->name('password.verify.otp');
     Route::get('/reset-password', [ForgotPasswordController::class, 'showResetPasswordForm'])->name('password.reset.form');
     Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('password.reset');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::post('/properties/{property}/inquiry/submit', [InquiryController::class, 'submitInquiry'])->name('inquiry.submit');
+    Route::post('/properties/{property}/inquiry/verify-otp', [InquiryController::class, 'verifyOtp'])->name('inquiry.verifyOtp');
+    Route::post('/properties/{property}/inquiry/status', [InquiryController::class, 'checkInquiryStatus'])->name('inquiry.status');
+    Route::post('/properties/{property}/contact', [\App\Http\Controllers\InquiryController::class, 'viewContact'])->name('properties.contact');
+    Route::post('/wishlist/add', [\App\Http\Controllers\Buyer\WishlistController::class, 'add'])->middleware('role:buyer')->name('wishlist.add');
+    Route::delete('/wishlist/remove/{propertyId}', [\App\Http\Controllers\Buyer\WishlistController::class, 'remove'])->middleware('role:buyer')->name('wishlist.remove');
 });
 
 require __DIR__.'/auth.php';

@@ -63,6 +63,21 @@
             @endif
         @endif
 
+        <!-- Property Video -->
+        @if($property->property_video)
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+            <div class="p-6">
+                <h2 class="text-2xl font-semibold text-gray-900 mb-4">Property Video</h2>
+                <div class="w-full">
+                    <video controls class="w-full max-w-4xl mx-auto rounded-lg shadow-md">
+                        <source src="{{ asset('storage/' . $property->property_video) }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            </div>
+        </div>
+        @endif
+
         <!-- Property Details -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 class="text-2xl font-semibold text-gray-900 mb-6">Property Details</h2>

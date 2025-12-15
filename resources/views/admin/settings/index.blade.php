@@ -37,6 +37,22 @@
                         <label for="whatsapp_notifications_enabled" class="ml-2 block text-sm text-gray-900">Enable WhatsApp Notifications</label>
                     </div>
 
+                    <!-- Social Login Settings Section -->
+                    <div class="border-t pt-4">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-3">Social Login Settings</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="google_login_enabled" name="google_login_enabled" value="1" {{ $settings['google_login_enabled'] == '1' ? 'checked' : '' }} class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                <label for="google_login_enabled" class="ml-2 block text-sm text-gray-900">Enable Google Login</label>
+                            </div>
+
+                            <div class="flex items-center">
+                                <input type="checkbox" id="facebook_login_enabled" name="facebook_login_enabled" value="1" {{ $settings['facebook_login_enabled'] == '1' ? 'checked' : '' }} class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="facebook_login_enabled" class="ml-2 block text-sm text-gray-900">Enable Facebook Login</label>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Map Settings Section -->
                     <div class="border-t pt-4">
                         <h3 class="text-lg font-semibold text-gray-900 mb-3">Map Settings</h3>

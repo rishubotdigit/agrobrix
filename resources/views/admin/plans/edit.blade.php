@@ -70,7 +70,7 @@
 
                 <div class="mb-6">
                     <label for="featured_duration_days" class="block text-sm font-medium text-gray-700 mb-2">Featured Duration (Days)</label>
-                    <input type="number" name="featured_duration_days" id="featured_duration_days" value="{{ old('featured_duration_days', $plan->capabilities['featured_duration_days'] ?? 1) }}" min="1"
+                    <input type="number" name="featured_duration_days" id="featured_duration_days" value="{{ old('featured_duration_days', $plan->capabilities['featured_duration_days'] ?? 0) }}" min="0"
                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('featured_duration_days') border-red-500 @enderror" required>
                     @error('featured_duration_days')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>

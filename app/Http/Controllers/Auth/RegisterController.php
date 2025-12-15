@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Events\UserRegistered;
 use App\Http\Controllers\Controller;
 use App\OtpService;
 use App\Models\User;
@@ -35,48 +36,26 @@ class RegisterController extends Controller
             'role' => 'required|in:admin,owner,agent,buyer',
         ]);
 
-        $otpEnabled = Setting::get('otp_verification_enabled') == '1';
+        // Create user directly
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'mobile' => $request->mobile,
+            'password' => Hash::make($request->password),
+            'role' => $request->role,
+            'email_verified_at' => now(),
+            'verified_at' => now(),
+        ]);
 
-        if (!$otpEnabled) {
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'mobile' => $request->mobile,
-                'password' => Hash::make($request->password),
-                'role' => $request->role,
-                'email_verified_at' => now(),
-                'verified_at' => now(),
-            ]);
+        UserRegistered::dispatch($user);
 
-            // User is registered but not logged in
-
-            if ($request->ajax()) {
-                return response()->json(['success' => true, 'message' => 'Registration completed successfully! Please log in.', 'redirect' => route('login')]);
-            }
-
-            return redirect(route('login'))->with('success', 'Registration completed successfully! Please log in.');
-        }
-
-        // Store registration data in session
-        session(['registration_data' => $request->only(['name', 'email', 'mobile', 'password', 'role'])]);
-
-        // Generate and send OTP
-        $otp = $this->otpService->generateOtp();
-
-        $result = $this->otpService->sendOtpToMobile($request->mobile, $otp);
-        if ($result['success']) {
-            // Initialize resend tracking
-            session(['otp_resend_count' => 1, 'last_otp_resend_at' => now()]);
-            if ($request->ajax()) {
-                return response()->json(['success' => true, 'message' => 'OTP sent successfully', 'api_response' => $result]);
-            }
-            return redirect()->route('register.verify.otp.form');
-        }
+        // Log in the user
+        Auth::login($user);
 
         if ($request->ajax()) {
-            return response()->json(['success' => false, 'message' => 'Failed to send OTP', 'api_response' => $result], 500);
+            return response()->json(['success' => true, 'message' => 'Registration completed successfully!', 'redirect' => $this->getRedirectUrl($user)]);
         }
-        return back()->withErrors(['mobile' => 'Failed to send OTP']);
+        return redirect($this->getRedirectUrl($user))->with('success', 'Registration completed successfully!');
     }
 
     public function showVerifyOtpForm()
@@ -84,13 +63,16 @@ class RegisterController extends Controller
         if (!session('registration_data')) {
             return redirect()->route('register');
         }
-        return view('auth.verify-otp');
+        $otpEnabled = Setting::get('otp_verification_enabled') == '1';
+        return view('auth.verify-otp', compact('otpEnabled'));
     }
 
     public function verifyOtp(Request $request)
     {
+        $otpEnabled = Setting::get('otp_verification_enabled') == '1';
+
         $request->validate([
-            'otp' => 'required|string|size:6',
+            'otp' => $otpEnabled ? 'required|string|size:6' : 'nullable',
         ]);
 
         $registrationData = session('registration_data');
@@ -101,7 +83,7 @@ class RegisterController extends Controller
             return redirect()->route('register');
         }
 
-        if ($this->otpService->verifyOtpFromSession($request->otp)) {
+        if (!$otpEnabled || $this->otpService->verifyOtpFromSession($request->otp)) {
             // Create user from session data
             $user = User::create([
                 'name' => $registrationData['name'],
@@ -112,6 +94,8 @@ class RegisterController extends Controller
                 'email_verified_at' => now(),
                 'verified_at' => now(),
             ]);
+
+            UserRegistered::dispatch($user);
 
             // Log in the user
             Auth::login($user);

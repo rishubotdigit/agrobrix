@@ -11,7 +11,7 @@ class PropertyController extends Controller
 {
     public function index()
     {
-        $properties = Property::with('owner')->paginate(20);
+        $properties = Property::with('owner')->paginate(9);
         return view('admin.properties.index', compact('properties'));
     }
 
@@ -24,7 +24,7 @@ class PropertyController extends Controller
 
     public function versions(Property $property)
     {
-        $versions = $property->versions()->orderBy('version', 'desc')->paginate(20);
+        $versions = $property->versions()->orderBy('version', 'desc')->paginate(9);
         return view('admin.properties.versions', compact('property', 'versions'));
     }
 

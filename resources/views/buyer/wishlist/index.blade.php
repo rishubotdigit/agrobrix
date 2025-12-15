@@ -87,7 +87,7 @@
                             View Details
                         </a>
 
-                        <button onclick="handleContactClick({{ $property->id }})" class="w-full py-2 px-4 border-2 border-emerald-500 text-emerald-600 rounded-lg font-semibold hover:bg-emerald-50 transition-colors">
+                        <button onclick="handleContactClick({{ $property->id }}, '{{ $property->owner_id }}', '{{ $property->agent_id }}')" class="w-full py-2 px-4 border-2 border-emerald-500 text-emerald-600 rounded-lg font-semibold hover:bg-emerald-50 transition-colors">
                             Contact
                         </button>
                     </div>
@@ -128,8 +128,8 @@ function removeFromWishlist(propertyId, buttonElement) {
         .then(response => response.json())
         .then(data => {
 const routes = {
-    plans: '{{ route("plans.index") }}',
-    login: '{{ route("login") }}'
+    plans: {!! json_encode(route("plans.index")) !!},
+    login: {!! json_encode(route("login")) !!}
 };
 
 const auth = {
@@ -137,15 +137,33 @@ const auth = {
     role: '{{ auth()->check() ? auth()->user()->role : "" }}'
 };
 
-function handleContactClick(propertyId) {
+function handleContactClick(propertyId, ownerId, agentId) {
+    console.log('Contact button clicked for property:', propertyId, 'owner:', ownerId, 'agent:', agentId);
+
     if (auth.loggedIn) {
-        if (auth.role === 'buyer') {
-            viewContact(propertyId);
+        var userId = '{{ Auth::id() }}';
+        var isOwnerOrAgent = (userId == ownerId) || (userId == agentId);
+
+        if (isOwnerOrAgent) {
+            // User is owner or agent - directly fetch contact
+            console.log('User is owner/agent, fetching contact directly');
+            fetchContactDirectly(propertyId);
         } else {
-            window.location.href = routes.plans;
+            if (auth.role === 'buyer') {
+                // User is logged in and is a buyer - open inquiry modal
+                console.log('Opening inquiry modal for buyer');
+                openInquiryModal(propertyId);
+            } else {
+                // User is logged in but not a buyer and not owner/agent - redirect to plans
+                console.log('Redirecting non-buyer non-owner to plans');
+                window.location.href = routes.plans;
+            }
         }
     } else {
-        window.location.href = '{{ route("contact.redirect.login") }}';
+        // User is not logged in - redirect to login
+        console.log('User not logged in, redirecting to login');
+        alert('Please log in to view contact details.');
+        window.location.href = {!! json_encode(route("login")) !!};
     }
 }
             if (data.success) {
@@ -199,29 +217,245 @@ function showContactDetails(contact) {
 function closeContactModal() {
     document.getElementById('contactModal').classList.add('hidden');
 }
-</script>
 
-<!-- Contact Modal -->
-<div id="contactModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
-        <div class="mt-3">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Contact Details</h3>
-            <div id="contactDetails" class="text-sm text-gray-700">
-                <!-- Contact details will be loaded here -->
-            </div>
-            <div class="flex justify-end mt-4">
-                <button onclick="closeContactModal()" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">Close</button>
+function fetchContactDirectly(propertyId) {
+    fetch(`/properties/${propertyId}/contact`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            'Accept': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.contact) {
+            showContactDetails(data.contact);
+        } else {
+            alert(data.error || 'An error occurred');
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching contact:', error);
+        alert('An error occurred while fetching contact details');
+    });
+}
+
+function openInquiryModal(propertyId) {
+    console.log('Opening inquiry modal for property:', propertyId);
+    if (propertyId) {
+        document.getElementById('propertyId').value = propertyId;
+    }
+    document.getElementById('inquiryModal').classList.remove('hidden');
+}
+
+function closeInquiryModal() {
+    document.getElementById('inquiryModal').classList.add('hidden');
+    document.getElementById('inquiryForm').reset();
+}
+
+function openOtpModal() {
+    document.getElementById('inquiryModal').classList.add('hidden');
+    document.getElementById('otpModal').classList.remove('hidden');
+}
+
+function closeOtpModal() {
+    document.getElementById('otpModal').classList.add('hidden');
+    document.getElementById('otpForm').reset();
+}
+
+function showConfirmationModal(inquiry, contact) {
+    const confirmationHtml = `
+        <div class="bg-emerald-50 rounded-lg p-4 mb-4">
+            <h4 class="font-semibold text-emerald-800 mb-3">Your Inquiry Details</h4>
+            <div class="grid grid-cols-1 gap-3 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Name:</span>
+                    <span class="font-medium text-gray-900">${inquiry.buyer_name}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Phone:</span>
+                    <span class="font-medium text-gray-900">${inquiry.buyer_phone}</span>
+                </div>
+                ${inquiry.buyer_email ? `
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Email:</span>
+                    <span class="font-medium text-gray-900">${inquiry.buyer_email}</span>
+                </div>
+                ` : ''}
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Type:</span>
+                    <span class="font-medium text-gray-900">${inquiry.buyer_type === 'agent' ? 'Agent' : 'Buyer'}</span>
+                </div>
+                ${inquiry.buying_purpose ? `
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Purpose:</span>
+                    <span class="font-medium text-gray-900">${inquiry.buying_purpose}</span>
+                </div>
+                ` : ''}
+                ${inquiry.buying_timeline ? `
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Timeline:</span>
+                    <span class="font-medium text-gray-900">${inquiry.buying_timeline}</span>
+                </div>
+                ` : ''}
+                ${inquiry.interested_in_site_visit ? `
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Site Visit:</span>
+                    <span class="font-medium text-gray-900">${inquiry.interested_in_site_visit == '1' ? 'Yes' : 'No'}</span>
+                </div>
+                ` : ''}
+                ${inquiry.additional_message ? `
+                <div class="flex flex-col gap-1">
+                    <span class="text-gray-600">Message:</span>
+                    <span class="font-medium text-gray-900 bg-white p-2 rounded border">${inquiry.additional_message}</span>
+                </div>
+                ` : ''}
             </div>
         </div>
-    </div>
-</div>
+        <p class="text-gray-600 text-sm">Your inquiry has been submitted successfully. Click "View Contact" to see the property owner's contact information.</p>
+    `;
+    document.getElementById('confirmationDetails').innerHTML = confirmationHtml;
+    window.currentContact = contact;
+    document.getElementById('confirmationModal').classList.remove('hidden');
+}
 
-<script>
-// Close modal when clicking outside
-document.getElementById('contactModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeContactModal();
+function closeConfirmationModal() {
+    document.getElementById('confirmationModal').classList.add('hidden');
+}
+
+function showContactDetails(contact) {
+    const contactHtml = `
+        <div class="space-y-3">
+            <div class="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg">
+                <svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <div>
+                    <p class="text-xs text-gray-500 uppercase tracking-wide">Name</p>
+                    <p class="font-semibold text-gray-900">${contact.owner_name}</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg">
+                <svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                <div>
+                    <p class="text-xs text-gray-500 uppercase tracking-wide">Email</p>
+                    <p class="font-semibold text-gray-900">${contact.owner_email}</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg">
+                <svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                </svg>
+                <div>
+                    <p class="text-xs text-gray-500 uppercase tracking-wide">Mobile</p>
+                    <p class="font-semibold text-gray-900">${contact.owner_mobile}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    document.getElementById('contactDetails').innerHTML = contactHtml;
+    document.getElementById('contactModal').classList.remove('hidden');
+}
+
+// Wait for DOM to be ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Form submission
+    const inquiryForm = document.getElementById('inquiryForm');
+    if (inquiryForm) {
+        inquiryForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const propertyId = formData.get('property_id');
+
+            fetch(`/properties/${propertyId}/inquiry/submit`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'Accept': 'application/json',
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.otp_required) {
+                        openOtpModal();
+                    } else {
+                        closeInquiryModal();
+                        showConfirmationModal(data.inquiry, data.contact);
+                    }
+                } else {
+                    alert(data.message || 'An error occurred');
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting inquiry:', error);
+                alert('An error occurred while submitting inquiry');
+            });
+        });
     }
+
+    // OTP verification
+    const otpForm = document.getElementById('otpForm');
+    if (otpForm) {
+        otpForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const otp = document.getElementById('otpInput').value;
+            const propertyId = document.getElementById('propertyId').value;
+
+            fetch(`/properties/${propertyId}/inquiry/verify-otp`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'Accept': 'application/json',
+                },
+                body: new URLSearchParams({ otp: otp })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeOtpModal();
+                    showConfirmationModal(data.inquiry, data.contact);
+                } else {
+                    alert(data.message || 'Invalid OTP');
+                }
+            })
+            .catch(error => {
+                console.error('Error verifying OTP:', error);
+                alert('An error occurred while verifying OTP');
+            });
+        });
+    }
+
+    // View Contact button in confirmation modal
+    const viewContactBtnModal = document.getElementById('viewContactBtnModal');
+    if (viewContactBtnModal) {
+        viewContactBtnModal.addEventListener('click', function() {
+            closeConfirmationModal();
+            showContactDetails(window.currentContact);
+        });
+    }
+
+    // Close modals when clicking outside
+    ['inquiryModal', 'otpModal', 'confirmationModal', 'contactModal'].forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    const closeFunc = modalId === 'inquiryModal' ? closeInquiryModal :
+                                    modalId === 'otpModal' ? closeOtpModal :
+                                    modalId === 'confirmationModal' ? closeConfirmationModal :
+                                    closeContactModal;
+                    closeFunc();
+                }
+            });
+        }
+    });
 });
 </script>
+
+@include('components.contact-inquiry-modal')
 @endsection

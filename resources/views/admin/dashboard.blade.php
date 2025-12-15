@@ -96,7 +96,7 @@
     <!-- Property Status Chart -->
     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">Property Status Distribution</h3>
-        <canvas id="propertyChart" width="400" height="200"></canvas>
+        <canvas id="propertyChart" width="300" height="200"></canvas>
     </div>
 </div>
 

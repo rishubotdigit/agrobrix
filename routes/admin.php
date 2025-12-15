@@ -11,8 +11,10 @@ use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\PaymentGatewayController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\SmsGatewayController;
+use App\Http\Controllers\Admin\SocialLoginController;
 use App\Http\Controllers\Admin\PlanPurchaseController;
 use App\Http\Controllers\Admin\AdminContactController;
+use App\Http\Controllers\Admin\NotificationController;
 
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('admin.dashboard');
@@ -80,8 +82,20 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     // SMS Gateways
     Route::get('sms-gateways', [SmsGatewayController::class, 'index'])->name('admin.sms-gateways.index');
     Route::post('sms-gateways', [SmsGatewayController::class, 'update'])->name('admin.sms-gateways.update');
+
+    // Social Logins
+    Route::get('social-logins', [SocialLoginController::class, 'index'])->name('admin.social-logins.index');
+    Route::post('social-logins', [SocialLoginController::class, 'update'])->name('admin.social-logins.update');
+
     // Contact Messages
     Route::get('contact-messages', [AdminContactController::class, 'index'])->name('admin.contact-messages.index');
     Route::delete('contact-messages/{contactMessage}', [AdminContactController::class, 'destroy'])->name('admin.contact-messages.destroy');
+
+    // Notifications
+    Route::get('notifications', [NotificationController::class, 'index'])->name('admin.notifications.index');
+    Route::get('notifications/count', [NotificationController::class, 'count'])->name('admin.notifications.count');
+    Route::get('notifications/dropdown', [NotificationController::class, 'dropdown'])->name('admin.notifications.dropdown');
+    Route::post('notifications/mark-seen', [NotificationController::class, 'markAsSeen'])->name('admin.notifications.mark-seen');
+    Route::delete('notifications/{notification}', [NotificationController::class, 'delete'])->name('admin.notifications.delete');
 
 });

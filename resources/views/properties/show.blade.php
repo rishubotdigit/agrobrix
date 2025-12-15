@@ -57,16 +57,29 @@
                 <svg class="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
-                Images & Gallery
+                Images & Videos
             </h2>
-            
+
+            <!-- Property Video -->
+            @if($property->property_video)
+            <div class="mb-8">
+                <div class="w-full max-w-4xl mx-auto">
+                    <video controls class="w-full rounded-xl shadow-lg">
+                        <source src="{{ asset('storage/' . $property->property_video) }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            </div>
+            @endif
+
+            <!-- Images -->
             @if($property->property_images && is_array(json_decode($property->property_images, true)))
                 @php $images = json_decode($property->property_images, true); @endphp
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     @foreach($images as $image)
                         <div class="relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow cursor-pointer group">
-                            <img src="{{ asset('storage/' . $image) }}" 
-                                 alt="{{ $property->title }}" 
+                            <img src="{{ asset('storage/' . $image) }}"
+                                 alt="{{ $property->title }}"
                                  class="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-300">
                             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity"></div>
                         </div>
@@ -244,6 +257,7 @@
         </div>
 
         <!-- CONTACT OWNER SECTION -->
+        @if($property->owner)
         <div class="bg-white rounded-2xl shadow-xl p-6 border border-emerald-100">
             <div class="flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
 
@@ -253,9 +267,11 @@
                         <h2 class="text-2xl font-bold text-gray-900">Interested in this property?</h2>
                         <p class="text-gray-600">Contact the owner for more details and schedule a visit.</p>
                     </div>
-                    <button id="viewContactBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">
+                    @if(!auth()->check() || auth()->user()->role !== 'owner')
+                    <button id="viewContactBtn" onclick="handleContactClick({{ $property->id }}, '{{ $property->owner_id }}', '{{ $property->agent_id }}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">
                         View Contact
                     </button>
+                    @endif
                 </div>
 
                 <!-- Right: Owner Profile Image -->
@@ -277,6 +293,7 @@
 
             </div>
         </div>
+        @endif
 
     </div>
 </div>

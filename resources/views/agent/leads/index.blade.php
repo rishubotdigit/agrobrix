@@ -49,8 +49,7 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <a href="{{ route('agent.leads.show', $lead->id) }}" class="text-primary hover:text-emerald-700 mr-3">View</a>
-                        <a href="{{ route('agent.leads.edit', $lead->id) }}" class="text-primary hover:text-emerald-700">Edit</a>
+                        <a href="{{ route('agent.leads.show', $lead->id) }}" class="text-primary hover:text-emerald-700">View</a>
                     </td>
                 </tr>
                 @empty

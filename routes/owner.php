@@ -41,4 +41,5 @@ Route::prefix('owner')->middleware(['auth', 'role:owner'])->group(function () {
 
     // Leads
     Route::get('/leads', [DashboardController::class, 'leads'])->name('owner.leads');
-});
+    Route::get('/leads/{lead}', [DashboardController::class, 'showLead'])->name('owner.leads.show');
+    });

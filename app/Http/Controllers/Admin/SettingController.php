@@ -17,6 +17,8 @@ class SettingController extends Controller
             'mobile_integration_enabled' => Setting::get('mobile_integration_enabled', '1'),
             'whatsapp_notifications_enabled' => Setting::get('whatsapp_notifications_enabled', '1'),
             'google_maps_api_key' => Setting::get('google_maps_api_key', ''),
+            'google_login_enabled' => Setting::get('google_login_enabled', '0'),
+            'facebook_login_enabled' => Setting::get('facebook_login_enabled', '0'),
         ];
 
         return view('admin.settings.index', compact('settings'));
@@ -31,6 +33,8 @@ class SettingController extends Controller
             'mobile_integration_enabled' => 'nullable|boolean',
             'whatsapp_notifications_enabled' => 'nullable|boolean',
             'google_maps_api_key' => 'nullable|string|max:255',
+            'google_login_enabled' => 'nullable|boolean',
+            'facebook_login_enabled' => 'nullable|boolean',
         ]);
 
         Setting::set('login_enabled', $request->has('login_enabled') ? '1' : '0');
@@ -39,6 +43,8 @@ class SettingController extends Controller
         Setting::set('mobile_integration_enabled', $request->has('mobile_integration_enabled') ? '1' : '0');
         Setting::set('whatsapp_notifications_enabled', $request->has('whatsapp_notifications_enabled') ? '1' : '0');
         Setting::set('google_maps_api_key', $request->input('google_maps_api_key', ''));
+        Setting::set('google_login_enabled', $request->has('google_login_enabled') ? '1' : '0');
+        Setting::set('facebook_login_enabled', $request->has('facebook_login_enabled') ? '1' : '0');
 
         return redirect()->route('admin.settings.index')->with('success', 'Settings updated successfully.');
     }

@@ -26,16 +26,18 @@ class SmsGatewayController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'sms_gateway' => 'nullable|in:twilio,2factor',
-            '2factor_api_key' => 'required_if:sms_gateway,2factor',
-            'sender_id' => 'required_if:sms_gateway,2factor',
-            'template_id' => 'required_if:sms_gateway,2factor',
-            'entity_id' => 'required_if:sms_gateway,2factor',
+            'enable_2factor' => 'nullable|boolean',
+            '2factor_api_key' => 'required_if:enable_2factor,1',
+            'sender_id' => 'required_if:enable_2factor,1',
+            'template_id' => 'required_if:enable_2factor,1',
+            'entity_id' => 'required_if:enable_2factor,1',
             'otp_expiry_time' => 'nullable|integer|min:1',
             'otp_resend_limit' => 'nullable|integer|min:1',
         ]);
 
-        Setting::set('sms_gateway', $request->input('sms_gateway'));
+        $sms_gateway = $request->has('enable_2factor') ? '2factor' : '';
+
+        Setting::set('sms_gateway', $sms_gateway);
         Setting::set('2factor_api_key', $request->input('2factor_api_key'));
         Setting::set('sender_id', $request->input('sender_id'));
         Setting::set('template_id', $request->input('template_id'));

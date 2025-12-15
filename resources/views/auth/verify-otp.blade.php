@@ -11,9 +11,10 @@
     <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h1 class="text-2xl font-bold mb-6 text-center">Verify Your Account</h1>
         @php
-            $isRegistration = session('register_user_id');
-            $mobile = $isRegistration ? \App\Models\User::find(session('register_user_id'))->mobile : session('otp_mobile');
+            $isRegistration = session('registration_data') ? true : (session('register_user_id') ? true : false);
+            $mobile = session('registration_data')['mobile'] ?? (session('register_user_id') ? \App\Models\User::find(session('register_user_id'))->mobile : session('otp_mobile'));
         @endphp
+        @if($otpEnabled ?? true)
         <p class="text-sm text-gray-600 mb-4 text-center">OTP sent to <span id="otp-mobile">{{ $mobile }}</span></p>
 
         <div class="mb-4">
@@ -21,8 +22,15 @@
             <input type="text" id="otp-code" maxlength="6" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-center text-2xl tracking-widest" required>
         </div>
 
+        @if($otpEnabled ?? true)
         <button id="verify-otp" class="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600">Verify OTP</button>
         <button id="resend-otp" class="w-full mt-2 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600">Resend OTP <span id="countdown"></span></button>
+        @else
+        <p class="text-sm text-gray-600 mb-4 text-center">Please verify your registration.</p>
+
+        <button id="verify-otp" class="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600">Complete Registration</button>
+        @endif
+        @endif
 
         <p class="mt-4 text-center text-gray-600">
             @if($isRegistration)
@@ -37,7 +45,9 @@
         $(document).ready(function() {
             // Handle OTP verification
             $('#verify-otp').click(function() {
+                @if($otpEnabled ?? true)
                 const otp = $('#otp-code').val();
+                @endif
                 const mobile = $('#otp-mobile').text();
 
                 $.ajax({
@@ -45,10 +55,14 @@
                     method: 'POST',
                     data: {
                         @if($isRegistration)
+                        @if($otpEnabled ?? true)
                         otp: otp,
+                        @endif
                         @else
                         mobile: mobile,
+                        @if($otpEnabled ?? true)
                         otp: otp,
+                        @endif
                         @endif
                         _token: '{{ csrf_token() }}'
                     },
@@ -65,6 +79,7 @@
                 });
             });
 
+            @if($otpEnabled ?? true)
             // Handle resend OTP
             $('#resend-otp').click(function() {
                 const button = $(this);
@@ -95,6 +110,7 @@
                     }
                 });
             });
+            @endif
         });
     </script>
 </body>

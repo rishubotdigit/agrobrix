@@ -94,7 +94,7 @@
                 <p class="text-xl text-gray-600">Discover our handpicked premium properties across India</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 @forelse($featuredProperties as $property)
                     <div class="property-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300">
                         <!-- Property Image -->
@@ -203,9 +203,11 @@
                                     View Details
                                 </a>
 
-                                <button onclick="handleContactClick({{ $property->id }})" class="w-full py-2 px-4 border-2 border-emerald-500 text-emerald-600 rounded-lg font-semibold hover:bg-emerald-50 transition-colors">
+                                @if(!Auth::check() || Auth::user()->role !== 'owner')
+                                <button type="button" onclick="handleContactClick({{ $property->id }}, '{{ $property->owner_id }}', '{{ $property->agent_id }}')" class="w-full py-2 px-4 border-2 border-emerald-500 text-emerald-600 rounded-lg font-semibold hover:bg-emerald-50 transition-colors">
                                     Contact
                                 </button>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -214,6 +216,12 @@
                         <p class="text-gray-500 text-lg">No featured properties available at the moment.</p>
                     </div>
                 @endforelse
+            </div>
+
+            <div class="text-center mt-12">
+                <a href="{{ route('properties.index') }}" class="inline-block bg-primary text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-dark transition">
+                    View All Properties
+                </a>
             </div>
         </div>
     </section>
@@ -226,7 +234,7 @@
                 <p class="text-xl text-gray-600">Check out the newest properties added to our platform</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 @forelse($latestProperties as $property)
                     <div class="property-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300">
                         <!-- Property Image -->
@@ -330,9 +338,11 @@
                                     View Details
                                 </a>
 
-                                <button onclick="handleContactClick({{ $property->id }})" class="w-full py-2 px-4 border-2 border-emerald-500 text-emerald-600 rounded-lg font-semibold hover:bg-emerald-50 transition-colors">
+                                @if(!Auth::check() || Auth::user()->role !== 'owner')
+                                <button type="button" onclick="handleContactClick({{ $property->id }}, '{{ $property->owner_id }}', '{{ $property->agent_id }}')" class="w-full py-2 px-4 border-2 border-emerald-500 text-emerald-600 rounded-lg font-semibold hover:bg-emerald-50 transition-colors">
                                     Contact
                                 </button>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -341,6 +351,12 @@
                         <p class="text-gray-500 text-lg">No properties available at the moment.</p>
                     </div>
                 @endforelse
+            </div>
+
+            <div class="text-center mt-12">
+                <a href="{{ route('properties.index') }}" class="inline-block bg-primary text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-dark transition">
+                    View All Properties
+                </a>
             </div>
         </div>
     </section>
@@ -445,6 +461,6 @@
 
    
 
-@include('components.contact-inquiry-modal', ['propertyId' => null])
+@include('components.contact-inquiry-modal')
 
 @endsection

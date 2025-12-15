@@ -15,6 +15,13 @@ class LeadController extends Controller
         $leads = Lead::where('agent_id', Auth::id())
             ->with(['property', 'agent'])
             ->get();
+
+        \Log::info('Agent leads fetched', [
+            'agent_id' => Auth::id(),
+            'leads_count' => $leads->count(),
+            'lead_ids' => $leads->pluck('id')->toArray()
+        ]);
+
         return view('agent.leads.index', compact('leads'));
     }
 

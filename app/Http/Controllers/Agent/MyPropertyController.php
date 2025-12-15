@@ -7,6 +7,7 @@ use App\Models\Property;
 use App\Traits\CapabilityTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Events\PropertySubmittedForApproval;
 
 class MyPropertyController extends Controller
 {
@@ -141,6 +142,8 @@ class MyPropertyController extends Controller
 
         // Create property
         $property = Property::create($propertyData);
+
+        event(new PropertySubmittedForApproval($property));
 
         // Attach amenities
         if (isset($validated['amenities'])) {
@@ -327,30 +330,62 @@ class MyPropertyController extends Controller
 
     public function featureProperty($id)
     {
-        $user = Auth::user();
-        $property = Property::findOrFail($id);
+        try {
+            \Log::info('Agent featureProperty called', ['property_id' => $id, 'user_id' => Auth::id()]);
 
-        if ($property->owner_id !== $user->id) {
-            abort(403, 'Unauthorized');
-        }
+            $user = Auth::user();
+            $property = Property::findOrFail($id);
 
-        if (!$user->canFeatureProperty()) {
+            if ($property->owner_id !== $user->id) {
+                \Log::warning('Unauthorized access to agent featureProperty', ['property_id' => $id, 'user_id' => $user->id]);
+                return response()->json([
+                    'error' => 'Unauthorized'
+                ], 403);
+            }
+
+            if (!$user->canFeatureProperty()) {
+                \Log::info('Agent featured listing limit reached', ['user_id' => $user->id]);
+                return response()->json([
+                    'error' => 'Featured listing limit reached. Please upgrade your plan.',
+                    'upgrade_required' => true
+                ], 403);
+            }
+
+            $activePurchases = $user->activePlanPurchases();
+            $activePurchase = $activePurchases->first();
+
+            if (!$activePurchase) {
+                \Log::info('Agent no active plan found', ['user_id' => $user->id]);
+                return response()->json([
+                    'error' => 'No active plan found. Please purchase a plan to feature properties.',
+                    'upgrade_required' => true
+                ], 403);
+            }
+
+            $duration = (int) ($activePurchase->plan ? $activePurchase->plan->getFeaturedDurationDays() : 10);
+            \Log::info('Agent updating property to featured', ['property_id' => $id, 'duration' => $duration]);
+
+            $property->update([
+                'featured' => true,
+                'featured_until' => now()->addDays($duration)
+            ]);
+
+            $activePurchase->increment('used_featured_listings');
+            \Log::info('Agent property featured successfully', ['property_id' => $id]);
+
+            return response()->json(['success' => 'Property featured successfully']);
+        } catch (\Throwable $e) {
+            \Log::error('Error in agent featureProperty', [
+                'property_id' => $id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
-                'error' => 'Featured listing limit reached. Please upgrade your plan.',
-                'upgrade_required' => true
-            ], 403);
+                'error' => 'An error occurred while featuring the property. Please try again.'
+            ], 500);
         }
-
-        $activePurchases = $user->activePlanPurchases();
-        $activePurchase = $activePurchases->first();
-        $property->update([
-            'featured' => true,
-            'featured_until' => now()->addDays($activePurchase->plan->getFeaturedDurationDays())
-        ]);
-
-        $activePurchase->increment('used_featured_listings');
-
-        return response()->json(['success' => 'Property featured successfully']);
     }
 
     public function unfeatureProperty($id)
