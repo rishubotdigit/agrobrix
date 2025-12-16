@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Owner\DashboardController;
 use App\Http\Controllers\Owner\ProfileController;
 use App\Http\Controllers\Owner\MyPropertyController;
+use App\Http\Controllers\Owner\NotificationController;
 use App\Http\Controllers\PlanPurchaseController;
 
 Route::prefix('owner')->middleware(['auth', 'role:owner'])->group(function () {
@@ -42,4 +43,11 @@ Route::prefix('owner')->middleware(['auth', 'role:owner'])->group(function () {
     // Leads
     Route::get('/leads', [DashboardController::class, 'leads'])->name('owner.leads');
     Route::get('/leads/{lead}', [DashboardController::class, 'showLead'])->name('owner.leads.show');
+
+    // Notifications
+    Route::get('notifications', [NotificationController::class, 'index'])->name('owner.notifications.index');
+    Route::get('notifications/count', [NotificationController::class, 'count'])->name('owner.notifications.count');
+    Route::get('notifications/dropdown', [NotificationController::class, 'dropdown'])->name('owner.notifications.dropdown');
+    Route::post('notifications/mark-seen', [NotificationController::class, 'markAsSeen'])->name('owner.notifications.mark-seen');
+    Route::delete('notifications/{notification}', [NotificationController::class, 'delete'])->name('owner.notifications.delete');
     });

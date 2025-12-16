@@ -450,10 +450,6 @@
                     </div>
                 @endforeach
             </div>
-
-            <div class="text-center mt-12">
-                <p class="text-gray-600">Need more contacts? <span class="font-semibold text-primary">₹10 per additional contact view</span></p>
-            </div>
         </div>
     </section>
     @endif

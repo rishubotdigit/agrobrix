@@ -103,4 +103,12 @@ class PlanPurchase extends Model
         ]);
     }
 
+    /**
+     * Generate HTML invoice for the plan purchase.
+     */
+    public function generateInvoiceHtml(): string
+    {
+        return view('invoices.plan-purchase', ['planPurchase' => $this])->render();
+    }
+
 }

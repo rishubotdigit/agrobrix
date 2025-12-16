@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\PaymentApproved;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -153,7 +154,12 @@ class Payment extends Model
         $this->approved_at = now();
         $this->admin_notes = $notes;
 
-        return $this->save();
+        if ($this->save()) {
+            event(new PaymentApproved($this));
+            return true;
+        }
+
+        return false;
     }
 
     /**

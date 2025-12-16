@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\SocialLoginController;
 use App\Http\Controllers\Admin\PlanPurchaseController;
 use App\Http\Controllers\Admin\AdminContactController;
 use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\EmailLogController;
 
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('admin.dashboard');
@@ -78,6 +79,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     // Settings
     Route::get('settings', [SettingController::class, 'index'])->name('admin.settings.index');
     Route::post('settings', [SettingController::class, 'update'])->name('admin.settings.update');
+    Route::post('settings/test-email', [SettingController::class, 'testEmail'])->name('admin.settings.test-email');
 
     // SMS Gateways
     Route::get('sms-gateways', [SmsGatewayController::class, 'index'])->name('admin.sms-gateways.index');
@@ -97,5 +99,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('notifications/dropdown', [NotificationController::class, 'dropdown'])->name('admin.notifications.dropdown');
     Route::post('notifications/mark-seen', [NotificationController::class, 'markAsSeen'])->name('admin.notifications.mark-seen');
     Route::delete('notifications/{notification}', [NotificationController::class, 'delete'])->name('admin.notifications.delete');
+
+    // Email Logs
+    Route::get('email-logs', [EmailLogController::class, 'index'])->name('admin.email-logs.index');
 
 });

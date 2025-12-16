@@ -7,6 +7,7 @@ use App\Http\Controllers\Agent\LeadController;
 use App\Http\Controllers\Agent\PropertyController;
 use App\Http\Controllers\Agent\VisitController;
 use App\Http\Controllers\Agent\FollowUpController;
+use App\Http\Controllers\Agent\NotificationController;
 use App\Http\Controllers\PlanPurchaseController;
 
 Route::prefix('agent')->middleware(['auth', 'role:agent'])->group(function () {
@@ -71,5 +72,12 @@ Route::prefix('agent')->middleware(['auth', 'role:agent'])->group(function () {
 
     // Payments
     Route::get('/payments', [DashboardController::class, 'payments'])->name('agent.payments');
+
+    // Notifications
+    Route::get('notifications', [NotificationController::class, 'index'])->name('agent.notifications.index');
+    Route::get('notifications/count', [NotificationController::class, 'count'])->name('agent.notifications.count');
+    Route::get('notifications/dropdown', [NotificationController::class, 'dropdown'])->name('agent.notifications.dropdown');
+    Route::post('notifications/mark-seen', [NotificationController::class, 'markAsSeen'])->name('agent.notifications.mark-seen');
+    Route::delete('notifications/{notification}', [NotificationController::class, 'delete'])->name('agent.notifications.delete');
 
 });

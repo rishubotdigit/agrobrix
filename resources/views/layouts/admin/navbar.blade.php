@@ -1,3 +1,7 @@
+@php
+    $notificationCount = \App\Models\Notification::where('seen', false)->whereNull('user_id')->count();
+    $notifications = \App\Models\Notification::whereNull('user_id')->orderBy('created_at', 'desc')->limit(10)->get();
+@endphp
 <nav class="bg-white shadow-lg border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
@@ -25,7 +29,7 @@
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM4.868 12.683A17.925 17.925 0 0112 21c7.962 0 12-1.21 12-2.683m-12 2.683a17.925 17.925 0 01-7.132-8.317M12 21c4.411 0 8-4.03 8-9s-3.589-9-8-9-8 4.03-8 9a9.06 9.06 0 001.832 5.683L4 21l4.868-8.317z"/>
                         </svg>
-                        <span id="notification-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+                        <span id="notification-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center {{ $notificationCount > 0 ? '' : 'hidden' }}">{{ $notificationCount > 99 ? '99+' : $notificationCount }}</span>
                     </button>
 
                     <!-- Dropdown -->
@@ -33,15 +37,44 @@
                         <div class="py-1">
                             <div class="px-4 py-2 border-b border-gray-200 flex justify-between items-center">
                                 <h3 class="text-sm font-medium text-gray-900">Notifications</h3>
-                                <div class="flex space-x-2">
-                                    <button onclick="markAllAsSeen()" class="text-xs text-blue-600 hover:text-blue-800">Mark all seen</button>
-                                    <a href="{{ route('admin.notifications.index') }}" class="text-xs text-gray-600 hover:text-gray-800">View all</a>
-                                </div>
+                                <a href="{{ route('admin.notifications.index') }}" class="text-xs text-gray-600 hover:text-gray-800">View all</a>
                             </div>
                             <div id="notification-list" class="max-h-64 overflow-y-auto">
-                                <!-- Notifications will be loaded here -->
+                                @foreach($notifications as $notification)
+                                    @php
+                                        $bgClass = $notification->seen ? 'bg-gray-50' : 'bg-blue-50';
+                                        $badgeClass = $notification->seen ? 'bg-gray-100 text-gray-800' : 'bg-blue-100 text-blue-800';
+                                        $date = $notification->created_at->format('M j, Y');
+
+                                        $messageHtml = $notification->message;
+                                        if ($notification->type === 'payment_submitted' && isset($notification->data['payment_id'])) {
+                                            $messageHtml = "<a href=\"/admin/payments/{$notification->data['payment_id']}\" class=\"text-sm text-blue-600 hover:text-blue-800\">{$notification->message}</a>";
+                                        } elseif ($notification->type === 'property_submitted' && isset($notification->data['property_id'])) {
+                                            $messageHtml = "<a href=\"/admin/properties/{$notification->data['property_id']}\" class=\"text-sm text-blue-600 hover:text-blue-800\">{$notification->message}</a>";
+                                        } elseif ($notification->type === 'payment_approved_admin' && isset($notification->data['payment_id'])) {
+                                            $messageHtml = "<a href=\"/admin/payments/{$notification->data['payment_id']}\" class=\"text-sm text-blue-600 hover:text-blue-800\">{$notification->message}</a>";
+                                        } elseif ($notification->type === 'property_approved_admin' && isset($notification->data['property_id'])) {
+                                            $messageHtml = "<a href=\"/admin/properties/{$notification->data['property_id']}\" class=\"text-sm text-blue-600 hover:text-blue-800\">{$notification->message}</a>";
+                                        } else {
+                                            $messageHtml = "<p class=\"text-sm text-gray-900\">{$notification->message}</p>";
+                                        }
+                                    @endphp
+                                    <div class="px-4 py-3 border-b border-gray-100 {{ $bgClass }}" data-notification-id="{{ $notification->id }}">
+                                        <div class="flex items-start">
+                                            <div class="flex-1">
+                                                <div class="flex items-center space-x-2 mb-1">
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium type-badge {{ $badgeClass }}">
+                                                        {{ ucfirst($notification->type) }}
+                                                    </span>
+                                                    <span class="text-xs text-gray-500">{{ $date }}</span>
+                                                </div>
+                                                {!! $messageHtml !!}
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
-                            <div id="no-notifications" class="px-4 py-2 text-sm text-gray-500 text-center hidden">
+                            <div id="no-notifications" class="px-4 py-2 text-sm text-gray-500 text-center {{ $notifications->isEmpty() ? '' : 'hidden' }}">
                                 No notifications
                             </div>
                         </div>

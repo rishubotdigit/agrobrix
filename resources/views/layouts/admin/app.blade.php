@@ -46,156 +46,144 @@
         </div>
     </div>
     @vite(['resources/js/app.js'])
+    @push('scripts')
     <script>
-        function updateNotificationCount() {
-            fetch('/admin/notifications/count')
-                .then(response => response.json())
-                .then(data => {
-                    const count = data.count;
-                    const badge = document.getElementById('notification-badge');
-                    const sidebarCount = document.getElementById('sidebar-notification-count');
-
-                    if (count > 0) {
-                        badge.textContent = count > 99 ? '99+' : count;
-                        badge.classList.remove('hidden');
-                        sidebarCount.textContent = count > 99 ? '99+' : count;
-                        sidebarCount.classList.remove('hidden');
-                    } else {
-                        badge.classList.add('hidden');
-                        sidebarCount.classList.add('hidden');
-                    }
-                })
-                .catch(error => console.error('Error fetching notification count:', error));
-        }
-
-        // Update on page load
-        document.addEventListener('DOMContentLoaded', updateNotificationCount);
-
-        // Update every 30 seconds
-        setInterval(updateNotificationCount, 30000);
-
-        // Notification dropdown
-        let notificationDropdown = document.getElementById('notification-dropdown');
-        let notificationToggle = document.getElementById('notification-toggle');
-
-        notificationToggle.addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (notificationDropdown.classList.contains('hidden')) {
-                loadNotifications();
-                notificationDropdown.classList.remove('hidden');
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof window.initNotifications === 'function') {
+                window.initNotifications('/admin');
             } else {
-                notificationDropdown.classList.add('hidden');
+                console.error('initNotifications function not found');
             }
         });
+        window.initNotifications = function(basePath) {
 
-        document.addEventListener('click', function() {
+    // Notification dropdown
+    let notificationDropdown = document.getElementById('notification-dropdown');
+    let notificationToggle = document.getElementById('notification-toggle');
+
+    notificationToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (notificationDropdown.classList.contains('hidden')) {
+            notificationDropdown.classList.remove('hidden');
+        } else {
             notificationDropdown.classList.add('hidden');
+        }
+    });
+
+    document.addEventListener('click', function() {
+        notificationDropdown.classList.add('hidden');
+    });
+
+
+    function markAsSeen(id) {
+        fetch(basePath + '/notifications/mark-seen', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ id: id })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update the specific notification item in DOM
+                const item = document.querySelector(`[data-notification-id="${id}"]`);
+                if (item) {
+                    item.classList.remove('bg-blue-50');
+                    item.classList.add('bg-gray-50');
+                    const seenButton = item.querySelector('.seen-button');
+                    if (seenButton) seenButton.remove();
+                    const typeBadge = item.querySelector('.type-badge');
+                    if (typeBadge) {
+                        typeBadge.classList.remove('bg-blue-100', 'text-blue-800');
+                        typeBadge.classList.add('bg-gray-100', 'text-gray-800');
+                    }
+                }
+                notificationDropdown.classList.add('hidden');
+            } else {
+                alert('Failed to mark notification as seen.');
+            }
+        })
+        .catch(error => {
+            console.error('Error marking notification as seen:', error);
+            alert('An error occurred while marking notification as seen.');
         });
+    }
 
-        function loadNotifications() {
-            fetch('/admin/notifications/dropdown')
-                .then(response => response.text())
-                .then(html => {
-                    const list = document.getElementById('notification-list');
-                    const noNotif = document.getElementById('no-notifications');
-                    list.innerHTML = html;
-                    if (list.children.length === 0) {
-                        noNotif.classList.remove('hidden');
-                    } else {
-                        noNotif.classList.add('hidden');
+    function markAllAsSeen() {
+        fetch(basePath + '/notifications/mark-seen', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update all notification items to seen
+                document.querySelectorAll('[data-notification-id]').forEach(item => {
+                    item.classList.remove('bg-blue-50');
+                    item.classList.add('bg-gray-50');
+                    const seenButton = item.querySelector('.seen-button');
+                    if (seenButton) seenButton.remove();
+                    const typeBadge = item.querySelector('.type-badge');
+                    if (typeBadge) {
+                        typeBadge.classList.remove('bg-blue-100', 'text-blue-800');
+                        typeBadge.classList.add('bg-gray-100', 'text-gray-800');
                     }
-                })
-                .catch(error => console.error('Error loading notifications:', error));
-        }
+                });
+                // Update badge
+                const badge = document.getElementById('notification-badge');
+                if (badge) {
+                    badge.textContent = '0';
+                    badge.classList.add('hidden');
+                }
+                notificationDropdown.classList.add('hidden');
+            } else {
+                alert('Failed to mark all notifications as seen.');
+            }
+        })
+        .catch(error => {
+            console.error('Error marking all notifications as seen:', error);
+            alert('An error occurred while marking all notifications as seen.');
+        });
+    }
 
-        function markAsSeen(id) {
-            fetch('/admin/notifications/mark-seen', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ id: id })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Update the specific notification item in DOM
-                    const item = document.querySelector(`[data-notification-id="${id}"]`);
-                    if (item) {
-                        item.classList.remove('bg-blue-50');
-                        item.classList.add('bg-gray-50');
-                        const seenButton = item.querySelector('.seen-button');
-                        if (seenButton) seenButton.remove();
-                        const typeBadge = item.querySelector('.type-badge');
-                        if (typeBadge) {
-                            typeBadge.classList.remove('bg-blue-100', 'text-blue-800');
-                            typeBadge.classList.add('bg-gray-100', 'text-gray-800');
-                        }
-                    }
-                    updateNotificationCount();
-                    notificationDropdown.classList.add('hidden');
-                } else {
-                    alert('Failed to mark notification as seen.');
-                }
-            })
-            .catch(error => {
-                console.error('Error marking notification as seen:', error);
-                alert('An error occurred while marking notification as seen.');
-            });
-        }
+    function deleteNotification(id) {
+        fetch(basePath + '/notifications/' + id, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove the specific notification item from DOM
+                const item = document.querySelector(`[data-notification-id="${id}"]`);
+                if (item) item.remove();
+                notificationDropdown.classList.add('hidden');
+            } else {
+                alert('Failed to delete notification.');
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting notification:', error);
+            alert('An error occurred while deleting notification.');
+        });
+    }
 
-        function markAllAsSeen() {
-            fetch('/admin/notifications/mark-seen', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({})
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    updateNotificationCount();
-                    loadNotifications();
-                    notificationDropdown.classList.add('hidden');
-                } else {
-                    alert('Failed to mark all notifications as seen.');
-                }
-            })
-            .catch(error => {
-                console.error('Error marking all notifications as seen:', error);
-                alert('An error occurred while marking all notifications as seen.');
-            });
-        }
-
-        function deleteNotification(id) {
-            fetch(`/admin/notifications/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Remove the specific notification item from DOM
-                    const item = document.querySelector(`[data-notification-id="${id}"]`);
-                    if (item) item.remove();
-                    updateNotificationCount();
-                    notificationDropdown.classList.add('hidden');
-                } else {
-                    alert('Failed to delete notification.');
-                }
-            })
-            .catch(error => {
-                console.error('Error deleting notification:', error);
-                alert('An error occurred while deleting notification.');
-            });
-        }
+    // Make functions global so they can be called from HTML
+    window.markAsSeen = markAsSeen;
+    window.markAllAsSeen = markAllAsSeen;
+    window.deleteNotification = deleteNotification;
+};
     </script>
+    @endpush
     @stack('scripts')
 </body>
 </html>

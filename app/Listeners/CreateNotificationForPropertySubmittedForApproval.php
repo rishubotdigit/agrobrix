@@ -3,7 +3,11 @@
 namespace App\Listeners;
 
 use App\Events\PropertySubmittedForApproval;
+use App\Mail\NotifyAdminPropertySubmitted;
 use App\Models\Notification;
+use App\Models\Setting;
+use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 
 class CreateNotificationForPropertySubmittedForApproval
 {
@@ -33,6 +37,18 @@ class CreateNotificationForPropertySubmittedForApproval
                     'property_id' => $event->property->id,
                 ],
             ]);
+        }
+
+        // Send email notification to admins if enabled
+        if (Setting::get('admin_property_submitted_notification_enabled', '1') === '1') {
+            $admins = User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                try {
+                    Mail::to($admin->email)->send(new NotifyAdminPropertySubmitted($event->property));
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send admin property submitted email: ' . $e->getMessage());
+                }
+            }
         }
     }
 }

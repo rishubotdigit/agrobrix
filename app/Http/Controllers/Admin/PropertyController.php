@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\PropertyApproved;
 use App\Http\Controllers\Controller;
 use App\Models\Property;
 use App\Models\PropertyVersion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class PropertyController extends Controller
 {
@@ -34,12 +36,23 @@ class PropertyController extends Controller
         // Apply the approved version to the property
         $property = $version->property;
         $property->update(array_merge($version->data, ['status' => 'approved']));
+
+        Log::info('Firing PropertyApproved event for property ID: ' . $property->id);
+        event(new PropertyApproved($property, auth()->id()));
+
         return redirect()->back()->with('success', 'Version approved.');
     }
 
     public function rejectVersion(PropertyVersion $version)
     {
         $version->update(['status' => 'rejected']);
+        // Update property status to rejected
+        $property = $version->property;
+        $property->update(['status' => 'rejected']);
+
+        Log::info('Firing PropertyRejected event for property ID: ' . $property->id);
+        event(new \App\Events\PropertyRejected($property, auth()->id()));
+
         return redirect()->back()->with('success', 'Version rejected.');
     }
 
@@ -52,7 +65,10 @@ class PropertyController extends Controller
         PropertyVersion::whereIn('id', $versionIds)->update(['status' => 'approved']);
         // Apply approved versions to properties
         PropertyVersion::whereIn('id', $versionIds)->each(function ($version) {
-            $version->property->update(array_merge($version->data, ['status' => 'approved']));
+            $property = $version->property;
+            $property->update(array_merge($version->data, ['status' => 'approved']));
+            Log::info('Firing PropertyApproved event for property ID: ' . $property->id . ' in bulk approve');
+            event(new PropertyApproved($property, auth()->id()));
         });
         return redirect()->back()->with('success', 'Selected versions approved.');
     }
@@ -64,6 +80,13 @@ class PropertyController extends Controller
             return redirect()->back()->with('error', 'No versions selected.');
         }
         PropertyVersion::whereIn('id', $versionIds)->update(['status' => 'rejected']);
+        // Update properties status to rejected and fire events
+        PropertyVersion::whereIn('id', $versionIds)->each(function ($version) {
+            $property = $version->property;
+            $property->update(['status' => 'rejected']);
+            Log::info('Firing PropertyRejected event for property ID: ' . $property->id . ' in bulk reject');
+            event(new \App\Events\PropertyRejected($property, auth()->id()));
+        });
         return redirect()->back()->with('success', 'Selected versions rejected.');
     }
 

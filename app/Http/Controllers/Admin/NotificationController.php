@@ -10,37 +10,37 @@ class NotificationController extends Controller
 {
     public function index()
     {
-        $notifications = Notification::orderBy('created_at', 'desc')->paginate(20);
+        $notifications = Notification::whereNull('user_id')->orderBy('created_at', 'desc')->paginate(20);
         return view('admin.notifications.index', compact('notifications'));
     }
 
     public function count()
     {
-        $count = Notification::where('seen', false)->count();
+        $count = Notification::where('seen', false)->whereNull('user_id')->count();
         return response()->json(['count' => $count]);
     }
 
     public function markAsSeen(Request $request)
     {
         if ($request->has('id')) {
-            $notification = Notification::findOrFail($request->id);
+            $notification = Notification::whereNull('user_id')->findOrFail($request->id);
             $notification->update(['seen' => true]);
         } else {
-            Notification::where('seen', false)->update(['seen' => true]);
+            Notification::where('seen', false)->whereNull('user_id')->update(['seen' => true]);
         }
-        return response()->json(['success' => true]);
+        return redirect()->route('admin.notifications.index');
     }
 
     public function delete($id)
     {
-        $notification = Notification::findOrFail($id);
+        $notification = Notification::whereNull('user_id')->findOrFail($id);
         $notification->delete();
-        return response()->json(['success' => true]);
+        return redirect()->route('admin.notifications.index')->with('success', 'Notification deleted successfully.');
     }
 
     public function dropdown()
     {
-        $notifications = Notification::orderBy('created_at', 'desc')->limit(10)->get();
+        $notifications = Notification::whereNull('user_id')->orderBy('created_at', 'desc')->limit(10)->get();
 
         if ($notifications->isEmpty()) {
             return '';
@@ -50,13 +50,16 @@ class NotificationController extends Controller
         foreach ($notifications as $notification) {
             $bgClass = $notification->seen ? 'bg-gray-50' : 'bg-blue-50';
             $badgeClass = $notification->seen ? 'bg-gray-100 text-gray-800' : 'bg-blue-100 text-blue-800';
-            $seenButton = !$notification->seen ? "<button onclick=\"markAsSeen({$notification->id})\" class=\"seen-button text-xs text-blue-600 hover:text-blue-800\">Seen</button>" : '';
             $date = $notification->created_at->format('M j, Y');
 
             $messageHtml = $notification->message;
             if ($notification->type === 'payment_submitted' && isset($notification->data['payment_id'])) {
                 $messageHtml = "<a href=\"/admin/payments/{$notification->data['payment_id']}\" class=\"text-sm text-blue-600 hover:text-blue-800\">{$notification->message}</a>";
             } elseif ($notification->type === 'property_submitted' && isset($notification->data['property_id'])) {
+                $messageHtml = "<a href=\"/admin/properties/{$notification->data['property_id']}\" class=\"text-sm text-blue-600 hover:text-blue-800\">{$notification->message}</a>";
+            } elseif ($notification->type === 'payment_approved_admin' && isset($notification->data['payment_id'])) {
+                $messageHtml = "<a href=\"/admin/payments/{$notification->data['payment_id']}\" class=\"text-sm text-blue-600 hover:text-blue-800\">{$notification->message}</a>";
+            } elseif ($notification->type === 'property_approved_admin' && isset($notification->data['property_id'])) {
                 $messageHtml = "<a href=\"/admin/properties/{$notification->data['property_id']}\" class=\"text-sm text-blue-600 hover:text-blue-800\">{$notification->message}</a>";
             } else {
                 $messageHtml = "<p class=\"text-sm text-gray-900\">{$notification->message}</p>";
@@ -72,10 +75,6 @@ class NotificationController extends Controller
                             <span class=\"text-xs text-gray-500\">{$date}</span>
                         </div>
                         {$messageHtml}
-                    </div>
-                    <div class=\"flex space-x-1 ml-2\">
-                        {$seenButton}
-                        <button onclick=\"deleteNotification({$notification->id})\" class=\"text-xs text-red-600 hover:text-red-800\">Delete</button>
                     </div>
                 </div>
             </div>";

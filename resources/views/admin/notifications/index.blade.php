@@ -10,9 +10,12 @@
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold text-gray-900">Notifications</h2>
                     @if($notifications->where('seen', false)->count() > 0)
-                        <button onclick="markAllAsSeen()" class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">
-                            Mark All as Seen
-                        </button>
+                        <form method="POST" action="{{ route('admin.notifications.mark-seen') }}" class="inline">
+                            @csrf
+                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">
+                                Mark All as Seen
+                            </button>
+                        </form>
                     @endif
                 </div>
 
@@ -40,13 +43,21 @@
                                     </div>
                                     <div class="flex space-x-2">
                                         @if(!$notification->seen)
-                                            <button onclick="markAsSeen({{ $notification->id }})" class="bg-blue-500 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded">
-                                                Mark as Seen
-                                            </button>
+                                            <form method="POST" action="{{ route('admin.notifications.mark-seen') }}" class="inline">
+                                                @csrf
+                                                <input type="hidden" name="id" value="{{ $notification->id }}">
+                                                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded">
+                                                    Mark as Seen
+                                                </button>
+                                            </form>
                                         @endif
-                                        <button onclick="deleteNotification({{ $notification->id }})" class="bg-red-500 hover:bg-red-700 text-white text-sm px-3 py-1 rounded">
-                                            Delete
-                                        </button>
+                                        <form method="POST" action="{{ route('admin.notifications.delete', $notification->id) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this notification?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="bg-red-500 hover:bg-red-700 text-white text-sm px-3 py-1 rounded">
+                                                Delete
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -70,62 +81,4 @@
     </div>
 </div>
 
-<script>
-function markAsSeen(id) {
-    fetch('/admin/notifications/mark-seen', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: JSON.stringify({ id: id })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const item = document.querySelector(`[data-notification-id="${id}"]`);
-            if (item) item.remove();
-            updateNotificationCount();
-        }
-    })
-    .catch(error => {
-        console.error('Error deleting notification:', error);
-        alert('An error occurred while deleting notification.');
-    });
-}
-
-function markAllAsSeen() {
-    fetch('/admin/notifications/mark-seen', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: JSON.stringify({})
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        }
-    });
-}
-
-function deleteNotification(id) {
-    if (confirm('Are you sure you want to delete this notification?')) {
-        fetch(`/admin/notifications/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            }
-        });
-    }
-}
-</script>
 @endsection
