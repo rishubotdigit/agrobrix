@@ -9,7 +9,7 @@ trait DynamicSmtpTrait
     /**
      * Load SMTP settings from database and configure mail dynamically.
      */
-    protected function loadSmtpSettings(): void
+    public static function loadSmtpSettings(): void
     {
         $smtpHost = Setting::get('smtp_host');
 
@@ -23,9 +23,7 @@ trait DynamicSmtpTrait
             config(['mail.mailers.smtp.username' => Setting::get('smtp_email', env('MAIL_USERNAME'))]);
             config(['mail.mailers.smtp.password' => Setting::get('smtp_password', env('MAIL_PASSWORD'))]);
             config(['mail.mailers.smtp.encryption' => Setting::get('smtp_encryption', env('MAIL_ENCRYPTION', 'tls'))]);
-
-            // Disable SSL peer verification to prevent certificate issues
-            config(['mail.mailers.smtp.stream' => ['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]]);
+            config(['mail.mailers.smtp.verify_peer' => false, 'mail.mailers.smtp.verify_peer_name' => false]);
 
             // Configure global from address
             $fromEmail = Setting::get('smtp_email', env('MAIL_FROM_ADDRESS', 'hello@example.com'));
