@@ -9,12 +9,15 @@ use App\Models\User;
 use App\Mail\WelcomeUser;
 use App\Mail\NotifyAdminNewUser;
 use App\Models\Setting;
+use App\Traits\DynamicSmtpTrait;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
 class CreateNotificationForUserRegistered
 {
+    use DynamicSmtpTrait;
+
     /**
      * Create the event listener.
      */
@@ -47,12 +50,15 @@ class CreateNotificationForUserRegistered
 
         // Send welcome email to user if enabled
         if (Setting::get('user_registration_welcome_email_enabled', '1') === '1') {
+            DynamicSmtpTrait::loadSmtpSettings();
             try {
                 Mail::to($event->user->email)->send(new WelcomeUser($event->user));
                 \App\Models\EmailLog::create([
                     'email_type' => 'welcome_user',
                     'recipient_email' => $event->user->email,
                     'user_id' => $event->user->id,
+                    'model_type' => 'App\Models\User',
+                    'model_id' => $event->user->id,
                     'status' => 'sent',
                 ]);
             } catch (\Exception $e) {
@@ -65,6 +71,8 @@ class CreateNotificationForUserRegistered
                     'email_type' => 'welcome_user',
                     'recipient_email' => $event->user->email,
                     'user_id' => $event->user->id,
+                    'model_type' => 'App\Models\User',
+                    'model_id' => $event->user->id,
                     'status' => 'failed',
                     'error_message' => $e->getMessage(),
                 ]);
@@ -73,6 +81,7 @@ class CreateNotificationForUserRegistered
 
         // Send notification email to admins if enabled and admins exist
         if (Setting::get('admin_new_user_notification_enabled', '1') === '1' && User::where('role', 'admin')->exists()) {
+            DynamicSmtpTrait::loadSmtpSettings();
             try {
                 Mail::send(new NotifyAdminNewUser($event->user));
                 // For admin emails, recipient is multiple, so perhaps log without recipient or with admin emails
@@ -81,6 +90,8 @@ class CreateNotificationForUserRegistered
                     'email_type' => 'notify_admin_new_user',
                     'recipient_email' => 'admins', // or get admin emails
                     'user_id' => $event->user->id,
+                    'model_type' => 'App\Models\User',
+                    'model_id' => $event->user->id,
                     'status' => 'sent',
                 ]);
             } catch (\Exception $e) {
@@ -92,6 +103,8 @@ class CreateNotificationForUserRegistered
                     'email_type' => 'notify_admin_new_user',
                     'recipient_email' => 'admins',
                     'user_id' => $event->user->id,
+                    'model_type' => 'App\Models\User',
+                    'model_id' => $event->user->id,
                     'status' => 'failed',
                     'error_message' => $e->getMessage(),
                 ]);

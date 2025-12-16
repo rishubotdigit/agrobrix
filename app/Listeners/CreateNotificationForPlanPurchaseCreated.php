@@ -7,6 +7,7 @@ use App\Mail\NotifyAdminPlanPurchase;
 use App\Mail\PlanPurchaseConfirmation;
 use App\Models\Notification;
 use App\Models\Setting;
+use App\Traits\DynamicSmtpTrait;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -42,6 +43,7 @@ class CreateNotificationForPlanPurchaseCreated
 
         // Send confirmation email to user if enabled
         if (Setting::get('user_plan_purchase_confirmation_enabled', '1') === '1') {
+            DynamicSmtpTrait::loadSmtpSettings();
             try {
                 Mail::to($event->planPurchase->user->email)->send(new PlanPurchaseConfirmation($event->planPurchase));
             } catch (\Exception $e) {
@@ -55,6 +57,7 @@ class CreateNotificationForPlanPurchaseCreated
 
         // Send notification email to admins if enabled
         if (Setting::get('admin_plan_purchase_notification_enabled', '1') === '1') {
+            DynamicSmtpTrait::loadSmtpSettings();
             try {
                 Mail::send(new NotifyAdminPlanPurchase($event->planPurchase));
             } catch (\Exception $e) {

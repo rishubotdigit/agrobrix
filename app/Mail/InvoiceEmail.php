@@ -4,16 +4,13 @@ namespace App\Mail;
 
 use App\Models\Payment;
 use App\Traits\DynamicSmtpTrait;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Queue\SerializesModels;
 
-class InvoiceEmail extends Mailable implements ShouldQueue
+class InvoiceEmail extends Mailable
 {
-    use Queueable, SerializesModels, DynamicSmtpTrait;
+    use DynamicSmtpTrait;
 
     public Payment $payment;
 

@@ -4,16 +4,13 @@ namespace App\Mail;
 
 use App\Models\Lead;
 use App\Traits\DynamicSmtpTrait;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Queue\SerializesModels;
 
-class PropertyInquiry extends Mailable implements ShouldQueue
+class PropertyInquiry extends Mailable
 {
-    use Queueable, SerializesModels, DynamicSmtpTrait;
+    use DynamicSmtpTrait;
 
     public Lead $lead;
 

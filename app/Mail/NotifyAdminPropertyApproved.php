@@ -5,16 +5,13 @@ namespace App\Mail;
 use App\Models\Property;
 use App\Models\User;
 use App\Traits\DynamicSmtpTrait;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Queue\SerializesModels;
 
-class NotifyAdminPropertyApproved extends Mailable implements ShouldQueue
+class NotifyAdminPropertyApproved extends Mailable
 {
-    use Queueable, SerializesModels, DynamicSmtpTrait;
+    use DynamicSmtpTrait;
 
     public Property $property;
 

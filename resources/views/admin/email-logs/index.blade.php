@@ -21,8 +21,10 @@
                 <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
                 <select id="status" name="status" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                     <option value="">All</option>
+                    <option value="sent" {{ request('status') == 'sent' ? 'selected' : '' }}>Sent</option>
                     <option value="queued" {{ request('status') == 'queued' ? 'selected' : '' }}>Queued</option>
                     <option value="failed" {{ request('status') == 'failed' ? 'selected' : '' }}>Failed</option>
+                    <option value="resent" {{ request('status') == 'resent' ? 'selected' : '' }}>Resent</option>
                 </select>
             </div>
             <div>
@@ -56,6 +58,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sent At</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -66,16 +69,22 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $log->recipient_email }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $log->user ? $log->user->name : 'N/A' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $log->status == 'queued' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800' }}">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full @if($log->status == 'sent' || $log->status == 'resent') bg-green-100 text-green-800 @elseif($log->status == 'queued') bg-yellow-100 text-yellow-800 @elseif($log->status == 'failed') bg-red-100 text-red-800 @else bg-gray-100 text-gray-800 @endif">
                                 {{ ucfirst($log->status) }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $log->sent_at ? $log->sent_at->format('Y-m-d H:i:s') : 'N/A' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $log->created_at->format('Y-m-d H:i:s') }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <form method="POST" action="{{ route('admin.email-logs.resend', $log->id) }}" style="display:inline;">
+                                @csrf
+                                <button type="submit" class="text-indigo-600 hover:text-indigo-900">Resend</button>
+                            </form>
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500">No email logs found.</td>
+                        <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">No email logs found.</td>
                     </tr>
                     @endforelse
                 </tbody>

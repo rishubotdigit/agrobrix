@@ -6,14 +6,13 @@ use App\Events\PropertyApproved;
 use App\Mail\PropertyApproved as PropertyApprovedMail;
 use App\Models\Notification;
 use App\Models\Setting;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
+use App\Models\EmailLog;
+use App\Traits\DynamicSmtpTrait;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
-class CreateNotificationForPropertyApproved implements ShouldQueue
+class CreateNotificationForPropertyApproved
 {
-    use InteractsWithQueue;
 
     /**
      * Create the event listener.
@@ -57,14 +56,32 @@ class CreateNotificationForPropertyApproved implements ShouldQueue
         if (Setting::get('property_approval_email_enabled', '1') === '1') {
             $user = $event->property->agent ?? $event->property->owner;
             if ($user && $user->email) {
+                DynamicSmtpTrait::loadSmtpSettings();
                 try {
                     Mail::to($user->email)->send(new PropertyApprovedMail($event->property));
                     Log::info('Property approval email sent to user: ' . $user->email);
+                    EmailLog::create([
+                        'email_type' => 'property_approved',
+                        'recipient_email' => $user->email,
+                        'user_id' => $userId,
+                        'model_type' => 'App\Models\Property',
+                        'model_id' => $event->property->id,
+                        'status' => 'sent',
+                    ]);
                 } catch (\Exception $e) {
                     Log::error('Failed to send property approval email to user', [
                         'property_id' => $event->property->id,
                         'user_email' => $user->email,
                         'error' => $e->getMessage(),
+                    ]);
+                    EmailLog::create([
+                        'email_type' => 'property_approved',
+                        'recipient_email' => $user->email,
+                        'user_id' => $userId,
+                        'model_type' => 'App\Models\Property',
+                        'model_id' => $event->property->id,
+                        'status' => 'failed',
+                        'error_message' => $e->getMessage(),
                     ]);
                 }
             } else {

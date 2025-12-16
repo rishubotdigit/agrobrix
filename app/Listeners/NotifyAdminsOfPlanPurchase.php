@@ -5,13 +5,11 @@ namespace App\Listeners;
 use App\Events\PlanPurchaseCreated;
 use App\Models\Notification;
 use App\Models\User;
+use App\Models\EmailLog;
 use App\Notifications\PlanPurchaseApprovalNeeded;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
-class NotifyAdminsOfPlanPurchase implements ShouldQueue
+class NotifyAdminsOfPlanPurchase
 {
-    use InteractsWithQueue;
 
     /**
      * Create the event listener.
@@ -37,7 +35,27 @@ class NotifyAdminsOfPlanPurchase implements ShouldQueue
                 ->exists();
 
             if (!$exists) {
-                $admin->notify(new PlanPurchaseApprovalNeeded($event->planPurchase));
+                try {
+                    $admin->notify(new PlanPurchaseApprovalNeeded($event->planPurchase));
+                    EmailLog::create([
+                        'email_type' => 'notify_admin_plan_purchase_approval_needed',
+                        'recipient_email' => $admin->email,
+                        'user_id' => $event->planPurchase->user_id,
+                        'model_type' => 'App\Models\PlanPurchase',
+                        'model_id' => $event->planPurchase->id,
+                        'status' => 'sent',
+                    ]);
+                } catch (\Exception $e) {
+                    EmailLog::create([
+                        'email_type' => 'notify_admin_plan_purchase_approval_needed',
+                        'recipient_email' => $admin->email,
+                        'user_id' => $event->planPurchase->user_id,
+                        'model_type' => 'App\Models\PlanPurchase',
+                        'model_id' => $event->planPurchase->id,
+                        'status' => 'failed',
+                        'error_message' => $e->getMessage(),
+                    ]);
+                }
             }
         }
     }

@@ -14,6 +14,8 @@ class EmailLog extends Model
         'status',
         'error_message',
         'sent_at',
+        'model_type',
+        'model_id',
     ];
 
     protected $casts = [

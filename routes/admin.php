@@ -102,5 +102,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
 
     // Email Logs
     Route::get('email-logs', [EmailLogController::class, 'index'])->name('admin.email-logs.index');
+    Route::post('email-logs/{id}/resend', [EmailLogController::class, 'resend'])->name('admin.email-logs.resend');
 
 });

@@ -7,13 +7,12 @@ use App\Mail\NotifyAdminPaymentApproved;
 use App\Models\Notification;
 use App\Models\Setting;
 use App\Models\User;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
+use App\Models\EmailLog;
+use App\Traits\DynamicSmtpTrait;
 use Illuminate\Support\Facades\Mail;
 
-class NotifyAdminsOfPaymentApproved implements ShouldQueue
+class NotifyAdminsOfPaymentApproved
 {
-    use InteractsWithQueue;
 
     /**
      * Create the event listener.
@@ -53,10 +52,28 @@ class NotifyAdminsOfPaymentApproved implements ShouldQueue
         if (Setting::get('admin_payment_approved_notification_enabled', '1') === '1') {
             $admins = User::where('role', 'admin')->where('id', '!=', $event->admin_id)->get();
             foreach ($admins as $admin) {
+                DynamicSmtpTrait::loadSmtpSettings();
                 try {
                     Mail::to($admin->email)->send(new NotifyAdminPaymentApproved($event->payment));
+                    EmailLog::create([
+                        'email_type' => 'notify_admin_payment_approved',
+                        'recipient_email' => $admin->email,
+                        'user_id' => $event->payment->user_id,
+                        'model_type' => 'App\Models\Payment',
+                        'model_id' => $event->payment->id,
+                        'status' => 'sent',
+                    ]);
                 } catch (\Exception $e) {
                     \Log::error('Failed to send admin payment approved email: ' . $e->getMessage());
+                    EmailLog::create([
+                        'email_type' => 'notify_admin_payment_approved',
+                        'recipient_email' => $admin->email,
+                        'user_id' => $event->payment->user_id,
+                        'model_type' => 'App\Models\Payment',
+                        'model_id' => $event->payment->id,
+                        'status' => 'failed',
+                        'error_message' => $e->getMessage(),
+                    ]);
                 }
             }
         }
