@@ -25,13 +25,24 @@
                         <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-sm font-semibold">Popular</div>
                     @endif
                     <h3 class="text-2xl font-bold mb-2 text-gray-900">{{ $plan->name }}</h3>
-                    <div class="text-4xl font-bold mb-6 text-primary">
-                        @if($plan->price > 0)
-                            ₹{{ number_format($plan->price, 0) }}<span class="text-lg text-gray-500">/mo</span>
-                        @else
-                            Custom
+                    <div class="mb-4">
+                        @if($plan->original_price && $plan->original_price > $plan->price)
+                            <div class="text-lg text-gray-500 line-through">₹{{ number_format($plan->original_price, 0) }}</div>
+                        @endif
+                        <div class="text-4xl font-bold text-primary">
+                            @if($plan->price > 0)
+                                ₹{{ number_format($plan->price, 0) }}<span class="text-lg text-gray-500">/mo</span>
+                            @else
+                                Custom
+                            @endif
+                        </div>
+                        @if($plan->discount > 0)
+                            <div class="text-sm text-green-600 font-semibold">{{ $plan->discount }}% off</div>
                         @endif
                     </div>
+                    @if($plan->validity_days)
+                        <div class="text-sm text-gray-600 mb-4">Validity: {{ $plan->validity_days }} days</div>
+                    @endif
                     <ul class="space-y-3 mb-8">
                         <li class="flex items-start">
                             <span class="text-primary mr-2">✓</span>
@@ -84,6 +95,19 @@
                             </li>
                         @endif
                     </ul>
+                    @if($plan->features && is_array($plan->features))
+                        <div class="mb-4">
+                            <h4 class="font-semibold text-gray-900 mb-2">Features:</h4>
+                            <ul class="space-y-1">
+                                @foreach($plan->features as $feature)
+                                    <li class="flex items-start text-sm">
+                                        <span class="text-primary mr-2">•</span>
+                                        <span>{{ $feature }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                     @if($plan->name === 'Enterprise')
                         <a href="/contact" class="block text-center bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition">Contact Sales</a>
                     @else

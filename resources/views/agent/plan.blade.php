@@ -10,6 +10,7 @@
 
 @if($activePlanPurchases->count() > 0)
     @foreach($activePlanPurchases as $activePlanPurchase)
+        @if($activePlanPurchase->plan)
         <!-- Active Plan Details -->
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
             <div class="flex items-center justify-between mb-6">
@@ -72,6 +73,7 @@
                 </div>
             </div>
         </div>
+        @endif
     @endforeach
 
     <!-- Combined Capabilities -->

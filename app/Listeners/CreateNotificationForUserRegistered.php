@@ -10,7 +10,6 @@ use App\Mail\WelcomeUser;
 use App\Mail\NotifyAdminNewUser;
 use App\Models\Setting;
 use App\Traits\DynamicSmtpTrait;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
@@ -50,9 +49,12 @@ class CreateNotificationForUserRegistered
 
         // Send welcome email to user if enabled
         if (Setting::get('user_registration_welcome_email_enabled', '1') === '1') {
+            $start = microtime(true);
             DynamicSmtpTrait::loadSmtpSettings();
             try {
                 Mail::to($event->user->email)->send(new WelcomeUser($event->user));
+                $duration = microtime(true) - $start;
+                Log::info('Welcome email sent successfully', ['user_id' => $event->user->id, 'duration' => $duration]);
                 \App\Models\EmailLog::create([
                     'email_type' => 'welcome_user',
                     'recipient_email' => $event->user->email,
@@ -62,9 +64,11 @@ class CreateNotificationForUserRegistered
                     'status' => 'sent',
                 ]);
             } catch (\Exception $e) {
-                Log::error('Failed to queue welcome email to user', [
+                $duration = microtime(true) - $start;
+                Log::error('Failed to send welcome email to user', [
                     'user_id' => $event->user->id,
                     'user_email' => $event->user->email,
+                    'duration' => $duration,
                     'error' => $e->getMessage(),
                 ]);
                 \App\Models\EmailLog::create([
@@ -81,9 +85,12 @@ class CreateNotificationForUserRegistered
 
         // Send notification email to admins if enabled and admins exist
         if (Setting::get('admin_new_user_notification_enabled', '1') === '1' && User::where('role', 'admin')->exists()) {
+            $start = microtime(true);
             DynamicSmtpTrait::loadSmtpSettings();
             try {
                 Mail::send(new NotifyAdminNewUser($event->user));
+                $duration = microtime(true) - $start;
+                Log::info('Admin notification email sent successfully', ['user_id' => $event->user->id, 'duration' => $duration]);
                 // For admin emails, recipient is multiple, so perhaps log without recipient or with admin emails
                 // For simplicity, log as queued to admins
                 \App\Models\EmailLog::create([
@@ -95,8 +102,10 @@ class CreateNotificationForUserRegistered
                     'status' => 'sent',
                 ]);
             } catch (\Exception $e) {
-                Log::error('Failed to queue new user notification email to admins', [
+                $duration = microtime(true) - $start;
+                Log::error('Failed to send new user notification email to admins', [
                     'user_id' => $event->user->id,
+                    'duration' => $duration,
                     'error' => $e->getMessage(),
                 ]);
                 \App\Models\EmailLog::create([

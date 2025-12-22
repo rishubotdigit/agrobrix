@@ -12,6 +12,7 @@ Route::prefix('buyer')->middleware(['auth', 'role:buyer'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('buyer.dashboard');
     Route::get('/dashboard/stats', [DashboardController::class, 'getStats'])->name('buyer.dashboard.stats');
     Route::get('/inquiries', [DashboardController::class, 'inquiries'])->name('buyer.inquiries');
+    Route::get('/plans', [DashboardController::class, 'plans'])->name('buyer.plans');
 
     // Profile
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('buyer.profile.edit');

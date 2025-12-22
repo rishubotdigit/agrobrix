@@ -75,7 +75,7 @@
                 @php
                     $activePlanPurchase = auth()->user()->activePlanPurchase();
                 @endphp
-                @if($activePlanPurchase)
+                @if($activePlanPurchase && $activePlanPurchase->plan)
                     <p class="text-2xl font-bold text-primary">{{ $activePlanPurchase->plan->name }}</p>
                     <p class="text-sm text-gray-500">{{ $activePlanPurchase->expires_at->diffInDays(now()) }} days left</p>
                 @else
@@ -92,32 +92,28 @@
     </div>
 </div>
 
-<!-- Recent Properties -->
+<!-- Recent Activity -->
 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
-    <div class="flex items-center justify-between mb-6">
-        <h3 class="text-lg font-semibold text-gray-900">Recent Properties</h3>
-        <a href="{{ route('owner.properties.index') }}" class="text-primary hover:text-emerald-700 font-medium">View All</a>
-    </div>
+    <h3 class="text-lg font-semibold text-gray-900 mb-6">Recent Activity</h3>
     <div class="space-y-4">
-        @forelse($recentProperties ?? [] as $property)
-        <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-            <div class="w-16 h-16 bg-primary rounded-lg flex items-center justify-center">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                </svg>
+        @if(!empty($recentActivities))
+            @foreach($recentActivities as $activity)
+                <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                        {!! $activity['icon'] !!}
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-900">{{ $activity['type'] }}</p>
+                        <p class="text-sm text-gray-600">{{ $activity['description'] }}</p>
+                    </div>
+                    <span class="text-sm text-gray-500">{{ $activity['timestamp']->diffForHumans() }}</span>
+                </div>
+            @endforeach
+        @else
+            <div class="p-4 bg-gray-50 rounded-lg text-center">
+                <p class="text-sm text-gray-600">No recent activities found.</p>
             </div>
-            <div class="flex-1">
-                <h4 class="font-medium text-gray-900">{{ $property->title ?? 'Property Title' }}</h4>
-                <p class="text-sm text-gray-600">{{ $property->location ?? 'Location' }}</p>
-            </div>
-            <div class="text-right">
-                <p class="font-semibold text-primary">₹{{ number_format($property->price ?? 0) }}</p>
-                <p class="text-sm text-gray-500">{{ $property->status ?? 'Status' }}</p>
-            </div>
-        </div>
-        @empty
-        <p class="text-gray-500 text-center py-8">No properties listed yet.</p>
-        @endforelse
+        @endif
     </div>
 </div>
 

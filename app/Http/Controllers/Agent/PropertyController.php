@@ -16,7 +16,7 @@ class PropertyController extends Controller
         $activePurchase = $user->activePlanPurchase();
         $usage = [
             'current_featured' => Property::where('agent_id', $user->id)->where('featured', true)->count(),
-            'max_featured' => $activePurchase ? $activePurchase->plan->getMaxFeaturedListings() : 0
+            'max_featured' => $activePurchase && $activePurchase->plan ? $activePurchase->plan->getMaxFeaturedListings() : 0
         ];
 
         return view('agent.properties.index', compact('properties', 'usage'));

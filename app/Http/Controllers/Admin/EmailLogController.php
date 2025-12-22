@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\EmailLog;
 use App\Models\User;
+use App\Traits\DynamicSmtpTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -58,6 +59,8 @@ class EmailLogController extends Controller
         if (!$mailClass) {
             return response()->json(['error' => 'Unknown email type'], 400);
         }
+
+        DynamicSmtpTrait::loadSmtpSettings();
 
         try {
             if ($emailLog->recipient_email === 'admins') {

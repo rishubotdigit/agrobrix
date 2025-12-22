@@ -158,12 +158,6 @@ class SocialAuthController extends Controller
 
     private function getRedirectUrl(User $user): string
     {
-        return match($user->role) {
-            'admin' => route('admin.dashboard'),
-            'owner' => route('owner.dashboard'),
-            'agent' => route('agent.dashboard'),
-            'buyer' => route('buyer.dashboard'),
-            default => '/',
-        };
+        return route('home');
     }
 }

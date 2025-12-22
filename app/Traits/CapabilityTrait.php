@@ -9,9 +9,23 @@ trait CapabilityTrait
      */
     protected function getCapabilityValue($user, string $capability): int
     {
+        return self::getCapabilityValueStatic($user, $capability);
+    }
+
+    /**
+     * Static version for use in views or other contexts
+     */
+    public static function getCapabilityValueStatic($user, string $capability): int
+    {
         $totalCapabilities = $user->getCombinedCapabilities();
 
         // Get the capability value
-        return $totalCapabilities[$capability] ?? 0;
+        $value = $totalCapabilities[$capability] ?? 0;
+        \Illuminate\Support\Facades\Log::info('Capability value retrieved', [
+            'user_id' => $user->id,
+            'capability' => $capability,
+            'value' => $value
+        ]);
+        return $value;
     }
 }

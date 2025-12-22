@@ -29,10 +29,8 @@ class User extends Authenticatable
         'otp_session_id',
         'verified_at',
         'role',
-        'plan_id',
         'profile_photo',
         'address',
-        'used_featured_listings',
         'google_id',
         'facebook_id',
     ];
@@ -78,10 +76,6 @@ class User extends Authenticatable
         return !is_null($this->verified_at);
     }
 
-    public function plan()
-    {
-        return $this->belongsTo(Plan::class);
-    }
 
     public function userAddons()
     {
@@ -176,7 +170,21 @@ class User extends Authenticatable
 
     public function activePlanPurchases()
     {
-        return $this->planPurchases()->where('status', 'activated')->where('expires_at', '>', now())->get();
+        $purchases = $this->planPurchases()->where('status', 'activated')->where('expires_at', '>', now())->get();
+        \Illuminate\Support\Facades\Log::info('Active plan purchases for user', [
+            'user_id' => $this->id,
+            'count' => $purchases->count(),
+            'purchases' => $purchases->map(function($p) {
+                return [
+                    'id' => $p->id,
+                    'plan_id' => $p->plan_id,
+                    'status' => $p->status,
+                    'expires_at' => $p->expires_at,
+                    'used_contacts' => $p->used_contacts
+                ];
+            })
+        ]);
+        return $purchases;
     }
 
 }

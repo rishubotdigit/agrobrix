@@ -10,14 +10,23 @@ class Plan extends Model
         'name',
         'price',
         'description',
+        'role',
         'capabilities',
-        'validity_period_days',
+        'original_price',
+        'offer_price',
+        'discount',
+        'contacts_to_unlock',
+        'validity_days',
+        'features',
+        'persona',
+        'status',
     ];
 
     protected function casts(): array
     {
         return [
             'capabilities' => 'array',
+            'features' => 'array',
         ];
     }
 
@@ -29,6 +38,25 @@ class Plan extends Model
     public function planPurchases()
     {
         return $this->hasMany(PlanPurchase::class);
+    }
+    public function scopeForRole($query, $role)
+    {
+        return $query->where('role', $role);
+    }
+
+    public function getValidityDays()
+    {
+        return $this->validity_days ?? $this->validity_period_days ?? 0;
+    }
+    
+    public function getMaxListings()
+    {
+        return $this->capabilities['max_listings'] ?? 0;
+    }
+
+    public function getMaxContacts()
+    {
+        return $this->capabilities['max_contacts'] ?? 0;
     }
 
     public function getMaxFeaturedListings()

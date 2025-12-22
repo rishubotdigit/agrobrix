@@ -40,7 +40,7 @@
 
             <p>Get started by exploring your dashboard and discovering properties that match your needs.</p>
 
-            <a href="{{ url('/dashboard') }}" class="cta-button">Go to Dashboard</a>
+            <a href="@if($user->role == 'buyer'){{ url('/buyer/dashboard') }}@elseif($user->role == 'owner'){{ url('/owner/dashboard') }}@elseif($user->role == 'agent'){{ url('/agent/dashboard') }}@else{{ url('/dashboard') }}@endif" class="cta-button">Go to Dashboard</a>
 
             <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
         </div>

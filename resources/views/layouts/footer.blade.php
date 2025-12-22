@@ -15,13 +15,13 @@
             </div>
 
             <!-- Right Section - Navigation Links -->
-            <div class="flex items-center gap-6 text-sm">
+            <div class="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6 text-sm">
                 <a href="/about" class="text-gray-700 hover:text-emerald-600 transition-colors font-medium">About Us</a>
-                <a href="/terms" class="text-gray-700 hover:text-emerald-600 transition-colors font-medium">Terms of Service</a>
-                <a href="/privacy" class="text-gray-700 hover:text-emerald-600 transition-colors font-medium">Privacy Policy</a>
-                <a href="/faq" class="text-gray-700 hover:text-emerald-600 transition-colors font-medium">FAQ</a>
                 <a href="{{ route('contact') }}" class="text-gray-700 hover:text-emerald-600 transition-colors font-medium">Contact Us</a>
+                <a href="/privacy" class="text-gray-700 hover:text-emerald-600 transition-colors font-medium">Privacy Policy</a>
+                <a href="/terms" class="text-gray-700 hover:text-emerald-600 transition-colors font-medium">Terms and Conditions</a>
                 <a href="{{ route('refund') }}" class="text-gray-700 hover:text-emerald-600 transition-colors font-medium">Refund/Cancellation Policy</a>
+                <a href="/faq" class="text-gray-700 hover:text-emerald-600 transition-colors font-medium">FAQ</a>
             </div>
         </div>
     </div>

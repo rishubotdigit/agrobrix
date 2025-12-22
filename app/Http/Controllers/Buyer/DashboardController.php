@@ -23,6 +23,25 @@ class DashboardController extends Controller
         $totalSpent = Payment::where('user_id', auth()->id())->where('status', 'completed')->sum('amount');
         $activeSearches = ViewedContact::where('user_id', auth()->id())->count();
 
+        // Plan information
+        $activePlanPurchases = $user->activePlanPurchases();
+        $currentPlan = $activePlanPurchases->first();
+        $planInfo = null;
+        if ($currentPlan) {
+            $maxContacts = $this->getCapabilityValue($user, 'max_contacts');
+            $usedContacts = $activePlanPurchases->sum('used_contacts');
+            $remainingContacts = max(0, $maxContacts - $usedContacts);
+
+            $planInfo = [
+                'name' => $currentPlan->plan->name ?? 'Unknown Plan',
+                'expires_at' => $currentPlan->expires_at,
+                'max_contacts' => $maxContacts,
+                'used_contacts' => $usedContacts,
+                'remaining_contacts' => $remainingContacts,
+                'is_expiring_soon' => $currentPlan->expires_at && $currentPlan->expires_at->diffInDays(now()) <= 7,
+            ];
+        }
+
         // Fetch recent activities
         $recentViewedContacts = ViewedContact::where('buyer_id', $user->id)
             ->with('property')
@@ -68,7 +87,7 @@ class DashboardController extends Controller
             ->sortByDesc('date')
             ->take(10);
 
-        return view('buyer.dashboard', compact('contactsViewed', 'savedProperties', 'totalSpent', 'activeSearches', 'recentActivities'));
+        return view('buyer.dashboard', compact('contactsViewed', 'savedProperties', 'totalSpent', 'activeSearches', 'recentActivities', 'planInfo'));
     }
 
     public function getStats()
@@ -79,11 +98,23 @@ class DashboardController extends Controller
         $totalSpent = Payment::where('user_id', auth()->id())->where('status', 'completed')->sum('amount');
         $activeSearches = ViewedContact::where('user_id', auth()->id())->count();
 
+        // Plan stats
+        $activePlanPurchases = $user->activePlanPurchases();
+        $maxContacts = $this->getCapabilityValue($user, 'max_contacts');
+        $usedContacts = $activePlanPurchases->sum('used_contacts');
+        $remainingContacts = max(0, $maxContacts - $usedContacts);
+
         return response()->json([
             'contactsViewed' => $contactsViewed,
             'savedProperties' => $savedProperties,
             'totalSpent' => $totalSpent,
             'activeSearches' => $activeSearches,
+            'plan' => [
+                'has_active_plan' => $activePlanPurchases->isNotEmpty(),
+                'max_contacts' => $maxContacts,
+                'used_contacts' => $usedContacts,
+                'remaining_contacts' => $remainingContacts,
+            ],
         ]);
     }
 
@@ -96,5 +127,14 @@ class DashboardController extends Controller
             ->get();
 
         return view('buyer.inquiries.index', compact('inquiries'));
+    }
+
+    public function plans()
+    {
+        $user = auth()->user();
+        $activePlanPurchases = $user->activePlanPurchases();
+        $planPurchaseHistory = $user->planPurchases()->with('plan', 'payment')->orderBy('created_at', 'desc')->get();
+
+        return view('buyer.plans.index', compact('activePlanPurchases', 'planPurchaseHistory'));
     }
 }

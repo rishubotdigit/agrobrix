@@ -28,6 +28,8 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
+        ini_set('max_execution_time', 120);
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -69,6 +71,8 @@ class RegisterController extends Controller
 
     public function verifyOtp(Request $request)
     {
+        ini_set('max_execution_time', 120);
+
         $otpEnabled = Setting::get('otp_verification_enabled') == '1';
 
         $request->validate([
@@ -145,12 +149,6 @@ class RegisterController extends Controller
 
     private function getRedirectUrl(User $user): string
     {
-        return match($user->role) {
-            'admin' => route('admin.dashboard'),
-            'owner' => route('owner.dashboard'),
-            'agent' => route('agent.dashboard'),
-            'buyer' => route('buyer.dashboard'),
-            default => '/',
-        };
+        return route('home');
     }
 }

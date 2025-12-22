@@ -20,7 +20,18 @@ class PlanController extends Controller
 
     public function index()
     {
-        $plans = Plan::all();
+        $userRole = auth()->check() ? auth()->user()->role : null;
+        Log::info('PlanController@index called', ['user_id' => auth()->id(), 'user_role' => $userRole]);
+
+        if (auth()->check() && auth()->user()->role) {
+            $plans = Plan::forRole(auth()->user()->role)->where('status', 'active')->get();
+        } else {
+            $plans = Plan::where('status', 'active')->get();
+        }
+
+        Log::info('Plans fetched for /plans', ['plans_count' => $plans->count(), 'plans' => $plans->map(function($plan) {
+            return ['id' => $plan->id, 'name' => $plan->name, 'role' => $plan->role, 'status' => $plan->status];
+        })]);
 
         return view('plans.index', compact('plans'));
     }

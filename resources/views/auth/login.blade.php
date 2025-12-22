@@ -3,13 +3,22 @@
 @section('title', 'Login - Agrobrix')
 
 @section('content')
+<style>
+/* Mobile responsiveness for login container */
+@media (max-width: 640px) {
+    #login-container {
+        width: 100% !important;
+        margin: 0 !important;
+    }
+}
+</style>
 <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full">
-        <div class="bg-white/80 backdrop-blur-lg py-10 px-8 shadow-2xl rounded-3xl sm:px-12 border border-white/20">
+        <div id="login-container" style="width: 450px; margin: -92px;" class="bg-white/80 backdrop-blur-lg py-10 px-4 sm:px-6 md:px-8 lg:px-12 shadow-2xl rounded-3xl border border-white/20">
             <!-- Logo/Brand Section -->
             <div class="text-center mb-8">
                
-                <h2 class="text-3xl font-bold text-gray-900 mb-2">Welcome</h2>
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Welcome</h2>
                 <p class="text-gray-600">Sign in to your Agrobrix account</p>
             </div>
 

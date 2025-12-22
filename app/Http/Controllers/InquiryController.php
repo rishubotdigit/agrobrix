@@ -237,11 +237,40 @@ class InquiryController extends Controller
                     ], 403);
                 }
             } elseif ($user->role === 'buyer') {
-                // Buyers have unlimited free access via inquiry process
-                \Log::info('Buyer viewing contact - unlimited access', [
+                // Buyers check their own plan limits
+                $buyerActivePurchases = $user->activePlanPurchases();
+
+                \Log::info('Buyer viewing contact - checking own plan', [
                     'buyer_id' => $user->id,
+                    'buyer_active_purchases_count' => $buyerActivePurchases->count(),
                     'property_id' => $property->id
                 ]);
+
+                if ($buyerActivePurchases->isEmpty()) {
+                    \Log::info('Buyer has no active plan', ['buyer_id' => $user->id]);
+                    return response()->json([
+                        'error' => 'No active plan. Please purchase a plan to view contacts.',
+                        'redirect' => route('plans.index')
+                    ], 403);
+                }
+
+                // Check max_contacts capability
+                $maxContacts = $this->getCapabilityValue($user, 'max_contacts');
+                $totalUsedContacts = $buyerActivePurchases->sum('used_contacts');
+
+                \Log::info('Buyer contact credits check', [
+                    'buyer_id' => $user->id,
+                    'max_contacts' => $maxContacts,
+                    'total_used_contacts' => $totalUsedContacts
+                ]);
+
+                if ($totalUsedContacts >= $maxContacts) {
+                    \Log::info('Buyer contact credits exhausted', ['buyer_id' => $user->id]);
+                    return response()->json([
+                        'error' => 'Contact credits exhausted. Please upgrade your plan.',
+                        'redirect' => route('plans.index')
+                    ], 403);
+                }
             } elseif ($user->role === 'admin') {
                 // Admin has full access, no restrictions
                 \Log::info('Admin viewing contact - allowed', [
@@ -289,12 +318,19 @@ class InquiryController extends Controller
                 'buyer_email' => $user->email
             ]);
 
-            // Only increment used_contacts if not owner/agent and user is agent
+            // Only increment used_contacts if not owner/agent and user is agent or buyer
             if (!$isOwnerOrAgent && $user->role === 'agent') {
                 $agentActivePurchases = $user->activePlanPurchases();
                 $agentActivePurchases->first()->increment('used_contacts');
                 \Log::info('Deducted contact credit from agent', [
                     'agent_id' => $user->id,
+                    'property_id' => $property->id
+                ]);
+            } elseif (!$isOwnerOrAgent && $user->role === 'buyer') {
+                $buyerActivePurchases = $user->activePlanPurchases();
+                $buyerActivePurchases->first()->increment('used_contacts');
+                \Log::info('Deducted contact credit from buyer', [
+                    'buyer_id' => $user->id,
                     'property_id' => $property->id
                 ]);
             }

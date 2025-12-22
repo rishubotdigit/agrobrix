@@ -11,7 +11,13 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $plans = Plan::all();
+        if (Auth::check() && Auth::user()->role) {
+            $plans = Plan::forRole(Auth::user()->role)->where('status', 'active')->get();
+            \Log::info('HomeController@index plans fetched for role', ['role' => Auth::user()->role, 'plans_count' => $plans->count(), 'plans' => $plans->pluck('name', 'role')]);
+        } else {
+            $plans = Plan::where('status', 'active')->get();
+            \Log::info('HomeController@index plans fetched for guest', ['plans_count' => $plans->count(), 'plans' => $plans->pluck('name', 'role')]);
+        }
         $featuredProperties = Property::with(['owner', 'agent', 'amenities'])->where('status', 'approved')->where('featured', true)->limit(4)->get();
         $latestProperties = Property::with(['owner', 'agent', 'amenities'])->where('status', 'approved')->orderBy('created_at', 'desc')->limit(4)->get();
 
@@ -76,12 +82,13 @@ class HomeController extends Controller
 
     public function pricing()
     {
-        // Buyers should not access pricing page
-        if (Auth::check() && Auth::user()->role === 'buyer') {
-            abort(403, 'Access denied. Buyers do not have pricing plans.');
+        if (Auth::check() && Auth::user()->role) {
+            $plans = Plan::forRole(Auth::user()->role)->where('status', 'active')->get();
+            \Log::info('HomeController@pricing plans fetched for role', ['role' => Auth::user()->role, 'plans_count' => $plans->count(), 'plans' => $plans->pluck('name', 'role')]);
+        } else {
+            $plans = Plan::where('status', 'active')->get();
+            \Log::info('HomeController@pricing plans fetched for guest', ['plans_count' => $plans->count(), 'plans' => $plans->pluck('name', 'role')]);
         }
-
-        $plans = Plan::all();
         return view('pages.pricing', compact('plans'));
     }
 

@@ -72,7 +72,7 @@
                 @php
                     $activePlanPurchase = auth()->user()->activePlanPurchase();
                 @endphp
-                @if($activePlanPurchase)
+                @if($activePlanPurchase && $activePlanPurchase->plan)
                     <p class="text-2xl font-bold text-primary">{{ $activePlanPurchase->plan->name }}</p>
                     <p class="text-sm text-gray-500">{{ $activePlanPurchase->expires_at->diffInDays(now()) }} days left</p>
                 @else
@@ -93,30 +93,24 @@
 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
     <h3 class="text-lg font-semibold text-gray-900 mb-6">Recent Activity</h3>
     <div class="space-y-4">
-        <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-            <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
+        @if(!empty($recentActivities))
+            @foreach($recentActivities as $activity)
+                <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                        {!! $activity['icon'] !!}
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-900">{{ $activity['type'] }}</p>
+                        <p class="text-sm text-gray-600">{{ $activity['description'] }}</p>
+                    </div>
+                    <span class="text-sm text-gray-500">{{ $activity['timestamp']->diffForHumans() }}</span>
+                </div>
+            @endforeach
+        @else
+            <div class="p-4 bg-gray-50 rounded-lg text-center">
+                <p class="text-sm text-gray-600">No recent activities found.</p>
             </div>
-            <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900">New client inquiry</p>
-                <p class="text-sm text-gray-600">John Doe is interested in a 3BHK apartment</p>
-            </div>
-            <span class="text-sm text-gray-500">2 hours ago</span>
-        </div>
-        <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-            <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
-            <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900">Deal closed</p>
-                <p class="text-sm text-gray-600">Successfully closed deal for Property #123</p>
-            </div>
-            <span class="text-sm text-gray-500">1 day ago</span>
-        </div>
+        @endif
     </div>
 </div>
 

@@ -22,12 +22,12 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
             <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-                <span class="text-primary">Privacy Policy</span>
+                <span class="text-primary">🔒 Privacy Policy</span>
             </h1>
             <p class="text-xl mb-8 text-gray-700 max-w-3xl mx-auto">
                 Your privacy is important to us. This policy explains how we collect, use, and protect your personal information.
             </p>
-            <p class="text-sm text-gray-600">Last updated: December 4, 2024</p>
+            <p class="text-sm text-gray-600">📅 Last updated: December 22, 2025</p>
         </div>
     </div>
 </section>
@@ -38,213 +38,81 @@
         <div class="prose prose-lg max-w-none">
 
             <div class="mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-6">1. Introduction</h2>
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">Privacy Policy</h2>
                 <p class="text-gray-600 leading-relaxed mb-4">
-                    Welcome to Agrobrix ("we," "us," or "our"). We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website, mobile application, and services (collectively, the "Service").
+                    📅 Last Updated: December 22, 2025
                 </p>
+                <p class="text-gray-600 leading-relaxed mb-4">
+                    🏠 Welcome to Agrobrix. We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, and share your data when you visit our website and use our services.
+                </p>
+            </div>
+
+            <div class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">ℹ️ 1. About Us</h2>
                 <p class="text-gray-600 leading-relaxed">
-                    By using our Service, you agree to the collection and use of information in accordance with this Privacy Policy. If you do not agree with our policies and practices, please do not use our Service.
+                    Agrobrix is a platform operated as a Sole Proprietorship (Registered under Udyam: [Insert Udyam Number if desired, or leave as 'Proprietorship Name']). We provide a marketplace for agricultural land listings.
                 </p>
             </div>
 
             <div class="mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-6">2. Information We Collect</h2>
-                <div class="space-y-6">
-                    <div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-3">2.1 Personal Information</h3>
-                        <p class="text-gray-600 leading-relaxed mb-2">We collect personal information that you provide directly to us, including:</p>
-                        <ul class="list-disc pl-6 text-gray-600 space-y-1">
-                            <li>Name, email address, phone number, and password during registration</li>
-                            <li>Profile information including address, business details, and preferences</li>
-                            <li>Property information when listing properties</li>
-                            <li>Payment information for subscription and contact view purchases</li>
-                            <li>Communication records when you contact our support team</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-3">2.2 Usage Information</h3>
-                        <p class="text-gray-600 leading-relaxed mb-2">We automatically collect certain information when you use our Service:</p>
-                        <ul class="list-disc pl-6 text-gray-600 space-y-1">
-                            <li>Device information (IP address, browser type, operating system)</li>
-                            <li>Usage data (pages visited, time spent, features used)</li>
-                            <li>Location data (approximate location based on IP address)</li>
-                            <li>Cookies and similar tracking technologies</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-3">2.3 Third-Party Information</h3>
-                        <p class="text-gray-600 leading-relaxed">
-                            We may receive information from third-party services, such as payment processors (Razorpay) for transaction verification and OTP services (Twilio) for phone verification.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-6">3. How We Use Your Information</h2>
-                <p class="text-gray-600 leading-relaxed mb-4">We use the information we collect for various purposes, including:</p>
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">📊 2. Information We Collect</h2>
+                <p class="text-gray-600 leading-relaxed mb-4">We collect the following information to provide a secure and efficient experience:</p>
                 <ul class="list-disc pl-6 text-gray-600 space-y-2">
-                    <li><strong>Service Provision:</strong> To create and manage your account, provide our services, and process transactions</li>
-                    <li><strong>Communication:</strong> To send important updates, respond to inquiries, and provide customer support</li>
-                    <li><strong>Personalization:</strong> To customize your experience and show relevant property listings</li>
-                    <li><strong>Security:</strong> To verify identities, prevent fraud, and ensure platform security</li>
-                    <li><strong>Analytics:</strong> To understand user behavior and improve our services</li>
-                    <li><strong>Legal Compliance:</strong> To comply with legal obligations and enforce our terms</li>
-                    <li><strong>Marketing:</strong> To send promotional materials (with your consent)</li>
+                    <li><strong>👤 For Buyers:</strong> Name (optional), Email Address, and Phone Number.</li>
+                    <li><strong>🛒 For Sellers:</strong> Email Address, Phone Number, and specific details regarding the property being listed (location, size, price, etc.).</li>
+                    <li><strong>💳 Transaction Data:</strong> We do not store your credit card, debit card, or net banking details. All payments are processed via Paytm, our PCI-DSS compliant payment partner. We only store the Transaction ID provided by the payment gateway for record-keeping and support.</li>
                 </ul>
             </div>
 
             <div class="mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-6">4. Information Sharing and Disclosure</h2>
-                <div class="space-y-4">
-                    <div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-2">4.1 Within Our Platform</h3>
-                        <p class="text-gray-600 leading-relaxed">
-                            Contact information is shared within our platform based on user roles and subscription plans. Buyers can view owner contact details only after purchasing access through our credit system.
-                        </p>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-2">4.2 Service Providers</h3>
-                        <p class="text-gray-600 leading-relaxed">
-                            We share information with trusted third-party service providers who assist us in operating our Service, such as payment processors, cloud hosting providers, and communication services.
-                        </p>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-2">4.3 Legal Requirements</h3>
-                        <p class="text-gray-600 leading-relaxed">
-                            We may disclose your information if required by law, court order, or government request, or to protect our rights, property, or safety, or that of our users.
-                        </p>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-2">4.4 Business Transfers</h3>
-                        <p class="text-gray-600 leading-relaxed">
-                            In the event of a merger, acquisition, or sale of assets, your information may be transferred to the new entity as part of the transaction.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-6">5. Data Security</h2>
-                <p class="text-gray-600 leading-relaxed mb-4">
-                    We implement appropriate technical and organizational security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. These measures include:
-                </p>
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">🔄 3. How We Use Your Information</h2>
                 <ul class="list-disc pl-6 text-gray-600 space-y-2">
-                    <li>Encryption of data in transit and at rest</li>
-                    <li>Secure server infrastructure with regular security audits</li>
-                    <li>Access controls and authentication mechanisms</li>
-                    <li>Regular security updates and patches</li>
-                    <li>Employee training on data protection practices</li>
-                </ul>
-                <p class="text-gray-600 leading-relaxed">
-                    However, no method of transmission over the internet or electronic storage is 100% secure. While we strive to protect your information, we cannot guarantee absolute security.
-                </p>
-            </div>
-
-            <div class="mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-6">6. Cookies and Tracking Technologies</h2>
-                <div class="space-y-4">
-                    <div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-2">6.1 What Are Cookies</h3>
-                        <p class="text-gray-600 leading-relaxed">
-                            Cookies are small text files stored on your device when you visit our website. They help us provide a better user experience and analyze site usage.
-                        </p>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-2">6.2 How We Use Cookies</h3>
-                        <p class="text-gray-600 leading-relaxed mb-2">We use cookies for:</p>
-                        <ul class="list-disc pl-6 text-gray-600 space-y-1">
-                            <li>Authentication and session management</li>
-                            <li>Remembering your preferences and settings</li>
-                            <li>Analyzing website traffic and user behavior</li>
-                            <li>Personalizing content and recommendations</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-2">6.3 Managing Cookies</h3>
-                        <p class="text-gray-600 leading-relaxed">
-                            You can control cookie settings through your browser preferences. However, disabling cookies may affect the functionality of our Service.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-6">7. Your Rights and Choices</h2>
-                <p class="text-gray-600 leading-relaxed mb-4">You have certain rights regarding your personal information:</p>
-                <ul class="list-disc pl-6 text-gray-600 space-y-2">
-                    <li><strong>Access:</strong> Request a copy of the personal information we hold about you</li>
-                    <li><strong>Correction:</strong> Request correction of inaccurate or incomplete information</li>
-                    <li><strong>Deletion:</strong> Request deletion of your personal information (subject to legal requirements)</li>
-                    <li><strong>Portability:</strong> Request transfer of your data in a structured format</li>
-                    <li><strong>Opt-out:</strong> Unsubscribe from marketing communications</li>
-                    <li><strong>Restriction:</strong> Request limitation of processing in certain circumstances</li>
-                </ul>
-                <p class="text-gray-600 leading-relaxed">
-                    To exercise these rights, please contact us using the information provided at the end of this policy.
-                </p>
-            </div>
-
-            <div class="mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-6">8. Data Retention</h2>
-                <p class="text-gray-600 leading-relaxed mb-4">
-                    We retain your personal information for as long as necessary to provide our services and fulfill the purposes outlined in this Privacy Policy, unless a longer retention period is required by law. Specific retention periods include:
-                </p>
-                <ul class="list-disc pl-6 text-gray-600 space-y-2">
-                    <li>Account information: Retained while your account is active and for 3 years after deactivation</li>
-                    <li>Transaction records: Retained for 7 years for tax and legal compliance</li>
-                    <li>Communication records: Retained for 2 years for customer service purposes</li>
-                    <li>Usage logs: Retained for 1 year for security and analytics purposes</li>
+                    <li><strong>🤝 Facilitating Connections:</strong> When a Buyer pays for a subscription plan, they are granted access to view the Seller's contact number.</li>
+                    <li><strong>👀 Seller Transparency:</strong> Sellers can see a list of users (Buyers) who have viewed their property contact details in the last 30 days.</li>
+                    <li><strong>📬 Notifications:</strong> We use your email/phone to send important service updates, transaction receipts, and property-related notifications.</li>
+                    <li><strong>🚫📧 No Spam Policy:</strong> We do not sell your data to third parties. Your details are used strictly for the Agrobrix ecosystem.</li>
                 </ul>
             </div>
 
             <div class="mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-6">9. International Data Transfers</h2>
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">✅ 4. Consent for Sharing (Important for Sellers)</h2>
                 <p class="text-gray-600 leading-relaxed">
-                    Your information may be transferred to and processed in countries other than India. We ensure that such transfers comply with applicable data protection laws and implement appropriate safeguards to protect your information.
+                    By listing a property on Agrobrix, the Seller explicitly consents to their contact information being shared with "Subscribed/Paid Buyers" who have purchased a valid plan. This is a core function of the platform to facilitate land sales.
                 </p>
             </div>
 
             <div class="mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-6">10. Children's Privacy</h2>
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">🔐 5. Data Storage and Security</h2>
                 <p class="text-gray-600 leading-relaxed">
-                    Our Service is not intended for children under 18 years of age. We do not knowingly collect personal information from children under 18. If we become aware that we have collected personal information from a child under 18, we will take steps to delete such information.
+                    Your data is stored securely using industry-standard protocols on our hosting servers (Hostinger). While we take every precaution to protect your Transaction IDs and contact info, no method of transmission over the internet is 100% secure.
                 </p>
             </div>
 
             <div class="mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-6">11. Third-Party Links and Services</h2>
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">🗑️ 6. User Control & Deletion</h2>
+                <ul class="list-disc pl-6 text-gray-600 space-y-2">
+                    <li><strong>⚙️ Self-Management:</strong> Users can delete, delist, or put their property listings on hold via their personal Dashboard.</li>
+                    <li><strong>❌ Account Deletion:</strong> You may request full account deletion by contacting our helpdesk.</li>
+                    <li><strong>⚖️ Our Rights:</strong> Agrobrix reserves the right to delist any property that violates our terms or appears fraudulent.</li>
+                </ul>
+            </div>
+
+            <div class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">🔗 7. Third-Party Links & Tools</h2>
                 <p class="text-gray-600 leading-relaxed">
-                    Our Service may contain links to third-party websites or services. We are not responsible for the privacy practices or content of these third parties. We encourage you to review the privacy policies of any third-party services you use.
+                    Our site contains links to other websites (like Paytm for payments). We are not responsible for the privacy practices of these external sites. We encourage you to read their respective policies.
                 </p>
             </div>
 
             <div class="mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-6">12. Changes to This Privacy Policy</h2>
-                <p class="text-gray-600 leading-relaxed">
-                    We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. We will notify you of any material changes by posting the updated policy on our website and updating the "Last updated" date. Your continued use of our Service after such changes constitutes acceptance of the updated policy.
-                </p>
-            </div>
-
-            <div class="mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-6">13. Contact Us</h2>
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">📞 8. Grievance Redressal</h2>
                 <p class="text-gray-600 leading-relaxed mb-4">
-                    If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us:
+                    In accordance with the Information Technology Act and the DPDP Act 2023, if you have any questions or complaints regarding your privacy, please contact our Grievance Officer:
                 </p>
                 <div class="bg-gray-50 p-6 rounded-lg">
-                    <p class="text-gray-600"><strong>Data Protection Officer</strong></p>
-                    <p class="text-gray-600"><strong>Email:</strong> privacy@agrobrix.com</p>
-                    <p class="text-gray-600"><strong>Phone:</strong> +91-XXXXXXXXXX</p>
-                    <p class="text-gray-600"><strong>Address:</strong> [Company Address], India</p>
-                    <p class="text-gray-600"><strong>Response Time:</strong> We aim to respond to all privacy-related inquiries within 30 days.</p>
+                    <p class="text-gray-600"><strong>📧 Email:</strong> helpdesk@agrobrix.com</p>
+                    <p class="text-gray-600"><strong><a href="/contact">Contact Us</a></strong></p>
                 </div>
-            </div>
-
-            <div class="mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-6">14. Complaints and Dispute Resolution</h2>
-                <p class="text-gray-600 leading-relaxed">
-                    If you believe we have not adequately addressed your privacy concerns, you have the right to lodge a complaint with the relevant data protection authority in your jurisdiction. In India, you can contact the Data Protection Board of India.
-                </p>
             </div>
 
         </div>
