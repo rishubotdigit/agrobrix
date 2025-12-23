@@ -69,7 +69,7 @@
             @endif
         </div>
         @if($property->google_map_lat && $property->google_map_lng)
-            @if(\App\Models\Setting::get('google_maps_api_key', ''))
+            @if(\App\Models\Setting::get('google_maps_api_key', '') && \App\Models\Setting::get('map_enabled', '0') == '1')
                 <div class="rounded-lg overflow-hidden shadow-md border border-gray-200">
                     <iframe
                         src="https://www.google.com/maps/embed/v1/view?key={{ \App\Models\Setting::get('google_maps_api_key', '') }}&center={{ $property->google_map_lat }},{{ $property->google_map_lng }}&zoom=15"
@@ -84,7 +84,7 @@
                 </div>
             @else
                 <div class="bg-gray-100 p-4 rounded-lg text-center">
-                    <p class="text-gray-600">Map preview not available. Please configure Google Maps API key in admin settings.</p>
+                    <p class="text-gray-600">Map preview not available. Please configure Google Maps API key and enable maps in admin settings.</p>
                 </div>
             @endif
         @else

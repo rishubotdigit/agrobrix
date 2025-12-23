@@ -51,6 +51,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Offer Price</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount (%)</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contacts to Unlock</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Persona / Use Case</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Validity (Days)</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -65,6 +66,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $plan->offer_price ? '₹' . number_format($plan->offer_price, 2) : '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $plan->discount }}%</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $plan->contacts_to_unlock }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $plan->persona }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $plan->validity_days }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ ucfirst($plan->status) }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -83,7 +85,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="px-6 py-4 text-center text-gray-500">No buyer plans found</td>
+                            <td colspan="10" class="px-6 py-4 text-center text-gray-500">No buyer plans found</td>
                         </tr>
                     @endforelse
                 </tbody>

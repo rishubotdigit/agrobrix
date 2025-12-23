@@ -461,6 +461,7 @@
                     @enderror
                 </div>
 
+                @if(\App\Models\Setting::get('map_enabled', '1') == '1')
                 <!-- Latitude -->
                 <div>
                     <label for="google_map_lat" class="block text-sm font-medium text-gray-700 mb-2">Latitude <span class="text-red-500">*</span></label>
@@ -489,6 +490,7 @@
                     <div id="map" class="w-full h-96 border border-gray-300 rounded-lg"></div>
                     <p class="mt-2 text-sm text-gray-600">Click on the map to select the property location. The coordinates will be automatically filled.</p>
                 </div>
+                @endif
             </div>
         </div>
 

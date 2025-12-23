@@ -460,6 +460,7 @@
                     @enderror
                 </div>
 
+                @if(\App\Models\Setting::get('map_enabled', '1') == '1')
                 <!-- Latitude -->
                 <div>
                     <label for="google_map_lat" class="block text-sm font-medium text-gray-700 mb-2">Latitude <span class="text-red-500">*</span></label>
@@ -488,6 +489,7 @@
                     <div id="map" class="w-full h-96 border border-gray-300 rounded-lg"></div>
                     <p class="mt-2 text-sm text-gray-600">Click on the map to select the property location. The coordinates will be automatically filled.</p>
                 </div>
+                @endif
             </div>
         </div>
 
@@ -628,6 +630,7 @@ document.addEventListener('DOMContentLoaded', function() {
     showStep(currentStep);
 });
 
+@if(\App\Models\Setting::get('map_enabled', '1') == '1')
 // Google Maps Integration
 function initializeMap() {
     // Default center (India)
@@ -713,6 +716,7 @@ function loadGoogleMapsAPI(callback) {
 
 // Load API when page loads
 loadGoogleMapsAPI(initializeMap);
+@endif
 
 // AJAX for dependent dropdowns
 document.getElementById('state').addEventListener('change', function() {

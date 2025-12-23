@@ -252,7 +252,7 @@
                 </div>
             </div>
 
-            @if($property->google_map_lat && $property->google_map_lng)
+            @if($property->google_map_lat && $property->google_map_lng && \App\Models\Setting::get('map_enabled', '1') == '1')
                 <div class="rounded-xl overflow-hidden shadow-md border border-gray-200">
                     <iframe
                         src="https://www.google.com/maps/embed/v1/view?key={{ \App\Models\Setting::get('google_maps_api_key', '') }}&center={{ $property->google_map_lat }},{{ $property->google_map_lng }}&zoom=15"

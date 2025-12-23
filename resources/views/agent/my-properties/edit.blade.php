@@ -416,12 +416,13 @@
                     @enderror
                 </div>
 
+                @if(\App\Models\Setting::get('map_enabled', '1') == '1')
                 <!-- Latitude -->
                 <div>
                     <label for="google_map_lat" class="block text-sm font-medium text-gray-700 mb-2">Latitude <span class="text-red-500">*</span></label>
                     <input type="number" name="google_map_lat" id="google_map_lat" step="any" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                           placeholder="Enter latitude" value="{{ old('google_map_lat', $property->google_map_lat) }}">
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                            placeholder="Enter latitude" value="{{ old('google_map_lat', $property->google_map_lat) }}">
                     @error('google_map_lat')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -431,8 +432,8 @@
                 <div>
                     <label for="google_map_lng" class="block text-sm font-medium text-gray-700 mb-2">Longitude <span class="text-red-500">*</span></label>
                     <input type="number" name="google_map_lng" id="google_map_lng" step="any" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                           placeholder="Enter longitude" value="{{ old('google_map_lng', $property->google_map_lng) }}">
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                            placeholder="Enter longitude" value="{{ old('google_map_lng', $property->google_map_lng) }}">
                     @error('google_map_lng')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -444,6 +445,7 @@
                     <div id="map" class="w-full h-96 border border-gray-300 rounded-lg"></div>
                     <p class="mt-2 text-sm text-gray-600">Click on the map to select the property location. The coordinates will be automatically filled.</p>
                 </div>
+                @endif
             </div>
         </div>
 

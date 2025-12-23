@@ -21,7 +21,7 @@ class UpdatePropertyRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'title' => 'required|string|max:255',
             'land_type' => 'required|in:Agriculture,Residential Plot,Commercial Plot',
             'state' => 'required|exists:states,id',
@@ -29,8 +29,6 @@ class UpdatePropertyRequest extends FormRequest
             'city_id' => 'required|exists:cities,id',
             'area' => 'required|string|max:255',
             'full_address' => 'nullable|string',
-            'google_map_lat' => 'required|numeric|between:-90,90',
-            'google_map_lng' => 'required|numeric|between:-180,180',
             'plot_area' => 'required|numeric|min:0',
             'plot_area_unit' => 'required|in:sq ft,sq yd,acre',
             'frontage' => 'nullable|numeric|min:0',
@@ -50,6 +48,17 @@ class UpdatePropertyRequest extends FormRequest
             'amenities' => 'nullable|array',
             'amenities.*' => 'exists:amenities,id',
         ];
+
+        $mapEnabled = \App\Models\Setting::get('map_enabled', '1') == '1';
+        if ($mapEnabled) {
+            $rules['google_map_lat'] = 'required|numeric|between:-90,90';
+            $rules['google_map_lng'] = 'required|numeric|between:-180,180';
+        } else {
+            $rules['google_map_lat'] = 'nullable|numeric|between:-90,90';
+            $rules['google_map_lng'] = 'nullable|numeric|between:-180,180';
+        }
+
+        return $rules;
     }
 
     /**

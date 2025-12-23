@@ -183,6 +183,13 @@
                 <input type="text" id="google_maps_api_key" name="google_maps_api_key" value="{{ $settings['google_maps_api_key'] }}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter your Google Maps API Key">
                 <p class="mt-1 text-sm text-gray-500">Required for maps to display correctly across the website.</p>
             </div>
+            <div class="mb-6">
+                <div class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <input type="checkbox" id="map_enabled" name="map_enabled" value="1" {{ $settings['map_enabled'] == '1' ? 'checked' : '' }} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                    <label for="map_enabled" class="ml-3 block text-sm font-medium text-gray-900">Enable Map Functionality</label>
+                </div>
+                <p class="mt-1 text-sm text-gray-500">Enable or disable map features across the website.</p>
+            </div>
             <div>
                 <h4 class="text-lg font-semibold text-gray-900 mb-4">Map Preview</h4>
                 <p class="text-sm text-gray-600 mb-4">This preview shows how maps will appear on your website. Enter the API key above and save to see the preview.</p>

@@ -33,6 +33,7 @@ class SettingController extends Controller
             'admin_property_rejected_notification_enabled' => Setting::get('admin_property_rejected_notification_enabled', '1'),
             'admin_payment_approved_notification_enabled' => Setting::get('admin_payment_approved_notification_enabled', '1'),
             'google_maps_api_key' => Setting::get('google_maps_api_key', ''),
+            'map_enabled' => Setting::get('map_enabled', '1'),
             'google_login_enabled' => Setting::get('google_login_enabled', '0'),
             'facebook_login_enabled' => Setting::get('facebook_login_enabled', '0'),
             'smtp_host' => Setting::get('smtp_host', ''),
@@ -69,6 +70,7 @@ class SettingController extends Controller
             'admin_property_rejected_notification_enabled' => 'nullable|boolean',
             'admin_payment_approved_notification_enabled' => 'nullable|boolean',
             'google_maps_api_key' => 'nullable|string|max:255',
+            'map_enabled' => 'nullable|boolean',
             'google_login_enabled' => 'nullable|boolean',
             'facebook_login_enabled' => 'nullable|boolean',
             'smtp_host' => 'nullable|string|max:255',
@@ -99,6 +101,7 @@ class SettingController extends Controller
         Setting::set('admin_property_rejected_notification_enabled', $request->has('admin_property_rejected_notification_enabled') ? '1' : '0');
         Setting::set('admin_payment_approved_notification_enabled', $request->has('admin_payment_approved_notification_enabled') ? '1' : '0');
         Setting::set('google_maps_api_key', $request->input('google_maps_api_key', ''));
+        Setting::set('map_enabled', $request->has('map_enabled') ? '1' : '0');
         Setting::set('google_login_enabled', $request->has('google_login_enabled') ? '1' : '0');
         Setting::set('facebook_login_enabled', $request->has('facebook_login_enabled') ? '1' : '0');
         Setting::set('smtp_host', $request->input('smtp_host', ''));
