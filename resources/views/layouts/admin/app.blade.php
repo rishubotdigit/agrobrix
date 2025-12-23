@@ -182,6 +182,24 @@
     window.markAllAsSeen = markAllAsSeen;
     window.deleteNotification = deleteNotification;
 };
+
+document.addEventListener('DOMContentLoaded', function() {
+    const locationsToggle = document.getElementById('locations-toggle');
+    const locationsSubmenu = document.getElementById('locations-submenu');
+    const locationsArrow = document.getElementById('locations-arrow');
+
+    if (locationsToggle) {
+        locationsToggle.addEventListener('click', function() {
+            if (locationsSubmenu.classList.contains('hidden')) {
+                locationsSubmenu.classList.remove('hidden');
+                locationsArrow.classList.add('rotate-180');
+            } else {
+                locationsSubmenu.classList.add('hidden');
+                locationsArrow.classList.remove('rotate-180');
+            }
+        });
+    }
+});
     </script>
     @endpush
     @stack('scripts')

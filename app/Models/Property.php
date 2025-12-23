@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\City;
 
 class Property extends Model
 {
@@ -18,7 +19,7 @@ class Property extends Model
         });
     }
     protected $fillable = [
-        'title', 'land_type', 'description', 'state', 'city', 'area', 'full_address',
+        'title', 'land_type', 'city_id', 'description', 'area', 'full_address',
         'google_map_lat', 'google_map_lng', 'plot_area', 'plot_area_unit', 'frontage',
         'depth', 'road_width', 'corner_plot', 'gated_community', 'ownership_type',
         'price', 'price_negotiable', 'contact_name', 'contact_mobile', 'contact_role',
@@ -84,6 +85,10 @@ class Property extends Model
     public function leads()
     {
         return $this->hasMany(Lead::class);
+    }
+    public function city()
+    {
+        return $this->belongsTo(City::class);
     }
 
     public function scopeFeatured($query)

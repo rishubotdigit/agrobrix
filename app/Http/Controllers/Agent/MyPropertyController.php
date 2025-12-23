@@ -45,7 +45,7 @@ class MyPropertyController extends Controller
         return view('agent.my-properties.create', compact('usage', 'step', 'categories'));
     }
 
-    public function store(Request $request)
+    public function store(\App\Http\Requests\StorePropertyRequest $request)
     {
         $user = Auth::user();
 
@@ -62,35 +62,7 @@ class MyPropertyController extends Controller
         }
 
         // Validate request
-        $isStep4 = $request->input('step') == 4;
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'land_type' => 'required|in:Agriculture,Residential Plot,Commercial Plot',
-            'state' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
-            'area' => 'required|string|max:255',
-            'full_address' => 'nullable|string',
-            'google_map_lat' => ($isStep4 ? 'required' : 'nullable') . '|numeric|between:-90,90',
-            'google_map_lng' => ($isStep4 ? 'required' : 'nullable') . '|numeric|between:-180,180',
-            'plot_area' => 'required|numeric|min:0',
-            'plot_area_unit' => 'required|in:sq ft,sq yd,acre',
-            'frontage' => 'nullable|numeric|min:0',
-            'depth' => 'nullable|numeric|min:0',
-            'road_width' => 'required|numeric|min:0',
-            'corner_plot' => 'nullable|boolean',
-            'gated_community' => 'nullable|boolean',
-            'ownership_type' => 'required|in:Freehold,Leasehold',
-            'price' => 'required|numeric|min:0',
-            'price_negotiable' => 'nullable|boolean',
-            'contact_name' => 'required|string|max:255',
-            'contact_mobile' => 'required|string|max:15',
-            'description' => 'required|string',
-            'property_images' => 'required|array|min:2|max:10',
-            'property_images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-            'property_video' => 'nullable|file|mimes:mp4,mov,avi|max:51200',
-            'amenities' => 'nullable|array',
-            'amenities.*' => 'exists:amenities,id',
-        ]);
+        $validated = $request->validated();
 
         // Handle file uploads
         $imagePaths = [];
@@ -111,8 +83,7 @@ class MyPropertyController extends Controller
             'title' => $validated['title'],
             'land_type' => $validated['land_type'],
             'description' => $validated['description'],
-            'state' => $validated['state'],
-            'city' => $validated['city'],
+            'city_id' => $validated['city_id'],
             'area' => $validated['area'],
             'full_address' => $validated['full_address'],
             'google_map_lat' => $validated['google_map_lat'] ?? null,
@@ -169,7 +140,7 @@ class MyPropertyController extends Controller
             $property->update(['owner_id' => $user->id]);
         }
 
-        $property->load('amenities.subcategory.category', 'agent');
+        $property->load('amenities.subcategory.category', 'agent', 'city.district.state');
 
         return view('agent.my-properties.show', compact('property'));
     }
@@ -188,7 +159,7 @@ class MyPropertyController extends Controller
         return view('agent.my-properties.edit', compact('property', 'step', 'categories'));
     }
 
-    public function update(Request $request, Property $property)
+    public function update(\App\Http\Requests\UpdatePropertyRequest $request, Property $property)
     {
         $user = Auth::user();
 
@@ -197,35 +168,7 @@ class MyPropertyController extends Controller
         }
 
         // Validate request
-        $isStep4 = $request->input('step') == 4;
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'land_type' => 'required|in:Agriculture,Residential Plot,Commercial Plot',
-            'state' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
-            'area' => 'required|string|max:255',
-            'full_address' => 'nullable|string',
-            'google_map_lat' => ($isStep4 ? 'required' : 'nullable') . '|numeric|between:-90,90',
-            'google_map_lng' => ($isStep4 ? 'required' : 'nullable') . '|numeric|between:-180,180',
-            'plot_area' => 'required|numeric|min:0',
-            'plot_area_unit' => 'required|in:sq ft,sq yd,acre',
-            'frontage' => 'nullable|numeric|min:0',
-            'depth' => 'nullable|numeric|min:0',
-            'road_width' => 'required|numeric|min:0',
-            'corner_plot' => 'nullable|boolean',
-            'gated_community' => 'nullable|boolean',
-            'ownership_type' => 'required|in:Freehold,Leasehold',
-            'price' => 'required|numeric|min:0',
-            'price_negotiable' => 'nullable|boolean',
-            'contact_name' => 'required|string|max:255',
-            'contact_mobile' => 'required|string|max:15',
-            'description' => 'required|string',
-            'property_images' => 'nullable|array|min:2|max:10',
-            'property_images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-            'property_video' => 'nullable|file|mimes:mp4,mov,avi|max:51200',
-            'amenities' => 'nullable|array',
-            'amenities.*' => 'exists:amenities,id',
-        ]);
+        $validated = $request->validated();
 
         // Handle file uploads
         $imagePaths = $property->property_images ? json_decode($property->property_images, true) : [];
@@ -264,8 +207,7 @@ class MyPropertyController extends Controller
             'title' => $validated['title'],
             'land_type' => $validated['land_type'],
             'description' => $validated['description'],
-            'state' => $validated['state'],
-            'city' => $validated['city'],
+            'city_id' => $validated['city_id'],
             'area' => $validated['area'],
             'full_address' => $validated['full_address'],
             'google_map_lat' => $validated['google_map_lat'] ?? null,

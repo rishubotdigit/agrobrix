@@ -33,8 +33,7 @@ class SearchController extends Controller
     public function advanced(Request $request)
     {
         $query = $request->get('q', '');
-        $state = $request->get('state', '');
-        $city = $request->get('city', '');
+        $city_id = $request->get('city_id', '');
         $minPrice = $request->get('min_price', '');
         $maxPrice = $request->get('max_price', '');
         $landType = $request->get('land_type', '');
@@ -42,21 +41,22 @@ class SearchController extends Controller
         $maxArea = $request->get('max_area', '');
         $amenities = $request->get('amenities', []);
 
-        $properties = Property::with(['owner', 'agent', 'amenities'])
+        $properties = Property::with(['owner', 'agent', 'amenities', 'city.district.state'])
             ->when($query, function ($q) use ($query) {
                 $q->where(function ($subQuery) use ($query) {
                     $subQuery->where('title', 'like', "%{$query}%")
                         ->orWhere('description', 'like', "%{$query}%")
-                        ->orWhere('city', 'like', "%{$query}%")
-                        ->orWhere('state', 'like', "%{$query}%")
-                        ->orWhere('area', 'like', "%{$query}%");
+                        ->orWhere('area', 'like', "%{$query}%")
+                        ->orWhereHas('city', function ($cityQuery) use ($query) {
+                            $cityQuery->where('name', 'like', "%{$query}%");
+                        })
+                        ->orWhereHas('city.district.state', function ($stateQuery) use ($query) {
+                            $stateQuery->where('name', 'like', "%{$query}%");
+                        });
                 });
             })
-            ->when($state, function ($q) use ($state) {
-                $q->where('state', $state);
-            })
-            ->when($city, function ($q) use ($city) {
-                $q->where('city', $city);
+            ->when($city_id, function ($q) use ($city_id) {
+                $q->where('city_id', $city_id);
             })
             ->when($minPrice, function ($q) use ($minPrice) {
                 $q->where('price', '>=', $minPrice);
@@ -93,16 +93,14 @@ class SearchController extends Controller
         }
 
         // Get filter options
-        $states = Property::distinct()->pluck('state')->filter()->sort();
-        $cities = Property::distinct()->pluck('city')->filter()->sort();
+        $states = \App\Models\State::orderBy('name')->get();
         $landTypes = Property::distinct()->pluck('land_type')->filter()->sort();
         $categoriesWithAmenities = \App\Models\Category::with('amenities')->get();
 
         return view('search.advanced', compact(
             'properties',
             'query',
-            'state',
-            'city',
+            'city_id',
             'minPrice',
             'maxPrice',
             'landType',
@@ -110,7 +108,6 @@ class SearchController extends Controller
             'maxArea',
             'amenities',
             'states',
-            'cities',
             'landTypes',
             'categoriesWithAmenities'
         ));
@@ -128,7 +125,7 @@ class SearchController extends Controller
     public function getPropertiesApi(Request $request)
     {
         $user = Auth::user();
-        $query = Property::with('owner');
+        $query = Property::with(['owner', 'city.district.state']);
 
         // Apply filters
         $minPrice = $request->get('min_price');

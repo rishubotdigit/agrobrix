@@ -35,6 +35,29 @@
             </svg>
             Categories
         </a>
+        <div>
+            <button id="locations-toggle" class="flex items-center w-full px-6 py-3 hover:bg-emerald-700 transition-colors {{ request()->routeIs(['admin.states.*', 'admin.districts.*', 'admin.cities.*']) ? 'bg-emerald-700 border-r-4 border-white' : '' }}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Locations
+                <svg class="w-4 h-4 ml-auto transform transition-transform" id="locations-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <div id="locations-submenu" class="hidden ml-6">
+                <a href="{{ route('admin.states.index') }}" class="flex items-center px-6 py-2 hover:bg-emerald-700 transition-colors {{ request()->routeIs('admin.states.*') ? 'bg-emerald-700 border-r-4 border-white' : '' }}">
+                    States
+                </a>
+                <a href="{{ route('admin.districts.index') }}" class="flex items-center px-6 py-2 hover:bg-emerald-700 transition-colors {{ request()->routeIs('admin.districts.*') ? 'bg-emerald-700 border-r-4 border-white' : '' }}">
+                    Districts
+                </a>
+                <a href="{{ route('admin.cities.index') }}" class="flex items-center px-6 py-2 hover:bg-emerald-700 transition-colors {{ request()->routeIs('admin.cities.*') ? 'bg-emerald-700 border-r-4 border-white' : '' }}">
+                    Cities
+                </a>
+            </div>
+        </div>
         <a href="{{ route('admin.plans.index') }}" class="flex items-center px-6 py-3 hover:bg-emerald-700 transition-colors {{ request()->routeIs('admin.plans.*') ? 'bg-emerald-700 border-r-4 border-white' : '' }}">
             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>

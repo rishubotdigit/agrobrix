@@ -18,8 +18,8 @@ class HomeController extends Controller
             $plans = Plan::where('status', 'active')->get();
             \Log::info('HomeController@index plans fetched for guest', ['plans_count' => $plans->count(), 'plans' => $plans->pluck('name', 'role')]);
         }
-        $featuredProperties = Property::with(['owner', 'agent', 'amenities'])->where('status', 'approved')->where('featured', true)->limit(4)->get();
-        $latestProperties = Property::with(['owner', 'agent', 'amenities'])->where('status', 'approved')->orderBy('created_at', 'desc')->limit(4)->get();
+        $featuredProperties = Property::with(['owner', 'agent', 'amenities', 'city.district.state'])->where('status', 'approved')->where('featured', true)->limit(4)->get();
+        $latestProperties = Property::with(['owner', 'agent', 'amenities', 'city.district.state'])->where('status', 'approved')->orderBy('created_at', 'desc')->limit(4)->get();
 
         // Add wishlist status for authenticated buyers
         if (Auth::check() && Auth::user()->role === 'buyer') {

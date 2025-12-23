@@ -16,6 +16,9 @@ use App\Http\Controllers\Admin\PlanPurchaseController;
 use App\Http\Controllers\Admin\AdminContactController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\EmailLogController;
+use App\Http\Controllers\Admin\StateController;
+use App\Http\Controllers\Admin\DistrictController;
+use App\Http\Controllers\Admin\CityController;
 
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('admin.dashboard');
@@ -103,5 +106,23 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     // Email Logs
     Route::get('email-logs', [EmailLogController::class, 'index'])->name('admin.email-logs.index');
     Route::post('email-logs/{id}/resend', [EmailLogController::class, 'resend'])->name('admin.email-logs.resend');
+
+    // States Management
+    Route::get('states', [StateController::class, 'index'])->name('admin.states.index');
+    Route::post('states', [StateController::class, 'store'])->name('admin.states.store');
+    Route::put('states/{state}', [StateController::class, 'update'])->name('admin.states.update');
+    Route::delete('states/{state}', [StateController::class, 'destroy'])->name('admin.states.destroy');
+
+    // Districts Management
+    Route::get('districts', [DistrictController::class, 'index'])->name('admin.districts.index');
+    Route::post('districts', [DistrictController::class, 'store'])->name('admin.districts.store');
+    Route::put('districts/{district}', [DistrictController::class, 'update'])->name('admin.districts.update');
+    Route::delete('districts/{district}', [DistrictController::class, 'destroy'])->name('admin.districts.destroy');
+
+    // Cities Management
+    Route::get('cities', [CityController::class, 'index'])->name('admin.cities.index');
+    Route::post('cities', [CityController::class, 'store'])->name('admin.cities.store');
+    Route::put('cities/{city}', [CityController::class, 'update'])->name('admin.cities.update');
+    Route::delete('cities/{city}', [CityController::class, 'destroy'])->name('admin.cities.destroy');
 
 });

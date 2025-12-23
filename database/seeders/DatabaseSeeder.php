@@ -23,9 +23,9 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
-            UserSeeder::class,
-            PlanSeeder::class,
-            CategorySeeder::class,
+            StateSeeder::class,
+            DistrictSeeder::class,
+            CitySeeder::class,
         ]);
     }
 }

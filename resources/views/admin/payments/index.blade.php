@@ -80,10 +80,10 @@
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $payment->id }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ $payment->user->name }}<br>
-                                <span class="text-gray-500">{{ $payment->user->email }}</span>
+                                {{ $payment->user ? $payment->user->name : 'N/A' }}<br>
+                                <span class="text-gray-500">{{ $payment->user ? $payment->user->email : 'N/A' }}</span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $payment->planPurchase->plan->name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $payment->planPurchase && $payment->planPurchase->plan ? $payment->planPurchase->plan->name : 'N/A' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹{{ number_format($payment->amount, 2) }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ ucfirst($payment->gateway) }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">

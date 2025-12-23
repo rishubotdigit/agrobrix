@@ -142,17 +142,17 @@
                         <div class="filter-group">
                             <h3 class="font-semibold text-gray-900 mb-3 text-lg">Location</h3>
                             <div class="space-y-3">
-                                <select name="state" class="filter-input w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900">
+                                <select name="state_id" id="state_id" class="filter-input w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900">
                                     <option value="">All States</option>
                                     @foreach($states as $stateOption)
-                                        <option value="{{ $stateOption }}" {{ $state == $stateOption ? 'selected' : '' }}>{{ $stateOption }}</option>
+                                        <option value="{{ $stateOption->id }}" {{ request('state_id') == $stateOption->id ? 'selected' : '' }}>{{ $stateOption->name }}</option>
                                     @endforeach
                                 </select>
-                                <select name="city" class="filter-input w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900">
-                                    <option value="">All Cities</option>
-                                    @foreach($cities as $cityOption)
-                                        <option value="{{ $cityOption }}" {{ $city == $cityOption ? 'selected' : '' }}>{{ $cityOption }}</option>
-                                    @endforeach
+                                <select name="district_id" id="district_id" class="filter-input w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900" disabled>
+                                    <option value="">Select District</option>
+                                </select>
+                                <select name="city_id" id="city_id" class="filter-input w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900" disabled>
+                                    <option value="">Select City</option>
                                 </select>
                             </div>
                         </div>
@@ -320,7 +320,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                                         </svg>
-                                        <span class="text-sm">{{ $property->city }}, {{ $property->state }}</span>
+                                        <span class="text-sm">{{ $property->city->name ?? 'N/A' }}, {{ $property->city->district->state->name ?? 'N/A' }}</span>
                                     </div>
 
                                     <!-- Area -->
@@ -438,7 +438,7 @@
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                                                         </svg>
-                                                        <span class="text-sm">{{ $property->city }}, {{ $property->state }}</span>
+                                                        <span class="text-sm">{{ $property->city->name ?? 'N/A' }}, {{ $property->city->district->state->name ?? 'N/A' }}</span>
                                                     </div>
                                                     <div class="flex items-center text-gray-600">
                                                         <svg class="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -628,5 +628,51 @@ function toggleWishlist(propertyId, buttonElement) {
         alert('An error occurred while updating wishlist');
     });
 }
+
+// AJAX for dependent dropdowns
+document.getElementById('state_id').addEventListener('change', function() {
+    const stateId = this.value;
+    const districtSelect = document.getElementById('district_id');
+    const citySelect = document.getElementById('city_id');
+
+    // Reset district and city
+    districtSelect.innerHTML = '<option value="">Select District</option>';
+    citySelect.innerHTML = '<option value="">Select City</option>';
+    districtSelect.disabled = true;
+    citySelect.disabled = true;
+
+    if (stateId) {
+        fetch(`/api/districts/${stateId}`)
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(district => {
+                    districtSelect.innerHTML += `<option value="${district.id}">${district.name}</option>`;
+                });
+                districtSelect.disabled = false;
+            })
+            .catch(error => console.error('Error loading districts:', error));
+    }
+});
+
+document.getElementById('district_id').addEventListener('change', function() {
+    const districtId = this.value;
+    const citySelect = document.getElementById('city_id');
+
+    // Reset city
+    citySelect.innerHTML = '<option value="">Select City</option>';
+    citySelect.disabled = true;
+
+    if (districtId) {
+        fetch(`/api/cities/${districtId}`)
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(city => {
+                    citySelect.innerHTML += `<option value="${city.id}">${city.name}</option>`;
+                });
+                citySelect.disabled = false;
+            })
+            .catch(error => console.error('Error loading cities:', error));
+    }
+});
 </script>
 @endsection

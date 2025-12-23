@@ -34,7 +34,14 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">{{ $lead->property->title }}</div>
-                            <div class="text-sm text-gray-500">{{ $lead->property->city }}, {{ $lead->property->state }}</div>
+                            <div class="text-sm text-gray-500">
+                                @if($lead->property->city)
+                                    {{ $lead->property->city->name }}
+                                    @if($lead->property->city->district && $lead->property->city->district->state)
+                                        , {{ $lead->property->city->district->state->name }}
+                                    @endif
+                                @endif
+                            </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {{ $lead->buyer_name }}

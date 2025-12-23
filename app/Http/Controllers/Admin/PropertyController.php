@@ -13,13 +13,13 @@ class PropertyController extends Controller
 {
     public function index()
     {
-        $properties = Property::with('owner')->paginate(9);
+        $properties = Property::with(['owner', 'city.district.state'])->paginate(9);
         return view('admin.properties.index', compact('properties'));
     }
 
     public function show(Property $property)
     {
-        $property->load(['owner', 'agent', 'amenities', 'versions']);
+        $property->load(['owner', 'agent', 'amenities', 'versions', 'city.district.state']);
         $versions = $property->versions()->orderBy('version', 'desc')->get();
         return view('admin.properties.show', compact('property', 'versions'));
     }

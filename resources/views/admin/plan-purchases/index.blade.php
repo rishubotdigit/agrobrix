@@ -72,11 +72,11 @@
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $purchase->id }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ $purchase->user->name }}<br>
-                                <span class="text-gray-500">{{ $purchase->user->email }}</span>
+                                {{ $purchase->user ? $purchase->user->name : 'N/A' }}<br>
+                                <span class="text-gray-500">{{ $purchase->user ? $purchase->user->email : 'N/A' }}</span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $purchase->plan->name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹{{ number_format($purchase->payment->amount ?? 0, 2) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $purchase->plan ? $purchase->plan->name : 'N/A' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹{{ $purchase->payment ? number_format($purchase->payment->amount ?? 0, 2) : 'N/A' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                                     @if($purchase->status == 'pending') bg-yellow-100 text-yellow-800

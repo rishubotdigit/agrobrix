@@ -352,21 +352,44 @@
                 <!-- State -->
                 <div>
                     <label for="state" class="block text-sm font-medium text-gray-700 mb-2">State <span class="text-red-500">*</span></label>
-                    <input type="text" name="state" id="state" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                           placeholder="Enter state" value="{{ old('state', $property->state) }}">
+                    <select name="state" id="state" required
+                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                        <option value="">Select State</option>
+                        @foreach(\App\Models\State::orderBy('name')->get() as $stateOption)
+                            <option value="{{ $stateOption->id }}" {{ old('state', $property->city->district->state->id ?? '') == $stateOption->id ? 'selected' : '' }}>{{ $stateOption->name }}</option>
+                        @endforeach
+                    </select>
                     @error('state')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- District -->
+                <div>
+                    <label for="district" class="block text-sm font-medium text-gray-700 mb-2">District <span class="text-red-500">*</span></label>
+                    <select name="district" id="district" required
+                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" disabled>
+                        <option value="">Select District</option>
+                        @if($property->city && $property->city->district)
+                            <option value="{{ $property->city->district->id }}" selected>{{ $property->city->district->name }}</option>
+                        @endif
+                    </select>
+                    @error('district')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <!-- City -->
                 <div>
-                    <label for="city" class="block text-sm font-medium text-gray-700 mb-2">City <span class="text-red-500">*</span></label>
-                    <input type="text" name="city" id="city" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                           placeholder="Enter city" value="{{ old('city', $property->city) }}">
-                    @error('city')
+                    <label for="city_id" class="block text-sm font-medium text-gray-700 mb-2">City <span class="text-red-500">*</span></label>
+                    <select name="city_id" id="city_id" required
+                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" disabled>
+                        <option value="">Select City</option>
+                        @if($property->city)
+                            <option value="{{ $property->city->id }}" selected>{{ $property->city->name }}</option>
+                        @endif
+                    </select>
+                    @error('city_id')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
@@ -595,6 +618,82 @@ function onGoogleMapsLoaded() {
 // Load API when page loads
 document.addEventListener('DOMContentLoaded', function() {
     loadGoogleMapsAPI();
+
+    // AJAX for dependent dropdowns
+    document.getElementById('state').addEventListener('change', function() {
+        const stateId = this.value;
+        const districtSelect = document.getElementById('district');
+        const citySelect = document.getElementById('city_id');
+
+        // Reset district and city
+        districtSelect.innerHTML = '<option value="">Select District</option>';
+        citySelect.innerHTML = '<option value="">Select City</option>';
+        districtSelect.disabled = true;
+        citySelect.disabled = true;
+
+        if (stateId) {
+            fetch(`/api/districts/${stateId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(district => {
+                        districtSelect.innerHTML += `<option value="${district.id}">${district.name}</option>`;
+                    });
+                    districtSelect.disabled = false;
+                })
+                .catch(error => console.error('Error loading districts:', error));
+        }
+    });
+
+    document.getElementById('district').addEventListener('change', function() {
+        const districtId = this.value;
+        const citySelect = document.getElementById('city_id');
+
+        // Reset city
+        citySelect.innerHTML = '<option value="">Select City</option>';
+        citySelect.disabled = true;
+
+        if (districtId) {
+            fetch(`/api/cities/${districtId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(city => {
+                        citySelect.innerHTML += `<option value="${city.id}">${city.name}</option>`;
+                    });
+                    citySelect.disabled = false;
+                })
+                .catch(error => console.error('Error loading cities:', error));
+        }
+    });
+
+    // Initialize dropdowns on page load if values exist
+    const stateSelect = document.getElementById('state');
+    const districtSelect = document.getElementById('district');
+    const citySelect = document.getElementById('city_id');
+
+    if (stateSelect.value) {
+        // Load districts for the selected state
+        fetch(`/api/districts/${stateSelect.value}`)
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(district => {
+                    districtSelect.innerHTML += `<option value="${district.id}">${district.name}</option>`;
+                });
+                districtSelect.disabled = false;
+                // Load cities for the selected district
+                if (districtSelect.value) {
+                    fetch(`/api/cities/${districtSelect.value}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            data.forEach(city => {
+                                citySelect.innerHTML += `<option value="${city.id}">${city.name}</option>`;
+                            });
+                            citySelect.disabled = false;
+                        })
+                        .catch(error => console.error('Error loading cities:', error));
+                }
+            })
+            .catch(error => console.error('Error loading districts:', error));
+    }
 });
 </script>
 @endsection
