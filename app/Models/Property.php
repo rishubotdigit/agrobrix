@@ -21,7 +21,7 @@ class Property extends Model
     protected $fillable = [
         'title', 'land_type', 'city_id', 'description', 'area', 'full_address',
         'google_map_lat', 'google_map_lng', 'plot_area', 'plot_area_unit', 'frontage',
-        'depth', 'road_width', 'corner_plot', 'gated_community', 'ownership_type',
+        'road_width', 'corner_plot', 'gated_community',
         'price', 'price_negotiable', 'contact_name', 'contact_mobile', 'contact_role',
         'property_images', 'property_video', 'status', 'owner_id', 'agent_id', 'featured', 'featured_until'
     ];
@@ -31,7 +31,6 @@ class Property extends Model
         'google_map_lng' => 'decimal:8',
         'plot_area' => 'decimal:2',
         'frontage' => 'decimal:2',
-        'depth' => 'decimal:2',
         'road_width' => 'decimal:2',
         'price' => 'decimal:2',
         'corner_plot' => 'boolean',

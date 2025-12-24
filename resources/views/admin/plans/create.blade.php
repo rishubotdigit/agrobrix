@@ -103,6 +103,42 @@
                         @enderror
                         <p class="text-gray-500 text-sm mt-1">Enter each feature on a new line</p>
                     </div>
+
+                    <div class="mb-4">
+                        <label for="max_listings" class="block text-sm font-medium text-gray-700 mb-2">Max Listings</label>
+                        <input type="number" name="max_listings" id="max_listings" value="{{ old('max_listings') }}" min="0"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('max_listings') border-red-500 @enderror">
+                        @error('max_listings')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="max_contacts" class="block text-sm font-medium text-gray-700 mb-2">Max Contacts</label>
+                        <input type="number" name="max_contacts" id="max_contacts" value="{{ old('max_contacts') }}" min="0"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('max_contacts') border-red-500 @enderror">
+                        @error('max_contacts')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="max_featured_listings" class="block text-sm font-medium text-gray-700 mb-2">Max Featured Listings</label>
+                        <input type="number" name="max_featured_listings" id="max_featured_listings" value="{{ old('max_featured_listings') }}" min="0"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('max_featured_listings') border-red-500 @enderror">
+                        @error('max_featured_listings')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="featured_duration_days" class="block text-sm font-medium text-gray-700 mb-2">Featured Duration (Days)</label>
+                        <input type="number" name="featured_duration_days" id="featured_duration_days" value="{{ old('featured_duration_days') }}" min="0"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('featured_duration_days') border-red-500 @enderror">
+                        @error('featured_duration_days')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
 
                 <div class="mb-4">

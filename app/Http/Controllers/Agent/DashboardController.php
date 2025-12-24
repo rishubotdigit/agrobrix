@@ -9,6 +9,7 @@ use App\Models\Property;
 use App\Models\Visit;
 use App\Models\Payment;
 use App\Models\FollowUp;
+use App\Models\ViewedContact;
 
 class DashboardController extends Controller
 {
@@ -86,13 +87,58 @@ class DashboardController extends Controller
 
     public function dashboard()
     {
-        $activeClients = Lead::where('agent_id', auth()->id())->whereNotNull('agent_id')->count();
-        $managedProperties = Property::where('agent_id', auth()->id())->count();
-        $closedDeals = Visit::whereHas('lead.property', function($q) { $q->where('agent_id', auth()->id()); })->where('status', 'completed')->count();
-        $totalCommission = Payment::whereHas('property', function($q) { $q->where('agent_id', auth()->id()); })->where('status', 'completed')->sum('amount');
+        $agentId = auth()->id();
+        $activeClients = Lead::where('agent_id', $agentId)->whereNotNull('agent_id')->count();
+        $managedProperties = Property::where('agent_id', $agentId)->count();
+        $closedDeals = Visit::whereHas('lead.property', function($q) use ($agentId) { $q->where('agent_id', $agentId); })->where('status', 'completed')->count();
+        $totalCommission = Payment::whereHas('property', function($q) use ($agentId) { $q->where('agent_id', $agentId); })->where('status', 'completed')->sum('amount');
         $recentActivities = $this->getRecentActivities();
 
-        return view('agent.dashboard', compact('activeClients', 'managedProperties', 'closedDeals', 'totalCommission', 'recentActivities'));
+        // Check for analytics access
+        $user = auth()->user();
+        $activePlanPurchases = $user->activePlanPurchases();
+        $hasAnalyticsAccess = $activePlanPurchases->contains(function($purchase) {
+            return in_array($purchase->plan->name, ['Professional', 'Business', 'Enterprise']);
+        });
+
+        $analyticsData = [];
+        if ($hasAnalyticsAccess) {
+            // Property views
+            $propertyViews = \App\Models\ViewedContact::whereHas('property', function($q) use ($agentId) {
+                $q->where('agent_id', $agentId);
+            })->count();
+
+            // Leads (inquiries)
+            $totalLeads = Lead::where('agent_id', $agentId)->count();
+
+            // Monthly data for charts (last 12 months)
+            $monthlyLeads = [];
+            $monthlyViews = [];
+            $monthlyDeals = [];
+            for ($i = 11; $i >= 0; $i--) {
+                $date = now()->subMonths($i);
+                $start = $date->startOfMonth();
+                $end = $date->endOfMonth();
+
+                $monthlyLeads[] = Lead::where('agent_id', $agentId)->whereBetween('created_at', [$start, $end])->count();
+                $monthlyViews[] = \App\Models\ViewedContact::whereHas('property', function($q) use ($agentId) {
+                    $q->where('agent_id', $agentId);
+                })->whereBetween('viewed_at', [$start, $end])->count();
+                $monthlyDeals[] = Visit::whereHas('lead.property', function($q) use ($agentId) {
+                    $q->where('agent_id', $agentId);
+                })->where('status', 'completed')->whereBetween('updated_at', [$start, $end])->count();
+            }
+
+            $analyticsData = [
+                'propertyViews' => $propertyViews,
+                'totalLeads' => $totalLeads,
+                'monthlyLeads' => $monthlyLeads,
+                'monthlyViews' => $monthlyViews,
+                'monthlyDeals' => $monthlyDeals,
+            ];
+        }
+
+        return view('agent.dashboard', compact('activeClients', 'managedProperties', 'closedDeals', 'totalCommission', 'recentActivities', 'hasAnalyticsAccess', 'analyticsData'));
     }
 
     public function plan()

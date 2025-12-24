@@ -171,4 +171,21 @@ class DashboardController extends Controller
         return view('owner.leads.show', compact('lead'));
     }
 
+    public function viewedContacts()
+    {
+        $user = auth()->user();
+
+        // Check if user has Premium or Elite plan
+        $activePlans = $user->activePlanPurchases()->pluck('plan.name')->toArray();
+        if (!in_array('Premium', $activePlans) && !in_array('Elite', $activePlans)) {
+            abort(403, 'This feature is only available for Premium and Elite plan users.');
+        }
+
+        $viewedContacts = ViewedContact::whereHas('property', function($q) {
+            $q->where('owner_id', $user->id);
+        })->with(['buyer', 'property'])->orderBy('viewed_at', 'desc')->get();
+
+        return view('owner.viewed-contacts', compact('viewedContacts'));
+    }
+
 }

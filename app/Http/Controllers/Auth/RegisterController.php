@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\OtpService;
 use App\Models\User;
 use App\Models\Setting;
+use App\Models\Plan;
+use App\Models\PlanPurchase;
 use App\Events\UserRegistered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -48,6 +50,8 @@ class RegisterController extends Controller
             'email_verified_at' => now(),
             'verified_at' => now(),
         ]);
+
+        $this->assignBasicPlanIfApplicable($user);
 
         UserRegistered::dispatch($user);
 
@@ -99,6 +103,8 @@ class RegisterController extends Controller
                 'verified_at' => now(),
             ]);
 
+            $this->assignBasicPlanIfApplicable($user);
+
             UserRegistered::dispatch($user);
 
             // Log in the user
@@ -145,6 +151,57 @@ class RegisterController extends Controller
             $remaining = max(0, $remaining);
             return response()->json(['error' => 'Too many requests. Try again in ' . $remaining . ' seconds.'], 429);
         }
+    }
+
+    private function assignBasicPlanIfApplicable(User $user): void
+    {
+        if (!in_array($user->role, ['owner', 'agent'])) {
+            return;
+        }
+
+        $basicPlan = Plan::where('name', 'Basic')
+            ->where('role', $user->role)
+            ->first();
+
+        if (!$basicPlan) {
+            \Illuminate\Support\Facades\Log::warning('Basic plan not found for role', ['role' => $user->role, 'user_id' => $user->id]);
+            return;
+        }
+
+        // Deactivate any existing active plans for the user
+        $activeCount = PlanPurchase::where('user_id', $user->id)
+            ->where('status', 'activated')
+            ->where(function($q) {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })->count();
+
+        PlanPurchase::where('user_id', $user->id)
+            ->where('status', 'activated')
+            ->where(function($q) {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })->update(['status' => 'deactivated']);
+
+        \Illuminate\Support\Facades\Log::info('Deactivated active plans on registration', [
+            'user_id' => $user->id,
+            'active_plans_deactivated' => $activeCount
+        ]);
+
+        // Create new PlanPurchase for Basic plan
+        $purchase = PlanPurchase::create([
+            'user_id' => $user->id,
+            'plan_id' => $basicPlan->id,
+            'status' => 'activated',
+            'activated_at' => now(),
+            'expires_at' => now()->addDays($basicPlan->getValidityDays()),
+            'used_contacts' => 0,
+            'used_featured_listings' => 0,
+        ]);
+
+        \Illuminate\Support\Facades\Log::info('Basic plan assigned on registration', [
+            'user_id' => $user->id,
+            'plan_id' => $basicPlan->id,
+            'purchase_id' => $purchase->id
+        ]);
     }
 
     private function getRedirectUrl(User $user): string

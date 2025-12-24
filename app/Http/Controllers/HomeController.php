@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Plan;
+use App\Models\PlanPurchase;
 use App\Models\Property;
 use App\Models\Wishlist;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +19,21 @@ class HomeController extends Controller
             $plans = Plan::where('status', 'active')->get();
             \Log::info('HomeController@index plans fetched for guest', ['plans_count' => $plans->count(), 'plans' => $plans->pluck('name', 'role')]);
         }
+
+        $currentPlanId = null;
+        $currentPlanPrice = 0;
+        if (Auth::check()) {
+            $activePurchase = PlanPurchase::where('user_id', Auth::id())
+                ->where('status', 'activated')
+                ->where(function($q) {
+                    $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+                })->first();
+            if ($activePurchase) {
+                $currentPlanId = $activePurchase->plan_id;
+                $currentPlanPrice = $activePurchase->plan->price ?? 0;
+            }
+        }
+
         $featuredProperties = Property::with(['owner', 'agent', 'amenities', 'city.district.state'])->where('status', 'approved')->where('featured', true)->limit(4)->get();
         $latestProperties = Property::with(['owner', 'agent', 'amenities', 'city.district.state'])->where('status', 'approved')->orderBy('created_at', 'desc')->limit(4)->get();
 
@@ -37,7 +53,7 @@ class HomeController extends Controller
             });
         }
 
-        return view('home', compact('plans', 'featuredProperties', 'latestProperties'));
+        return view('home', compact('plans', 'featuredProperties', 'latestProperties', 'currentPlanId', 'currentPlanPrice'));
     }
 
     public function about()

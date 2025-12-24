@@ -24,7 +24,9 @@ class PlanPurchaseController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $purchases = $user->planPurchases()->with(['plan', 'payment'])->get();
+        $purchases = $user->planPurchases()->with(['plan', 'payment'])->whereHas('plan', function($q) {
+            $q->where('price', '>', 0);
+        })->get();
 
         return response()->json($purchases);
     }
@@ -35,6 +37,13 @@ class PlanPurchaseController extends Controller
     public function initiatePurchase(Request $request, Plan $plan)
     {
         $user = Auth::user();
+
+        // Prevent purchase of free plans
+        if ($plan->price == 0) {
+            return response()->json([
+                'error' => 'Free plans cannot be purchased manually'
+            ], 400);
+        }
 
         // Validate gateway parameter
         $request->validate([
@@ -69,6 +78,12 @@ class PlanPurchaseController extends Controller
                 'plan_id' => $plan->id,
                 'payment_id' => $payment->id,
                 'status' => 'pending',
+            ]);
+
+            \Illuminate\Support\Facades\Log::info('Plan purchase initiated', [
+                'plan_purchase_id' => $planPurchase->id,
+                'user_id' => $user->id,
+                'plan_id' => $plan->id
             ]);
 
             // Fire event for admin notification

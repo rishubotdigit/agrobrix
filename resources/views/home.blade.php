@@ -377,7 +377,6 @@
 
 
     <!-- Pricing -->
-    @auth
     <section id="pricing" class="py-20 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
@@ -390,6 +389,9 @@
                     <div class="bg-white p-8 rounded-xl {{ $plan->name === 'Pro' ? 'border-2 border-primary' : 'border-2 border-gray-200' }} card-hover relative">
                         @if($plan->name === 'Pro')
                             <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-sm font-semibold">Popular</div>
+                        @endif
+                        @if(isset($currentPlanId) && $plan->id == $currentPlanId)
+                            <div class="absolute -top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Current Plan</div>
                         @endif
                         <h3 class="text-2xl font-bold mb-2 text-gray-900">{{ $plan->name }}</h3>
                         <div class="mb-4">
@@ -475,11 +477,16 @@
                                 </ul>
                             </div>
                         @endif
-                        @if($plan->name === 'Enterprise')
-                            <a href="/contact" class="block text-center bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition">Contact Sales</a>
+                        @if(isset($currentPlanId) && $plan->id == $currentPlanId)
+                            <button disabled class="block text-center w-full bg-gray-300 text-gray-500 px-6 py-3 rounded-lg font-semibold cursor-not-allowed">Current Plan</button>
+                        @elseif($plan->price == 0)
+                            <button disabled class="block text-center w-full bg-gray-300 text-gray-500 px-6 py-3 rounded-lg font-semibold cursor-not-allowed">Default Plan</button>
                         @else
+                            @php
+                                $buttonText = isset($currentPlanPrice) && $plan->price > $currentPlanPrice ? 'Upgrade' : 'Buy';
+                            @endphp
                             @if(auth()->check())
-                                <a href="{{ route('plans.index') }}" class="block text-center {{ $plan->name === 'Pro' ? 'gradient-bg text-white hover:opacity-90' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} px-6 py-3 rounded-lg font-semibold transition">Purchase Plan</a>
+                                <a href="{{ route('plans.index') }}" class="block text-center {{ $plan->name === 'Pro' ? 'gradient-bg text-white hover:opacity-90' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} px-6 py-3 rounded-lg font-semibold transition">{{ $buttonText }}</a>
                             @else
                                 <a href="/register" class="block text-center {{ $plan->name === 'Pro' ? 'gradient-bg text-white hover:opacity-90' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} px-6 py-3 rounded-lg font-semibold transition">Get Started</a>
                             @endif
@@ -489,7 +496,6 @@
             </div>
         </div>
     </section>
-    @endauth
 
    
 

@@ -59,9 +59,7 @@
                     <div><strong>Land Type:</strong> {{ $property->land_type }}</div>
                     <div><strong>Plot Area:</strong> {{ $property->plot_area }} {{ $property->plot_area_unit }}</div>
                     <div><strong>Frontage:</strong> {{ $property->frontage }} ft</div>
-                    <div><strong>Depth:</strong> {{ $property->depth }} ft</div>
                     <div><strong>Road Width:</strong> {{ $property->road_width }} ft</div>
-                    <div><strong>Ownership Type:</strong> {{ $property->ownership_type }}</div>
                     <div><strong>Corner Plot:</strong> {{ $property->corner_plot ? 'Yes' : 'No' }}</div>
                     <div><strong>Gated Community:</strong> {{ $property->gated_community ? 'Yes' : 'No' }}</div>
                     <div><strong>Price Negotiable:</strong> {{ $property->price_negotiable ? 'Yes' : 'No' }}</div>

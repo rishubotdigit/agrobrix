@@ -44,6 +44,9 @@ Route::prefix('owner')->middleware(['auth', 'role:owner'])->group(function () {
     Route::get('/leads', [DashboardController::class, 'leads'])->name('owner.leads');
     Route::get('/leads/{lead}', [DashboardController::class, 'showLead'])->name('owner.leads.show');
 
+    // Viewed Contacts
+    Route::get('/viewed-contacts', [DashboardController::class, 'viewedContacts'])->name('owner.viewed-contacts');
+
     // Notifications
     Route::get('notifications', [NotificationController::class, 'index'])->name('owner.notifications.index');
     Route::get('notifications/count', [NotificationController::class, 'count'])->name('owner.notifications.count');

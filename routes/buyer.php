@@ -7,6 +7,7 @@ use App\Http\Controllers\Buyer\SearchController;
 use App\Http\Controllers\Buyer\WishlistController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PlanPurchaseController;
+use App\Http\Controllers\InquiryController;
 
 Route::prefix('buyer')->middleware(['auth', 'role:buyer'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('buyer.dashboard');
@@ -22,6 +23,8 @@ Route::prefix('buyer')->middleware(['auth', 'role:buyer'])->group(function () {
     Route::get('/api/properties', [SearchController::class, 'getPropertiesApi'])->name('buyer.api.properties');
     Route::get('/api/property-options', [SearchController::class, 'getPropertyOptions'])->name('buyer.api.property-options');
     Route::get('/search', [SearchController::class, 'index'])->name('buyer.search.index');
+
+    Route::get('/properties/{property}/contact', [InquiryController::class, 'viewContact'])->name('buyer.properties.contact');
 
     // Wishlist
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('buyer.wishlist.index');

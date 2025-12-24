@@ -39,6 +39,11 @@ class PlanController extends Controller
             if ($request->role === 'buyer') {
                 $rules['contacts_to_unlock'] = 'required|integer|min:0';
                 $rules['persona'] = 'nullable|string';
+            } elseif (in_array($request->role, ['owner', 'agent'])) {
+                $rules['max_listings'] = 'nullable|integer|min:0';
+                $rules['max_contacts'] = 'nullable|integer|min:0';
+                $rules['max_featured_listings'] = 'nullable|integer|min:0';
+                $rules['featured_duration_days'] = 'nullable|integer|min:0';
             }
 
             Log::info('About to validate request');
@@ -47,20 +52,22 @@ class PlanController extends Controller
 
             // Check features for owner/agent
             if ($request->role !== 'buyer') {
-                if (!isset($validated['features']) || (is_string($validated['features']) && trim($validated['features']) === '') || (is_array($validated['features']) && count(array_filter($validated['features'])) === 0)) {
+                if (!$request->has('features') || trim($request->features) === '') {
                     return redirect()->back()->withErrors(['features' => 'Features are required.'])->withInput();
                 }
             }
 
             // Normalize features to array
-            if (isset($validated['features'])) {
-                if (is_string($validated['features'])) {
-                    $validated['features'] = array_filter(array_map('trim', explode("\n", $validated['features'])));
-                } elseif (is_array($validated['features'])) {
-                    $validated['features'] = array_filter(array_map('trim', $validated['features']));
+            if ($request->has('features')) {
+                $features = $request->features;
+                if (is_string($features)) {
+                    $features = array_filter(array_map('trim', explode("\n", $features)));
+                } elseif (is_array($features)) {
+                    $features = array_filter(array_map('trim', $features));
                 } else {
-                    $validated['features'] = [$validated['features']];
+                    $features = [$features];
                 }
+                $validated['features'] = $features;
             }
 
             $price = $validated['offer_price'] ?? $validated['original_price'];
@@ -68,6 +75,11 @@ class PlanController extends Controller
             $capabilities = [];
             if ($validated['role'] === 'buyer') {
                 $capabilities['max_contacts'] = $validated['contacts_to_unlock'];
+            } elseif (in_array($validated['role'], ['owner', 'agent'])) {
+                $capabilities['max_listings'] = $validated['max_listings'] ?? 0;
+                $capabilities['max_contacts'] = $validated['max_contacts'] ?? 0;
+                $capabilities['max_featured_listings'] = $validated['max_featured_listings'] ?? 0;
+                $capabilities['featured_duration_days'] = $validated['featured_duration_days'] ?? 0;
             }
 
             $planData = [
@@ -132,26 +144,33 @@ class PlanController extends Controller
         if ($role === 'buyer') {
             $rules['contacts_to_unlock'] = 'required|integer|min:0';
             $rules['persona'] = 'nullable|string';
+        } elseif (in_array($role, ['owner', 'agent'])) {
+            $rules['max_listings'] = 'nullable|integer|min:0';
+            $rules['max_contacts'] = 'nullable|integer|min:0';
+            $rules['max_featured_listings'] = 'nullable|integer|min:0';
+            $rules['featured_duration_days'] = 'nullable|integer|min:0';
         }
 
         $validated = $request->validate($rules);
 
         // Check features for owner/agent
         if ($role !== 'buyer') {
-            if (!isset($validated['features']) || (is_string($validated['features']) && trim($validated['features']) === '') || (is_array($validated['features']) && count(array_filter($validated['features'])) === 0)) {
+            if (!$request->has('features') || trim($request->features) === '') {
                 return redirect()->back()->withErrors(['features' => 'Features are required.'])->withInput();
             }
         }
 
         // Normalize features to array
-        if (isset($validated['features'])) {
-            if (is_string($validated['features'])) {
-                $validated['features'] = array_filter(array_map('trim', explode("\n", $validated['features'])));
-            } elseif (is_array($validated['features'])) {
-                $validated['features'] = array_filter(array_map('trim', $validated['features']));
+        if ($request->has('features')) {
+            $features = $request->features;
+            if (is_string($features)) {
+                $features = array_filter(array_map('trim', explode("\n", $features)));
+            } elseif (is_array($features)) {
+                $features = array_filter(array_map('trim', $features));
             } else {
-                $validated['features'] = [$validated['features']];
+                $features = [$features];
             }
+            $validated['features'] = $features;
         }
 
         $price = $validated['offer_price'] ?? $validated['original_price'];
@@ -159,6 +178,11 @@ class PlanController extends Controller
         $capabilities = [];
         if ($role === 'buyer') {
             $capabilities['max_contacts'] = $validated['contacts_to_unlock'];
+        } elseif (in_array($role, ['owner', 'agent'])) {
+            $capabilities['max_listings'] = $validated['max_listings'] ?? 0;
+            $capabilities['max_contacts'] = $validated['max_contacts'] ?? 0;
+            $capabilities['max_featured_listings'] = $validated['max_featured_listings'] ?? 0;
+            $capabilities['featured_duration_days'] = $validated['featured_duration_days'] ?? 0;
         }
 
         $plan->update([

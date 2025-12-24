@@ -31,12 +31,7 @@
             <div class="flex-1 h-1 mx-4 {{ $step >= 3 ? 'bg-primary' : 'bg-gray-300' }}"></div>
             <div class="flex items-center">
                 <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium {{ $step >= 3 ? 'bg-primary text-white' : 'bg-gray-300 text-gray-500' }}">3</div>
-                <span class="ml-2 text-sm font-medium {{ $step >= 3 ? 'text-primary' : 'text-gray-500' }}">Media & Pricing</span>
-            </div>
-            <div class="flex-1 h-1 mx-4 {{ $step >= 4 ? 'bg-primary' : 'bg-gray-300' }}"></div>
-            <div class="flex items-center">
-                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium {{ $step >= 4 ? 'bg-primary text-white' : 'bg-gray-300 text-gray-500' }}">4</div>
-                <span class="ml-2 text-sm font-medium {{ $step >= 4 ? 'text-primary' : 'text-gray-500' }}">Address & Map</span>
+                <span class="ml-2 text-sm font-medium {{ $step >= 3 ? 'text-primary' : 'text-gray-500' }}">Media, Pricing & Location</span>
             </div>
         </div>
     </div>
@@ -113,19 +108,6 @@
                     @enderror
                 </div>
 
-                <!-- Ownership Type -->
-                <div>
-                    <label for="ownership_type" class="block text-sm font-medium text-gray-700 mb-2">Ownership Type <span class="text-red-500">*</span></label>
-                    <select name="ownership_type" id="ownership_type" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
-                        <option value="">Select Ownership Type</option>
-                        <option value="Freehold" {{ old('ownership_type', $property->ownership_type) == 'Freehold' ? 'selected' : '' }}>Freehold</option>
-                        <option value="Leasehold" {{ old('ownership_type', $property->ownership_type) == 'Leasehold' ? 'selected' : '' }}>Leasehold</option>
-                    </select>
-                    @error('ownership_type')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
 
                 <!-- Frontage -->
                 <div>
@@ -138,16 +120,6 @@
                     @enderror
                 </div>
 
-                <!-- Depth -->
-                <div>
-                    <label for="depth" class="block text-sm font-medium text-gray-700 mb-2">Depth/Length (ft)</label>
-                    <input type="number" name="depth" id="depth" min="0" step="0.01"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                           placeholder="Enter depth/length" value="{{ old('depth', $property->depth) }}">
-                    @error('depth')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
 
                 <!-- Corner Plot -->
                 <div>
@@ -219,9 +191,9 @@
             </div>
         </div>
 
-        <!-- Step 3: Media & Final -->
+        <!-- Step 3: Media, Pricing, Contact & Location -->
         <div id="step3" class="step-content {{ $step == 3 ? '' : 'hidden' }}">
-            <h3 class="text-xl font-semibold text-gray-900 mb-6">Step 3: Media, Pricing & Contact Info</h3>
+            <h3 class="text-xl font-semibold text-gray-900 mb-6">Step 3: Media, Pricing, Contact & Location</h3>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Price -->
@@ -340,14 +312,7 @@
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
-            </div>
-        </div>
 
-        <!-- Step 4: Address & Map -->
-        <div id="step4" class="step-content {{ $step == 4 ? '' : 'hidden' }}">
-            <h3 class="text-xl font-semibold text-gray-900 mb-6">Step 4: Address & Map Location</h3>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- State -->
                 <div>
                     <label for="state" class="block text-sm font-medium text-gray-700 mb-2">State <span class="text-red-500">*</span></label>
@@ -440,13 +405,14 @@
 
                 <!-- Interactive Map -->
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Location on Map <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Location on Map</label>
                     <div id="map" class="w-full h-96 border border-gray-300 rounded-lg"></div>
                     <p class="mt-2 text-sm text-gray-600">Click on the map to select the property location. The coordinates will be automatically filled.</p>
                 </div>
                 @endif
             </div>
         </div>
+
 
         <!-- Navigation Buttons -->
         <div class="mt-8 flex items-center justify-between">
@@ -459,10 +425,10 @@
                     Cancel
                 </a>
 
-                <button type="button" id="nextBtn" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-emerald-700" style="display: {{ $step < 4 ? 'block' : 'none' }}">
+                <button type="button" id="nextBtn" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-emerald-700" style="display: {{ $step < 3 ? 'block' : 'none' }}">
                     Next
                 </button>
-                <button type="submit" id="submitBtn" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-emerald-700" style="display: {{ $step == 4 ? 'block' : 'none' }}">
+                <button type="submit" id="submitBtn" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-emerald-700" style="display: {{ $step == 3 ? 'block' : 'none' }}">
                     Update Property
                 </button>
             </div>
@@ -473,7 +439,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     let currentStep = {{ $step }};
-    const totalSteps = 4;
+    const totalSteps = 3;
 
     function showStep(step) {
         // Hide all steps
@@ -503,8 +469,8 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('nextBtn').style.display = step < totalSteps ? 'block' : 'none';
         document.getElementById('submitBtn').style.display = step === totalSteps ? 'block' : 'none';
 
-        // Initialize map if on step 4
-        if (step === 4) {
+        // Initialize map if on step 3
+        if (step === 3) {
             initializeMap();
         }
     }

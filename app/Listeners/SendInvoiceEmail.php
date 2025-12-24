@@ -25,6 +25,11 @@ class SendInvoiceEmail
      */
     public function handle(PaymentApproved $event): void
     {
+        // Skip sending invoice for Basic plan (free plan)
+        if ($event->payment->planPurchase && $event->payment->planPurchase->plan->price == 0) {
+            return;
+        }
+
         // Send invoice email to user if enabled
         if (Setting::get('invoice_email_enabled', '1') === '1') {
             DynamicSmtpTrait::loadSmtpSettings();

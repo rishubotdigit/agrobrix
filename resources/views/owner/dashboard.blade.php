@@ -77,7 +77,13 @@
                 @endphp
                 @if($activePlanPurchase && $activePlanPurchase->plan)
                     <p class="text-2xl font-bold text-primary">{{ $activePlanPurchase->plan->name }}</p>
-                    <p class="text-sm text-gray-500">{{ $activePlanPurchase->expires_at->diffInDays(now()) }} days left</p>
+                    @if($activePlanPurchase->expires_at)
+                        <p class="text-sm text-gray-500">Expires: {{ $activePlanPurchase->expires_at->format('M d, Y') }}</p>
+                        <p class="text-sm text-gray-500">{{ $activePlanPurchase->expires_at->diffInDays(now()) }} days left</p>
+                    @else
+                        <p class="text-sm text-gray-500">Expires: Never</p>
+                        <p class="text-sm text-gray-500">Unlimited days left</p>
+                    @endif
                 @else
                     <p class="text-2xl font-bold text-red-500">No Plan</p>
                     <p class="text-sm text-gray-500">Subscribe to unlock features</p>
@@ -133,11 +139,12 @@
             </svg>
             My Properties
         </a>
-        <a href="#" class="flex items-center justify-center bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors">
+        <a href="{{ route('owner.viewed-contacts') }}" class="flex items-center justify-center bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
             </svg>
-            View Analytics
+            Who Viewed My Contact
         </a>
     </div>
     @if($properties >= $maxListings)

@@ -183,6 +183,8 @@ class PaymentController extends Controller
             // If it's a plan purchase, activate the plan
             if ($payment->type === 'plan_purchase' && $payment->planPurchase) {
                 $payment->planPurchase->activate();
+                // Deactivate other active plans after activation
+                \App\Models\PlanPurchase::deactivateActivePlansForUser($payment->user_id, $payment->planPurchase->id);
             }
 
             return response()->json([
@@ -434,6 +436,8 @@ class PaymentController extends Controller
                 // If it's a plan purchase, activate the plan
                 if ($payment->type === 'plan_purchase' && $payment->planPurchase) {
                     $payment->planPurchase->activate();
+                    // Deactivate other active plans after activation
+                    \App\Models\PlanPurchase::deactivateActivePlansForUser($payment->user_id, $payment->planPurchase->id);
                 }
             }
         }
@@ -459,6 +463,8 @@ class PaymentController extends Controller
                 // If it's a plan purchase, activate the plan
                 if ($payment->type === 'plan_purchase' && $payment->planPurchase) {
                     $payment->planPurchase->activate();
+                    // Deactivate other active plans after activation
+                    \App\Models\PlanPurchase::deactivateActivePlansForUser($payment->user_id, $payment->planPurchase->id);
                 }
             }
         }

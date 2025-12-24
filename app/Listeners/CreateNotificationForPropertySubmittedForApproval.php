@@ -34,7 +34,7 @@ class CreateNotificationForPropertySubmittedForApproval
         if (!$exists) {
             Notification::create([
                 'type' => 'property_submitted',
-                'message' => 'A new property "' . $event->property->title . '" in ' . $event->property->city . ', ' . $event->property->state . ' has been submitted for approval by ' . $event->property->owner->name . '.',
+                'message' => 'A new property "' . $event->property->title . '" in ' . $event->property->city->name . ', ' . $event->property->city->district->state->name . ' has been submitted for approval by ' . $event->property->owner->name . '.',
                 'data' => [
                     'property_id' => $event->property->id,
                 ],

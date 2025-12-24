@@ -101,10 +101,6 @@
                             <dd class="text-sm text-gray-900">{{ $property->plot_area }} {{ $property->plot_area_unit }}</dd>
                         </div>
                         <div>
-                            <dt class="text-sm font-medium text-gray-500">Ownership Type</dt>
-                            <dd class="text-sm text-gray-900">{{ $property->ownership_type }}</dd>
-                        </div>
-                        <div>
                             <dt class="text-sm font-medium text-gray-500">Road Width</dt>
                             <dd class="text-sm text-gray-900">{{ $property->road_width }} ft</dd>
                         </div>
@@ -118,12 +114,6 @@
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Frontage</dt>
                                 <dd class="text-sm text-gray-900">{{ $property->frontage }} ft</dd>
-                            </div>
-                        @endif
-                        @if($property->depth)
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Depth</dt>
-                                <dd class="text-sm text-gray-900">{{ $property->depth }} ft</dd>
                             </div>
                         @endif
                         <div>

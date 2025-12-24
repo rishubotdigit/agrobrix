@@ -6,10 +6,13 @@ use App\Models\Lead;
 use App\Models\PlanPurchase;
 use App\Models\Property;
 use App\Models\Setting;
+use App\Models\ViewedContact;
 use App\OtpService;
 use App\Traits\CapabilityTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
@@ -123,37 +126,96 @@ class InquiryController extends Controller
             ], 400);
         }
 
-        // Check if lead already exists
-        $existingLead = Lead::where('property_id', $property->id)
-            ->where('buyer_email', $inquiryData['buyer_email'])
-            ->first();
+        $user = Auth::user();
+        $isBuyer = $user && $user->role === 'buyer' && $inquiryData['buyer_type'] === 'buyer';
 
-        if ($existingLead) {
-            // Update existing lead
-            $existingLead->update(array_merge($inquiryData, [
-                'agent_id' => $property->agent_id ?? ($property->owner && $property->owner->role === 'agent' ? $property->owner_id : null),
-            ]));
-            \Log::info('Existing lead updated from inquiry', [
-                'lead_id' => $existingLead->id,
-                'property_id' => $property->id,
-                'agent_id' => $property->agent_id,
-                'buyer_email' => $inquiryData['buyer_email']
-            ]);
+        if ($isBuyer) {
+            // Buyer-specific logic
+            $existingViewed = ViewedContact::where('buyer_id', $user->id)
+                ->where('property_id', $property->id)
+                ->exists();
+
+            if (!$existingViewed) {
+                // Validate plan and credits
+                $activePurchases = $user->activePlanPurchases();
+
+                if ($activePurchases->isEmpty()) {
+                    Log::error('Buyer has no active plan for inquiry', [
+                        'buyer_id' => $user->id,
+                        'property_id' => $property->id
+                    ]);
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No active plan. Please purchase a plan to view contacts.'
+                    ], 403);
+                }
+
+                $maxContacts = $this->getCapabilityValue($user, 'max_contacts');
+                $totalUsedContacts = $activePurchases->sum('used_contacts');
+
+                if ($totalUsedContacts >= $maxContacts) {
+                    Log::error('Buyer contact credits exhausted for inquiry', [
+                        'buyer_id' => $user->id,
+                        'property_id' => $property->id
+                    ]);
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Contact credits exhausted. Please upgrade your plan.'
+                    ], 403);
+                }
+
+                // Wrap deduction and creation in transaction
+                DB::transaction(function () use ($user, $property, $activePurchases) {
+                    $activePurchases->first()->increment('used_contacts');
+                    ViewedContact::create([
+                        'buyer_id' => $user->id,
+                        'property_id' => $property->id,
+                    ]);
+                });
+
+                Log::info('Buyer viewed contact via inquiry, credit deducted', [
+                    'buyer_id' => $user->id,
+                    'property_id' => $property->id
+                ]);
+            } else {
+                Log::info('Buyer already viewed contact via inquiry, no deduction', [
+                    'buyer_id' => $user->id,
+                    'property_id' => $property->id
+                ]);
+            }
         } else {
-            // Create new lead
-            $agentId = $property->agent_id ?? ($property->owner && $property->owner->role === 'agent' ? $property->owner_id : null);
-            $lead = Lead::create(array_merge($inquiryData, [
-                'agent_id' => $agentId,
-            ]));
-            \Log::info('New lead created from inquiry', [
-                'lead_id' => $lead->id,
-                'property_id' => $property->id,
-                'property_agent_id' => $property->agent_id,
-                'assigned_agent_id' => $agentId,
-                'property_owner_id' => $property->owner_id,
-                'property_owner_role' => $property->owner ? $property->owner->role : null,
-                'buyer_email' => $inquiryData['buyer_email']
-            ]);
+            // Non-buyer logic: create or update Lead
+            $existingLead = Lead::where('property_id', $property->id)
+                ->where('buyer_email', $inquiryData['buyer_email'])
+                ->first();
+
+            if ($existingLead) {
+                // Update existing lead
+                $existingLead->update(array_merge($inquiryData, [
+                    'agent_id' => $property->agent_id ?? ($property->owner && $property->owner->role === 'agent' ? $property->owner_id : null),
+                ]));
+                Log::info('Existing lead updated from inquiry', [
+                    'lead_id' => $existingLead->id,
+                    'property_id' => $property->id,
+                    'agent_id' => $property->agent_id,
+                    'buyer_email' => $inquiryData['buyer_email']
+                ]);
+            } else {
+                // Create new lead
+                $agentId = $property->agent_id ?? ($property->owner && $property->owner->role === 'agent' ? $property->owner_id : null);
+                $lead = Lead::create(array_merge($inquiryData, [
+                    'agent_id' => $agentId,
+                ]));
+                Log::info('New lead created from inquiry', [
+                    'lead_id' => $lead->id,
+                    'property_id' => $property->id,
+                    'property_agent_id' => $property->agent_id,
+                    'assigned_agent_id' => $agentId,
+                    'property_owner_id' => $property->owner_id,
+                    'property_owner_role' => $property->owner ? $property->owner->role : null,
+                    'buyer_email' => $inquiryData['buyer_email']
+                ]);
+            }
         }
 
         // Capture inquiry data before clearing session
@@ -290,47 +352,66 @@ class InquiryController extends Controller
             }
         }
 
-        // Check if lead already exists
-        $existingLead = Lead::where('property_id', $property->id)
-            ->where('buyer_name', $user->name)
-            ->where('buyer_email', $user->email)
-            ->exists();
+        // Handle lead/viewed contact creation and credit deduction based on role
+        if ($user->role === 'buyer' && !$isOwnerOrAgent) {
+            $existingViewed = ViewedContact::where('buyer_id', $user->id)
+                ->where('property_id', $property->id)
+                ->exists();
 
-        if (!$existingLead) {
-            // Create lead for assigned agent or owner
-            $agentId = $property->agent_id ?? ($property->owner && $property->owner->role === 'agent' ? $property->owner_id : null);
+            if (!$existingViewed) {
+                // Wrap deduction and creation in transaction
+                DB::transaction(function () use ($user, $property) {
+                    $buyerActivePurchases = $user->activePlanPurchases();
+                    $buyerActivePurchases->first()->increment('used_contacts');
+                    ViewedContact::create([
+                        'buyer_id' => $user->id,
+                        'property_id' => $property->id,
+                    ]);
+                });
 
-            $lead = Lead::create([
-                'property_id' => $property->id,
-                'agent_id' => $agentId,
-                'buyer_name' => $user->name,
-                'buyer_email' => $user->email,
-                'buyer_phone' => $user->mobile ?? '',
-            ]);
-
-            \Log::info('Lead created from view contact', [
-                'lead_id' => $lead->id,
-                'property_id' => $property->id,
-                'property_agent_id' => $property->agent_id,
-                'assigned_agent_id' => $agentId,
-                'property_owner_id' => $property->owner_id,
-                'property_owner_role' => $property->owner ? $property->owner->role : null,
-                'buyer_email' => $user->email
-            ]);
-
-            // Only increment used_contacts if not owner/agent and user is agent or buyer
-            if (!$isOwnerOrAgent && $user->role === 'agent') {
-                $agentActivePurchases = $user->activePlanPurchases();
-                $agentActivePurchases->first()->increment('used_contacts');
-                \Log::info('Deducted contact credit from agent', [
-                    'agent_id' => $user->id,
+                Log::info('Deducted contact credit from buyer in viewContact', [
+                    'buyer_id' => $user->id,
                     'property_id' => $property->id
                 ]);
-            } elseif (!$isOwnerOrAgent && $user->role === 'buyer') {
-                $buyerActivePurchases = $user->activePlanPurchases();
-                $buyerActivePurchases->first()->increment('used_contacts');
-                \Log::info('Deducted contact credit from buyer', [
+            } else {
+                Log::info('Buyer already viewed contact, no deduction', [
                     'buyer_id' => $user->id,
+                    'property_id' => $property->id
+                ]);
+            }
+        } elseif ($user->role === 'agent' && !$isOwnerOrAgent) {
+            $existingLead = Lead::where('property_id', $property->id)
+                ->where('buyer_name', $user->name)
+                ->where('buyer_email', $user->email)
+                ->exists();
+
+            if (!$existingLead) {
+                // Create lead for assigned agent or owner
+                $agentId = $property->agent_id ?? ($property->owner && $property->owner->role === 'agent' ? $property->owner_id : null);
+
+                $lead = Lead::create([
+                    'property_id' => $property->id,
+                    'agent_id' => $agentId,
+                    'buyer_name' => $user->name,
+                    'buyer_email' => $user->email,
+                    'buyer_phone' => $user->mobile ?? '',
+                ]);
+
+                Log::info('Lead created from view contact for agent', [
+                    'lead_id' => $lead->id,
+                    'property_id' => $property->id,
+                    'property_agent_id' => $property->agent_id,
+                    'assigned_agent_id' => $agentId,
+                    'property_owner_id' => $property->owner_id,
+                    'property_owner_role' => $property->owner ? $property->owner->role : null,
+                    'buyer_email' => $user->email
+                ]);
+
+                // Deduct credit
+                $agentActivePurchases = $user->activePlanPurchases();
+                $agentActivePurchases->first()->increment('used_contacts');
+                Log::info('Deducted contact credit from agent', [
+                    'agent_id' => $user->id,
                     'property_id' => $property->id
                 ]);
             }
@@ -359,10 +440,40 @@ class InquiryController extends Controller
             return response()->json(['exists' => false]);
         }
 
-        $exists = Lead::where('property_id', $property->id)
-            ->where('buyer_email', Auth::user()->email)
+        $user = Auth::user();
+        $exists = ViewedContact::where('buyer_id', $user->id)
+            ->where('property_id', $property->id)
             ->exists();
 
-        return response()->json(['exists' => $exists]);
+        if ($exists) {
+            return response()->json(['exists' => true]);
+        }
+
+        // Check active plan and credits
+        $activePurchases = $user->activePlanPurchases();
+
+        if ($activePurchases->isEmpty()) {
+            return response()->json([
+                'exists' => false,
+                'can_inquire' => false,
+                'message' => 'No active plan. Please purchase a plan to inquire.'
+            ]);
+        }
+
+        $maxContacts = $this->getCapabilityValue($user, 'max_contacts');
+        $totalUsedContacts = $activePurchases->sum('used_contacts');
+
+        if ($totalUsedContacts >= $maxContacts) {
+            return response()->json([
+                'exists' => false,
+                'can_inquire' => false,
+                'message' => 'Contact credits exhausted. Please upgrade your plan.'
+            ]);
+        }
+
+        return response()->json([
+            'exists' => false,
+            'can_inquire' => true
+        ]);
     }
 }

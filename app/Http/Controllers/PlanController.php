@@ -33,7 +33,21 @@ class PlanController extends Controller
             return ['id' => $plan->id, 'name' => $plan->name, 'role' => $plan->role, 'status' => $plan->status];
         })]);
 
-        return view('plans.index', compact('plans'));
+        $currentPlanId = null;
+        $currentPlanPrice = 0;
+        if (auth()->check()) {
+            $activePurchase = \App\Models\PlanPurchase::where('user_id', auth()->id())
+                ->where('status', 'activated')
+                ->where(function($q) {
+                    $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+                })->first();
+            if ($activePurchase) {
+                $currentPlanId = $activePurchase->plan_id;
+                $currentPlanPrice = $activePurchase->plan->price ?? 0;
+            }
+        }
+
+        return view('plans.index', compact('plans', 'currentPlanId', 'currentPlanPrice'));
     }
 
     public function purchase(Plan $plan)
@@ -64,17 +78,24 @@ class PlanController extends Controller
             return redirect()->back()->with('error', 'Selected payment method is not available');
         }
 
-        // For free plans, create purchase directly
+        // For free plans, deactivate all active plans and create purchase directly
         if ($plan->price == 0) {
+            $activeCount = PlanPurchase::deactivateActivePlansForUser(auth()->id());
+
             $purchase = PlanPurchase::create([
                 'user_id' => auth()->id(),
                 'plan_id' => $plan->id,
                 'status' => 'activated',
                 'activated_at' => now(),
-                'expires_at' => now()->addMonth(),
+                'expires_at' => now()->addDays($plan->getValidityDays()),
             ]);
 
-            Log::info('Free plan purchase created', ['purchase_id' => $purchase->id, 'user_id' => auth()->id(), 'plan_id' => $plan->id]);
+            Log::info('Free plan purchase created', [
+                'purchase_id' => $purchase->id,
+                'user_id' => auth()->id(),
+                'plan_id' => $plan->id,
+                'active_plans_deactivated' => $activeCount
+            ]);
 
             return redirect()->route(auth()->user()->role . '.dashboard')
                             ->with('success', "Successfully subscribed to {$plan->name} plan!");
@@ -135,6 +156,9 @@ class PlanController extends Controller
                 $payment->order_id = $order['order_id'];
                 $payment->save();
             }
+
+            // Deactivate existing active plans before creating new paid plan purchase
+            $activeDeactivated = PlanPurchase::deactivateActivePlansForUser(auth()->id());
 
             // Create plan purchase record
             $purchase = PlanPurchase::create([
@@ -197,6 +221,9 @@ class PlanController extends Controller
             'status' => 'completed',
         ]);
 
+        // Deactivate existing active plans before creating new paid plan purchase
+        $activeDeactivated = PlanPurchase::deactivateActivePlansForUser(auth()->id());
+
         // Create plan purchase
         $purchase = PlanPurchase::create([
             'user_id' => auth()->id(),
@@ -205,7 +232,13 @@ class PlanController extends Controller
             'status' => 'pending',
         ]);
 
-        Log::info('Paid plan purchase created', ['purchase_id' => $purchase->id, 'user_id' => auth()->id(), 'plan_id' => $plan->id, 'status' => 'pending']);
+        Log::info('Paid plan purchase created', [
+            'purchase_id' => $purchase->id,
+            'user_id' => auth()->id(),
+            'plan_id' => $plan->id,
+            'status' => 'pending',
+            'active_plans_deactivated' => $activeDeactivated
+        ]);
 
         // Dispatch event to notify admins
         PlanPurchaseCreated::dispatch($purchase);

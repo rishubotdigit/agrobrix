@@ -18,8 +18,9 @@ class MyPropertyController extends Controller
         $user = Auth::user();
         $properties = Property::where('owner_id', $user->id)->orWhere('agent_id', $user->id)->with('agent')->paginate(10);
 
+        $current_listings = $user->properties()->count();
         $usage = [
-            'current_listings' => $properties->total(),
+            'current_listings' => $current_listings,
             'max_listings' => $this->getCapabilityValue($user, 'max_listings'),
             'current_featured' => $user->properties()->where('featured', true)->count(),
             'max_featured' => $this->getCapabilityValue($user, 'max_featured_listings')
@@ -55,7 +56,7 @@ class MyPropertyController extends Controller
 
         if ($currentListings >= $maxListings) {
             return response()->json([
-                'error' => 'Maximum listings limit reached',
+                'error' => 'You have reached your maximum property listing limit. Please upgrade your plan to list more properties.',
                 'current' => $currentListings,
                 'limit' => $maxListings
             ], 403);
@@ -63,6 +64,14 @@ class MyPropertyController extends Controller
 
         // Validate request
         $validated = $request->validated();
+
+        // Log confirmation of field removal
+        \Log::info('Agent Property Update - Confirming removed fields not present', [
+            'depth_present_in_request' => $request->has('depth'),
+            'ownership_type_present_in_request' => $request->has('ownership_type'),
+            'depth_value' => $request->input('depth'),
+            'ownership_type_value' => $request->input('ownership_type')
+        ]);
 
         // Handle file uploads
         $imagePaths = [];
@@ -91,11 +100,9 @@ class MyPropertyController extends Controller
             'plot_area' => $validated['plot_area'],
             'plot_area_unit' => $validated['plot_area_unit'],
             'frontage' => $validated['frontage'],
-            'depth' => $validated['depth'],
             'road_width' => $validated['road_width'],
             'corner_plot' => $validated['corner_plot'] ?? false,
             'gated_community' => $validated['gated_community'] ?? false,
-            'ownership_type' => $validated['ownership_type'],
             'price' => $validated['price'],
             'price_negotiable' => $validated['price_negotiable'] ?? false,
             'contact_name' => $validated['contact_name'],
@@ -170,6 +177,14 @@ class MyPropertyController extends Controller
         // Validate request
         $validated = $request->validated();
 
+        // Log confirmation of field removal
+        \Log::info('Agent Property Store - Confirming removed fields not present', [
+            'depth_present_in_request' => $request->has('depth'),
+            'ownership_type_present_in_request' => $request->has('ownership_type'),
+            'depth_value' => $request->input('depth'),
+            'ownership_type_value' => $request->input('ownership_type')
+        ]);
+
         // Handle file uploads
         $imagePaths = $property->property_images ? json_decode($property->property_images, true) : [];
         if ($request->hasFile('property_images')) {
@@ -215,11 +230,9 @@ class MyPropertyController extends Controller
             'plot_area' => $validated['plot_area'],
             'plot_area_unit' => $validated['plot_area_unit'],
             'frontage' => $validated['frontage'],
-            'depth' => $validated['depth'],
             'road_width' => $validated['road_width'],
             'corner_plot' => $validated['corner_plot'] ?? false,
             'gated_community' => $validated['gated_community'] ?? false,
-            'ownership_type' => $validated['ownership_type'],
             'price' => $validated['price'],
             'price_negotiable' => $validated['price_negotiable'] ?? false,
             'contact_name' => $validated['contact_name'],

@@ -29,7 +29,7 @@ class DashboardController extends Controller
         $planInfo = null;
         if ($currentPlan) {
             $maxContacts = $this->getCapabilityValue($user, 'max_contacts');
-            $usedContacts = $activePlanPurchases->sum('used_contacts');
+            $usedContacts = $user->viewedContacts()->count();
             $remainingContacts = max(0, $maxContacts - $usedContacts);
 
             $planInfo = [
@@ -101,7 +101,7 @@ class DashboardController extends Controller
         // Plan stats
         $activePlanPurchases = $user->activePlanPurchases();
         $maxContacts = $this->getCapabilityValue($user, 'max_contacts');
-        $usedContacts = $activePlanPurchases->sum('used_contacts');
+        $usedContacts = $user->viewedContacts()->count();
         $remainingContacts = max(0, $maxContacts - $usedContacts);
 
         return response()->json([
@@ -121,9 +121,9 @@ class DashboardController extends Controller
     public function inquiries()
     {
         $user = auth()->user();
-        $inquiries = Lead::where('buyer_email', $user->email)
-            ->with('property')
-            ->orderBy('updated_at', 'desc')
+        $inquiries = ViewedContact::where('buyer_id', $user->id)
+            ->with('property.city.district.state')
+            ->orderBy('viewed_at', 'desc')
             ->get();
 
         return view('buyer.inquiries.index', compact('inquiries'));

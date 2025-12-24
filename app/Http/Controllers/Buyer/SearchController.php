@@ -7,6 +7,7 @@ use App\Models\Lead;
 use App\Models\PlanPurchase;
 use App\Models\Property;
 use App\Models\Setting;
+use App\Models\ViewedContact;
 use App\Models\Wishlist;
 use App\OtpService;
 use App\Traits\CapabilityTrait;
@@ -83,11 +84,13 @@ class SearchController extends Controller
             ->where('status', 'approved')
             ->paginate(12);
 
-        // Add wishlist status for authenticated buyers
+        // Add wishlist and contact viewed status for authenticated buyers
         if (Auth::check() && Auth::user()->role === 'buyer') {
             $wishlistPropertyIds = Wishlist::where('user_id', Auth::id())->pluck('property_id')->toArray();
-            $properties->getCollection()->transform(function ($property) use ($wishlistPropertyIds) {
+            $viewedContactPropertyIds = ViewedContact::where('buyer_id', Auth::id())->pluck('property_id')->toArray();
+            $properties->getCollection()->transform(function ($property) use ($wishlistPropertyIds, $viewedContactPropertyIds) {
                 $property->is_in_wishlist = in_array($property->id, $wishlistPropertyIds);
+                $property->contact_viewed = in_array($property->id, $viewedContactPropertyIds);
                 return $property;
             });
         }
@@ -151,12 +154,14 @@ class SearchController extends Controller
 
         $properties = $query->where('status', 'approved')->paginate(10);
 
-        // Get user's wishlist property IDs
+        // Get user's wishlist and viewed contact property IDs
         $wishlistPropertyIds = Wishlist::where('user_id', $user->id)->pluck('property_id')->toArray();
-
-        // Add wishlist status to each property
-        $properties->getCollection()->transform(function ($property) use ($wishlistPropertyIds) {
+        $viewedContactPropertyIds = ViewedContact::where('buyer_id', $user->id)->pluck('property_id')->toArray();
+        
+        // Add wishlist and contact viewed status to each property
+        $properties->getCollection()->transform(function ($property) use ($wishlistPropertyIds, $viewedContactPropertyIds) {
             $property->is_in_wishlist = in_array($property->id, $wishlistPropertyIds);
+            $property->contact_viewed = in_array($property->id, $viewedContactPropertyIds);
             return $property;
         });
 

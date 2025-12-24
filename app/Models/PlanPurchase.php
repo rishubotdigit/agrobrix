@@ -53,8 +53,7 @@ class PlanPurchase extends Model
     public function isActive(): bool
     {
         return $this->status === 'activated' &&
-               $this->expires_at &&
-               $this->expires_at->isFuture();
+               ($this->expires_at === null || $this->expires_at->isFuture());
     }
 
     /**
@@ -79,7 +78,7 @@ class PlanPurchase extends Model
             throw new \Exception('Plan not found for plan purchase');
         }
 
-        $validityDays = $this->plan->validity_period_days ?? 30; // Default to 30 days if null
+        $validityDays = $this->plan->getValidityDays(); // Use the plan's validity days
 
         \Illuminate\Support\Facades\Log::info('Activating plan purchase', [
             'plan_purchase_id' => $this->id,
@@ -109,6 +108,60 @@ class PlanPurchase extends Model
     public function generateInvoiceHtml(): string
     {
         return view('invoices.plan-purchase', ['planPurchase' => $this])->render();
+    }
+
+    /**
+     * Deactivate all active plan purchases for a user.
+     */
+    public static function deactivateActivePlansForUser(int $userId, int $excludeId = null): int
+    {
+        $activePurchases = self::where('user_id', $userId)
+            ->where('status', 'activated')
+            ->where(function($q) {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })
+            ->when($excludeId, function($q) use ($excludeId) {
+                $q->where('id', '!=', $excludeId);
+            })
+            ->get();
+
+        $count = $activePurchases->count();
+
+        foreach ($activePurchases as $purchase) {
+            $purchase->update(['status' => 'deactivated']);
+            \Illuminate\Support\Facades\Log::info('Plan purchase deactivated', [
+                'plan_purchase_id' => $purchase->id,
+                'user_id' => $userId,
+                'plan_id' => $purchase->plan_id
+            ]);
+        }
+
+        return $count;
+    }
+
+    /**
+     * Deactivate active paid plans for a user (plans with price > 0).
+     */
+    public static function deactivateActivePaidPlansForUser(int $userId): void
+    {
+        $activePaidPurchases = self::where('user_id', $userId)
+            ->where('status', 'activated')
+            ->where(function($q) {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })
+            ->whereHas('plan', function($q) {
+                $q->where('price', '>', 0);
+            })
+            ->get();
+
+        foreach ($activePaidPurchases as $purchase) {
+            $purchase->update(['status' => 'deactivated']);
+            \Illuminate\Support\Facades\Log::info('Paid plan purchase deactivated', [
+                'plan_purchase_id' => $purchase->id,
+                'user_id' => $userId,
+                'plan_id' => $purchase->plan_id
+            ]);
+        }
     }
 
 }

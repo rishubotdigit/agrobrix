@@ -170,8 +170,26 @@ class User extends Authenticatable
 
     public function activePlanPurchases()
     {
-        $purchases = $this->planPurchases()->where('status', 'activated')->where('expires_at', '>', now())->get();
-        \Illuminate\Support\Facades\Log::info('Active plan purchases for user', [
+        // Log all plan purchases for debugging
+        $allPurchases = $this->planPurchases()->get();
+        \Illuminate\Support\Facades\Log::info('All plan purchases for user', [
+            'user_id' => $this->id,
+            'count' => $allPurchases->count(),
+            'purchases' => $allPurchases->map(function($p) {
+                return [
+                    'id' => $p->id,
+                    'plan_id' => $p->plan_id,
+                    'status' => $p->status,
+                    'expires_at' => $p->expires_at,
+                    'used_contacts' => $p->used_contacts
+                ];
+            })
+        ]);
+
+        $purchases = $this->planPurchases()->where('status', 'activated')->where(function($q) {
+            $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+        })->get();
+        \Illuminate\Support\Facades\Log::info('Active plan purchases for user (fixed query)', [
             'user_id' => $this->id,
             'count' => $purchases->count(),
             'purchases' => $purchases->map(function($p) {
