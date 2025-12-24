@@ -41,8 +41,8 @@ class UpdatePropertyRequest extends FormRequest
             'contact_mobile' => 'required|string|max:15',
             'description' => 'required|string',
             'property_images' => 'nullable|array|min:2|max:10',
-            'property_images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-            'property_video' => 'nullable|file|mimes:mp4,mov,avi|max:51200',
+            'property_images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'property_video' => 'nullable|file|mimes:mp4,mov,avi|max:30720',
             'amenities' => 'nullable|array',
             'amenities.*' => 'exists:amenities,id',
         ];
@@ -129,12 +129,12 @@ class UpdatePropertyRequest extends FormRequest
             'property_images.min' => 'Please upload at least 2 images.',
             'property_images.max' => 'You can upload a maximum of 10 images.',
             'property_images.*.image' => 'Each file must be a valid image.',
-            'property_images.*.mimes' => 'Images must be in JPEG, PNG, JPG, or GIF format.',
-            'property_images.*.max' => 'Each image cannot exceed 2MB in size.',
+            'property_images.*.mimes' => 'Images must be in JPEG, PNG, JPG, GIF, or WebP format.',
+            'property_images.*.max' => 'Each image cannot exceed 5MB in size.',
 
             'property_video.file' => 'The property video must be a valid file.',
             'property_video.mimes' => 'The video must be in MP4, MOV, or AVI format.',
-            'property_video.max' => 'The video cannot exceed 50MB in size.',
+            'property_video.max' => 'The video cannot exceed 30MB in size.',
 
             'amenities.array' => 'Amenities must be selected as a list.',
             'amenities.*.exists' => 'One or more selected amenities are invalid.',

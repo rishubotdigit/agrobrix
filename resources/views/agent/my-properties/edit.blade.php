@@ -250,11 +250,12 @@
                 <div class="md:col-span-2">
                     <label for="property_images" class="block text-sm font-medium text-gray-700 mb-2">Property Images</label>
                     <input type="file" name="property_images[]" id="property_images" multiple accept="image/*"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
-                    <p class="mt-1 text-sm text-gray-500">Upload at least 2 images. Maximum 10 images allowed.</p>
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                    <p class="mt-1 text-sm text-gray-500">Upload at least 2 images (JPG, PNG, GIF, WebP). Maximum 10 images, each up to 5MB.</p>
                     @error('property_images')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
+                    <div id="property_images_error" class="mt-1 text-sm text-red-600 hidden"></div>
                 </div>
 
                 <!-- Current Video Display -->
@@ -273,11 +274,12 @@
                 <div class="md:col-span-2">
                     <label for="property_video" class="block text-sm font-medium text-gray-700 mb-2">Property Video</label>
                     <input type="file" name="property_video" id="property_video" accept="video/*"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
-                    <p class="mt-1 text-sm text-gray-500">Optional video upload.</p>
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                    <p class="mt-1 text-sm text-gray-500">Optional video upload (MP4, MOV, AVI). Maximum 30MB.</p>
                     @error('property_video')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
+                    <div id="property_video_error" class="mt-1 text-sm text-red-600 hidden"></div>
                 </div>
 
                 <!-- Contact Name -->
@@ -437,6 +439,58 @@
     </form>
 </div>
 
+// Validation rules
+const imageRules = {
+    minCount: 2,
+    maxCount: 10,
+    maxSize: 5 * 1024 * 1024, // 5MB
+    allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+};
+
+const videoRules = {
+    maxSize: 30 * 1024 * 1024, // 30MB
+    allowedTypes: ['video/mp4', 'video/quicktime', 'video/x-msvideo']
+};
+
+function validateFiles(input, rules, isRequired = false, typeName = 'images') {
+    const files = input.files;
+    if (isRequired && files.length === 0) {
+        return typeName === 'images' ? 'At least 2 images are required.' : 'Video is required.';
+    }
+    if (files.length === 0) return null;
+    if (rules.minCount && files.length < rules.minCount) {
+        return `Minimum ${rules.minCount} files required.`;
+    }
+    if (rules.maxCount && files.length > rules.maxCount) {
+        return `Maximum ${rules.maxCount} files allowed.`;
+    }
+    for (let file of files) {
+        if (rules.maxSize && file.size > rules.maxSize) {
+            return `File "${file.name}" exceeds maximum size of ${rules.maxSize / (1024 * 1024)}MB.`;
+        }
+        if (rules.allowedTypes && !rules.allowedTypes.includes(file.type)) {
+            const formats = typeName === 'images' ? 'JPG, PNG, GIF, WebP' : 'MP4, MOV, AVI';
+            return `File "${file.name}" has invalid format. Allowed formats: ${formats}.`;
+        }
+    }
+    return null;
+}
+
+function showError(elementId, message) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.textContent = message;
+        element.classList.remove('hidden');
+    }
+}
+
+function hideError(elementId) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.classList.add('hidden');
+    }
+}
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     let currentStep = {{ $step }};
@@ -497,6 +551,41 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     showStep(currentStep);
+
+    // Form validation
+    document.getElementById('propertyForm').addEventListener('submit', function(e) {
+        const imageInput = document.getElementById('property_images');
+        const videoInput = document.getElementById('property_video');
+
+        const imageError = validateFiles(imageInput, imageRules, false, 'images'); // Not required in edit
+        const videoError = validateFiles(videoInput, videoRules, false, 'video');
+
+        hideError('property_images_error');
+        hideError('property_video_error');
+
+        if (imageError) {
+            showError('property_images_error', imageError);
+            e.preventDefault();
+            imageInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
+        if (videoError) {
+            showError('property_video_error', videoError);
+            e.preventDefault();
+            videoInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+    });
+
+    // Clear errors on change
+    document.getElementById('property_images').addEventListener('change', function() {
+        hideError('property_images_error');
+    });
+
+    document.getElementById('property_video').addEventListener('change', function() {
+        hideError('property_video_error');
+    });
 
     // Google Maps Integration
     let map;
