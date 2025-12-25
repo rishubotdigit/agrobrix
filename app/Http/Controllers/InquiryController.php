@@ -192,7 +192,7 @@ class InquiryController extends Controller
             if ($existingLead) {
                 // Update existing lead
                 $existingLead->update(array_merge($inquiryData, [
-                    'agent_id' => $property->agent_id ?? ($property->owner && $property->owner->role === 'agent' ? $property->owner_id : null),
+                    'agent_id' => $property->owner && $property->owner->role === 'agent' ? $property->owner_id : null,
                 ]));
                 Log::info('Existing lead updated from inquiry', [
                     'lead_id' => $existingLead->id,
@@ -202,7 +202,7 @@ class InquiryController extends Controller
                 ]);
             } else {
                 // Create new lead
-                $agentId = $property->agent_id ?? ($property->owner && $property->owner->role === 'agent' ? $property->owner_id : null);
+                $agentId = $property->owner && $property->owner->role === 'agent' ? $property->owner_id : null;
                 $lead = Lead::create(array_merge($inquiryData, [
                     'agent_id' => $agentId,
                 ]));
@@ -387,7 +387,7 @@ class InquiryController extends Controller
 
             if (!$existingLead) {
                 // Create lead for assigned agent or owner
-                $agentId = $property->agent_id ?? ($property->owner && $property->owner->role === 'agent' ? $property->owner_id : null);
+                $agentId = $property->owner && $property->owner->role === 'agent' ? $property->owner_id : null;
 
                 $lead = Lead::create([
                     'property_id' => $property->id,

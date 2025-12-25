@@ -24,12 +24,15 @@
                 <button type="button" class="tab-button whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="map">
                     Map Settings
                 </button>
+                <button type="button" class="tab-button whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="branding">
+                    Branding
+                </button>
             </nav>
         </div>
     </div>
 
     <!-- Settings Form -->
-    <form method="POST" action="{{ route('admin.settings.update') }}" id="settingsForm">
+    <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data" id="settingsForm">
         @csrf
 
         <!-- General Tab -->
@@ -211,6 +214,33 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
                             </svg>
                             <p class="text-gray-500">Enter API key to preview map</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <!-- Branding Tab -->
+        <div id="branding" class="tab-content bg-white shadow-md rounded-lg p-6 hidden">
+            <h3 class="text-xl font-semibold text-gray-900 mb-4">Branding Settings</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="logo" class="block text-sm font-medium text-gray-700">Logo</label>
+                    <input type="file" id="logo" name="logo" accept="image/*" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    @if($settings['logo'])
+                        <div class="mt-2">
+                            <img src="{{ asset(App\Models\Setting::get('logo')) }}" alt="Agrobrix" class="h-8">
+                            <p class="text-sm text-gray-500">Current logo</p>
+                        </div>
+                    @endif
+                </div>
+                <div>
+                    <label for="favicon" class="block text-sm font-medium text-gray-700">Favicon</label>
+                    <input type="file" id="favicon" name="favicon" accept="image/*,.ico" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    @if($settings['favicon'])
+                        <div class="mt-2">
+                            <img src="{{ asset(App\Models\Setting::get('favicon')) }}" alt="Current Favicon" class="h-8 w-8">
+                            <p class="text-sm text-gray-500">Current favicon</p>
                         </div>
                     @endif
                 </div>

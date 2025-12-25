@@ -27,14 +27,14 @@ class LeadController extends Controller
 
     public function create()
     {
-        $properties = Property::where('agent_id', Auth::id())->get();
+        $properties = Property::where('owner_id', Auth::id())->get();
         return view('agent.leads.create', compact('properties'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'property_id' => 'required|exists:properties,id',
+            'property_id' => 'required|exists:properties,id,owner_id,' . Auth::id(),
             'buyer_name' => 'required|string|max:255',
             'buyer_email' => 'required|email|max:255',
             'buyer_phone' => 'required|string|max:20',
@@ -45,15 +45,6 @@ class LeadController extends Controller
             'additional_message' => 'sometimes|string',
             'buyer_type' => 'sometimes|in:agent,buyer',
         ]);
-
-        // Check if property is assigned to the agent
-        $property = Property::where('id', $request->property_id)
-            ->where('agent_id', Auth::id())
-            ->first();
-
-        if (!$property) {
-            return redirect()->back()->withErrors(['property_id' => 'You are not assigned to this property.']);
-        }
 
         Lead::create([
             'property_id' => $request->property_id,
@@ -89,7 +80,7 @@ class LeadController extends Controller
             ->with('property')
             ->firstOrFail();
 
-        $properties = Property::where('agent_id', Auth::id())->get();
+        $properties = Property::where('owner_id', Auth::id())->get();
 
         return view('agent.leads.edit', compact('lead', 'properties'));
     }
@@ -101,7 +92,7 @@ class LeadController extends Controller
             ->firstOrFail();
 
         $request->validate([
-            'property_id' => 'required|exists:properties,id',
+            'property_id' => 'required|exists:properties,id,owner_id,' . Auth::id(),
             'buyer_name' => 'required|string|max:255',
             'buyer_email' => 'required|email|max:255',
             'buyer_phone' => 'required|string|max:20',
@@ -112,15 +103,6 @@ class LeadController extends Controller
             'additional_message' => 'sometimes|string',
             'buyer_type' => 'sometimes|in:agent,buyer',
         ]);
-
-        // Check if property is assigned to the agent
-        $property = Property::where('id', $request->property_id)
-            ->where('agent_id', Auth::id())
-            ->first();
-
-        if (!$property) {
-            return redirect()->back()->withErrors(['property_id' => 'You are not assigned to this property.']);
-        }
 
         $lead->update($request->only([
             'property_id',

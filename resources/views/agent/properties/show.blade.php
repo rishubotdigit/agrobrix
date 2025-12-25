@@ -148,11 +148,4 @@
         </div>
     </div>
 </div>
-
-<!-- Action Buttons -->
-<div class="mt-6">
-    <a href="{{ route('agent.properties.index') }}" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors inline-block">
-        Back to Properties
-    </a>
-</div>
 @endsection

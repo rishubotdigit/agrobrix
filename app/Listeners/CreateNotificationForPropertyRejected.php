@@ -54,7 +54,7 @@ class CreateNotificationForPropertyRejected
 
         // Send rejection email to the user if enabled
         if (Setting::get('property_rejection_email_enabled', '1') === '1') {
-            $user = $event->property->agent ?? $event->property->owner;
+            $user = $event->property->owner;
             if ($user && $user->email) {
                 DynamicSmtpTrait::loadSmtpSettings();
                 try {

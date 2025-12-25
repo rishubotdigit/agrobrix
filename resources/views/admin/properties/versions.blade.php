@@ -37,6 +37,7 @@
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                                 @if($version->status == 'approved') bg-green-100 text-green-800
                                 @elseif($version->status == 'rejected') bg-red-100 text-red-800
+                                @elseif($version->status == 'canceled') bg-gray-100 text-gray-800
                                 @else bg-yellow-100 text-yellow-800 @endif">
                                 {{ ucfirst($version->status) }}
                             </span>
@@ -51,7 +52,11 @@
                                 </form>
                                 <form method="POST" action="{{ route('admin.versions.reject', $version) }}" class="inline">
                                     @csrf
-                                    <button type="submit" class="text-red-600 hover:text-red-900">Reject</button>
+                                    <button type="submit" class="text-red-600 hover:text-red-900 mr-2">Reject</button>
+                                </form>
+                                <form method="POST" action="{{ route('admin.versions.cancel', $version) }}" class="inline">
+                                    @csrf
+                                    <button type="submit" class="text-gray-600 hover:text-gray-900">Cancel</button>
                                 </form>
                             @endif
                         </td>

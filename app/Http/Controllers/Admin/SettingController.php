@@ -7,6 +7,7 @@ use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class SettingController extends Controller
 {
@@ -42,6 +43,8 @@ class SettingController extends Controller
             'smtp_password' => Setting::get('smtp_password', ''),
             'smtp_encryption' => Setting::get('smtp_encryption', 'tls'),
             'smtp_from_name' => Setting::get('smtp_from_name', ''),
+            'logo' => Setting::get('logo', ''),
+            'favicon' => Setting::get('favicon', ''),
         ];
 
         return view('admin.settings.index', compact('settings'));
@@ -79,6 +82,8 @@ class SettingController extends Controller
             'smtp_password' => 'nullable|string|max:255',
             'smtp_encryption' => 'nullable|in:tls,ssl',
             'smtp_from_name' => 'nullable|string|max:255',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'favicon' => 'nullable|image|mimes:jpeg,png,jpg,gif,ico|max:1024',
         ]);
 
         Setting::set('login_enabled', $request->has('login_enabled') ? '1' : '0');
@@ -110,6 +115,16 @@ class SettingController extends Controller
         Setting::set('smtp_password', $request->input('smtp_password', ''));
         Setting::set('smtp_encryption', $request->input('smtp_encryption', 'tls'));
         Setting::set('smtp_from_name', $request->input('smtp_from_name', ''));
+
+        if ($request->hasFile('logo')) {
+            $logoPath = $request->file('logo')->store('images', 'public');
+            Setting::set('logo', 'storage/' . $logoPath);
+        }
+
+        if ($request->hasFile('favicon')) {
+            $faviconPath = $request->file('favicon')->store('', 'public');
+            Setting::set('favicon', 'storage/' . $faviconPath);
+        }
 
         return redirect()->route('admin.settings.index')->with('success', 'Settings updated successfully.');
     }

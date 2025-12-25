@@ -23,8 +23,6 @@ Route::prefix('owner')->middleware(['auth', 'role:owner'])->group(function () {
     Route::get('/properties/{property}/edit', [MyPropertyController::class, 'edit'])->name('owner.properties.edit');
     Route::put('/properties/{property}', [MyPropertyController::class, 'update'])->name('owner.properties.update');
     Route::delete('/properties/{property}', [MyPropertyController::class, 'destroy'])->name('owner.properties.destroy');
-    Route::post('/properties/{property}/assign-agent', [MyPropertyController::class, 'assignAgent'])->name('owner.properties.assignAgent');
-    Route::post('/properties/{property}/unassign-agent', [MyPropertyController::class, 'unassignAgent'])->name('owner.properties.unassignAgent');
     Route::post('/properties/{property}/feature', [MyPropertyController::class, 'featureProperty'])->name('owner.properties.feature');
     Route::post('/properties/{property}/unfeature', [MyPropertyController::class, 'unfeatureProperty'])->name('owner.properties.unfeature');
 

@@ -35,10 +35,16 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     // Properties
     Route::get('properties', [PropertyController::class, 'index'])->name('admin.properties.index');
     Route::get('properties/{property}', [PropertyController::class, 'show'])->name('admin.properties.show');
+    Route::get('properties/{property}/edit', [PropertyController::class, 'edit'])->name('admin.properties.edit');
+    Route::put('properties/{property}', [PropertyController::class, 'update'])->name('admin.properties.update');
+    Route::post('properties/{property}/disable', [PropertyController::class, 'disable'])->name('admin.properties.disable');
+    Route::post('properties/{property}/re-approve', [PropertyController::class, 'reApprove'])->name('admin.properties.re-approve');
+    Route::post('properties/{property}/re-enable', [PropertyController::class, 'reEnable'])->name('admin.properties.re-enable');
     Route::delete('properties/{property}', [PropertyController::class, 'destroy'])->name('admin.properties.destroy');
     Route::get('properties/{property}/versions', [PropertyController::class, 'versions'])->name('admin.properties.versions');
     Route::post('versions/{version}/approve', [PropertyController::class, 'approveVersion'])->name('admin.versions.approve');
     Route::post('versions/{version}/reject', [PropertyController::class, 'rejectVersion'])->name('admin.versions.reject');
+    Route::post('versions/{version}/cancel', [PropertyController::class, 'cancelVersion'])->name('admin.versions.cancel');
     Route::post('versions/bulk-approve', [PropertyController::class, 'bulkApprove'])->name('admin.versions.bulk-approve');
     Route::post('versions/bulk-reject', [PropertyController::class, 'bulkReject'])->name('admin.versions.bulk-reject');
     Route::get('versions/{version}/diff', [PropertyController::class, 'diff'])->name('admin.versions.diff');

@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Agent\DashboardController;
 use App\Http\Controllers\Agent\ProfileController;
 use App\Http\Controllers\Agent\LeadController;
-use App\Http\Controllers\Agent\PropertyController;
 use App\Http\Controllers\Agent\VisitController;
 use App\Http\Controllers\Agent\FollowUpController;
 use App\Http\Controllers\Agent\NotificationController;
@@ -26,13 +25,6 @@ Route::prefix('agent')->middleware(['auth', 'role:agent'])->group(function () {
     Route::get('/leads/{id}/edit', [LeadController::class, 'edit'])->name('agent.leads.edit');
     Route::put('/leads/{id}', [LeadController::class, 'update'])->name('agent.leads.update');
     Route::delete('/leads/{id}', [LeadController::class, 'destroy'])->name('agent.leads.destroy');
-
-    // Properties
-    Route::get('/properties', [PropertyController::class, 'index'])->name('agent.properties.index');
-    Route::get('/properties/{property}', [PropertyController::class, 'show'])->name('agent.properties.show');
-    Route::post('/properties/{property}/feature', [PropertyController::class, 'featureProperty'])->name('agent.properties.feature');
-    Route::post('/properties/{property}/unfeature', [PropertyController::class, 'unfeatureProperty'])->name('agent.properties.unfeature');
-    
     // My Properties
     Route::get('/my-properties', [App\Http\Controllers\Agent\MyPropertyController::class, 'index'])->name('agent.my-properties.index');
     Route::get('/my-properties/create', [App\Http\Controllers\Agent\MyPropertyController::class, 'create'])->name('agent.my-properties.create');

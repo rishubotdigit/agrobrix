@@ -42,7 +42,7 @@ class SearchController extends Controller
         $maxArea = $request->get('max_area', '');
         $amenities = $request->get('amenities', []);
 
-        $properties = Property::with(['owner', 'agent', 'amenities', 'city.district.state'])
+        $properties = Property::with(['owner', 'amenities', 'city.district.state'])
             ->when($query, function ($q) use ($query) {
                 $q->where(function ($subQuery) use ($query) {
                     $subQuery->where('title', 'like', "%{$query}%")

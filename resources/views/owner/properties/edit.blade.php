@@ -437,6 +437,7 @@
         </div>
     </form>
 </div>
+<script>
 
 // Validation rules
 const imageRules = {

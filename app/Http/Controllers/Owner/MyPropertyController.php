@@ -16,9 +16,7 @@ class MyPropertyController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $properties = $user->properties()->with('agent', 'city.district.state')->paginate(10);
-
-        $agents = \App\Models\User::where('role', 'agent')->get();
+        $properties = $user->properties()->with('city.district.state')->paginate(10);
 
         $usage = [
             'current_listings' => $properties->total(),
@@ -27,7 +25,7 @@ class MyPropertyController extends Controller
             'max_featured' => $this->getCapabilityValue($user, 'max_featured_listings')
         ];
 
-        return view('owner.properties.index', compact('properties', 'usage', 'agents'));
+        return view('owner.properties.index', compact('properties', 'usage'));
     }
 
     public function create(Request $request)
@@ -47,7 +45,7 @@ class MyPropertyController extends Controller
         return view('owner.properties.create', compact('usage', 'step', 'categories'));
     }
 
-    public function store(\App\Http\Requests\StorePropertyRequest $request)
+    public function store(Request $request)
     {
         $user = Auth::user();
 
@@ -56,15 +54,30 @@ class MyPropertyController extends Controller
         $maxListings = $this->getCapabilityValue($user, 'max_listings');
 
         if ($currentListings >= $maxListings) {
-            return response()->json([
-                'error' => 'You have reached your maximum property listing limit. Please upgrade your plan to list more properties.',
-                'current' => $currentListings,
-                'limit' => $maxListings
-            ], 403);
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You have reached your maximum property listing limit. Please upgrade your plan to list more properties.',
+                    'current' => $currentListings,
+                    'limit' => $maxListings
+                ], 403);
+            }
+            return redirect()->back()->withErrors(['limit' => 'You have reached your maximum property listing limit. Please upgrade your plan to list more properties.']);
         }
 
         // Validate request
-        $validated = $request->validated();
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), (new \App\Http\Requests\StorePropertyRequest())->rules());
+        if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+        $validated = $validator->validated();
 
         // Log confirmation of field removal
         \Log::info('Owner Property Update - Confirming removed fields not present', [
@@ -124,6 +137,14 @@ class MyPropertyController extends Controller
 
         // Create initial version
         $property->createVersion();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Property created successfully',
+                'redirect' => route('owner.properties.show', $property)
+            ]);
+        }
 
         return redirect()->route('owner.properties.show', $property)->with('success', 'Property created successfully');
     }
@@ -272,55 +293,6 @@ class MyPropertyController extends Controller
         return redirect()->route('owner.properties.index')->with('success', 'Property deleted successfully');
     }
 
-    public function assignAgent(Request $request, $propertyId)
-    {
-        $user = Auth::user();
-
-        // Find property and check ownership
-        $property = Property::findOrFail($propertyId);
-        if ($property->owner_id !== $user->id) {
-            abort(403, 'Unauthorized');
-        }
-
-        // Validate request
-        $validated = $request->validate([
-            'agent_id' => 'required|exists:users,id',
-        ]);
-
-        // Check if agent exists and has agent role
-        $agent = \App\Models\User::findOrFail($validated['agent_id']);
-        if (!$agent->hasRole('agent')) {
-            return response()->json([
-                'error' => 'Selected user is not an agent'
-            ], 422);
-        }
-
-        // Assign agent and update contact information
-        $property->update([
-            'agent_id' => $agent->id,
-            'contact_name' => $agent->name,
-            'contact_mobile' => $agent->mobile ?? $agent->phone,
-            'contact_role' => 'Agent'
-        ]);
-
-        return redirect()->back()->with('success', 'Agent assigned successfully');
-    }
-
-    public function unassignAgent($propertyId)
-    {
-        $user = Auth::user();
-
-        // Find property and check ownership
-        $property = Property::findOrFail($propertyId);
-        if ($property->owner_id !== $user->id) {
-            abort(403, 'Unauthorized');
-        }
-
-        // Unassign agent
-        $property->update(['agent_id' => null]);
-
-        return redirect()->back()->with('success', 'Agent unassigned successfully');
-    }
     public function featureProperty($id)
     {
         try {

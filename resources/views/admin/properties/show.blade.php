@@ -10,7 +10,16 @@
         <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ $property->title }}</h1>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div><strong>ID:</strong> {{ $property->id }}</div>
-            <div><strong>Status:</strong> {{ $property->status }}</div>
+            <div><strong>Status:</strong>
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ml-2
+                    @if($property->status == 'approved') bg-green-100 text-green-800
+                    @elseif($property->status == 'rejected') bg-red-100 text-red-800
+                    @elseif($property->status == 'disabled') bg-yellow-100 text-yellow-800
+                    @elseif($property->status == 'canceled') bg-gray-100 text-gray-800
+                    @else bg-yellow-100 text-yellow-800 @endif">
+                    {{ ucfirst($property->status ?? 'pending') }}
+                </span>
+            </div>
             <div><strong>Featured:</strong> {{ $property->featured ? 'Yes' : 'No' }}</div>
         </div>
     </div>
@@ -172,6 +181,7 @@
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                                 @if($version->status == 'approved') bg-green-100 text-green-800
                                 @elseif($version->status == 'rejected') bg-red-100 text-red-800
+                                @elseif($version->status == 'canceled') bg-gray-100 text-gray-800
                                 @else bg-yellow-100 text-yellow-800 @endif">
                                 {{ ucfirst($version->status) }}
                             </span>
@@ -186,7 +196,11 @@
                                 </form>
                                 <form method="POST" action="{{ route('admin.versions.reject', $version) }}" class="inline">
                                     @csrf
-                                    <button type="submit" class="text-red-600 hover:text-red-900">Reject</button>
+                                    <button type="submit" class="text-red-600 hover:text-red-900 mr-2">Reject</button>
+                                </form>
+                                <form method="POST" action="{{ route('admin.versions.cancel', $version) }}" class="inline">
+                                    @csrf
+                                    <button type="submit" class="text-gray-600 hover:text-gray-900">Cancel</button>
                                 </form>
                             @endif
                         </td>

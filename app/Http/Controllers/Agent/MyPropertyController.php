@@ -16,7 +16,7 @@ class MyPropertyController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $properties = Property::where('owner_id', $user->id)->orWhere('agent_id', $user->id)->with('agent')->paginate(10);
+        $properties = Property::where('owner_id', $user->id)->paginate(10);
 
         $current_listings = $user->properties()->count();
         $usage = [
@@ -46,7 +46,7 @@ class MyPropertyController extends Controller
         return view('agent.my-properties.create', compact('usage', 'step', 'categories'));
     }
 
-    public function store(\App\Http\Requests\StorePropertyRequest $request)
+    public function store(Request $request)
     {
         $user = Auth::user();
 
@@ -55,15 +55,31 @@ class MyPropertyController extends Controller
         $maxListings = $this->getCapabilityValue($user, 'max_listings');
 
         if ($currentListings >= $maxListings) {
-            return response()->json([
-                'error' => 'You have reached your maximum property listing limit. Please upgrade your plan to list more properties.',
-                'current' => $currentListings,
-                'limit' => $maxListings
-            ], 403);
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You have reached your maximum property listing limit. Please upgrade your plan to list more properties.',
+                    'current' => $currentListings,
+                    'limit' => $maxListings
+                ], 403);
+            }
+            return redirect()->back()->withErrors(['limit' => 'You have reached your maximum property listing limit. Please upgrade your plan to list more properties.']);
         }
 
         // Validate request
-        $validated = $request->validated();
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), (new \App\Http\Requests\StorePropertyRequest())->rules());
+        if ($validator->fails()) {
+            \Log::info('Agent store validation failed, errors: ' . json_encode($validator->errors()));
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+        $validated = $validator->validated();
 
         // Log confirmation of field removal
         \Log::info('Agent Property Update - Confirming removed fields not present', [
@@ -131,6 +147,14 @@ class MyPropertyController extends Controller
         // Create initial version
         $property->createVersion();
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Property created successfully',
+                'redirect' => route('agent.my-properties.show', $property)
+            ]);
+        }
+
         return redirect()->route('agent.my-properties.show', $property)->with('success', 'Property created successfully');
     }
 
@@ -138,7 +162,7 @@ class MyPropertyController extends Controller
     {
         $user = Auth::user();
 
-        if ($property->owner_id !== $user->id && $property->agent_id !== $user->id && $property->owner_id !== null) {
+        if ($property->owner_id !== $user->id) {
             abort(403, 'Unauthorized');
         }
 
@@ -147,7 +171,7 @@ class MyPropertyController extends Controller
             $property->update(['owner_id' => $user->id]);
         }
 
-        $property->load('amenities.subcategory.category', 'agent', 'city.district.state');
+        $property->load('amenities.subcategory.category', 'city.district.state');
 
         return view('agent.my-properties.show', compact('property'));
     }
@@ -161,6 +185,7 @@ class MyPropertyController extends Controller
         }
 
         $step = $request->get('step', 1);
+        \Log::info('Agent create called with step: ' . $step);
         $categories = \App\Models\Category::with('subcategories.amenities')->get();
 
         return view('agent.my-properties.edit', compact('property', 'step', 'categories'));

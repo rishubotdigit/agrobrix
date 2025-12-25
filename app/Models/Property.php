@@ -22,7 +22,7 @@ class Property extends Model
         'title', 'land_type', 'city_id', 'description', 'area', 'full_address',
         'google_map_lat', 'google_map_lng', 'plot_area', 'plot_area_unit', 'frontage',
         'road_width', 'corner_plot', 'gated_community',
-        'price', 'price_negotiable', 'contact_name', 'contact_mobile', 'contact_role',
+        'price', 'price_negotiable',
         'property_images', 'property_video', 'status', 'owner_id', 'agent_id', 'featured', 'featured_until'
     ];
 
@@ -60,6 +60,7 @@ class Property extends Model
     {
         return $this->belongsTo(User::class, 'agent_id');
     }
+
 
     public function versions()
     {

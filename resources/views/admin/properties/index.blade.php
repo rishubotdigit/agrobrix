@@ -36,8 +36,13 @@
 
             <!-- Status Badge -->
             <div class="absolute top-3 right-3">
-                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                    {{ $property->status ?? 'For Sale' }}
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                    @if($property->status == 'approved') bg-green-100 text-green-800
+                    @elseif($property->status == 'rejected') bg-red-100 text-red-800
+                    @elseif($property->status == 'disabled') bg-yellow-100 text-yellow-800
+                    @elseif($property->status == 'canceled') bg-gray-100 text-gray-800
+                    @else bg-yellow-100 text-yellow-800 @endif">
+                    {{ ucfirst($property->status ?? 'pending') }}
                 </span>
             </div>
         </div>
@@ -78,13 +83,38 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex space-x-2">
-                <a href="{{ route('admin.properties.show', $property) }}" class="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors text-center text-sm">
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('admin.properties.show', $property) }}" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors text-center text-sm">
                     View
                 </a>
-                <a href="{{ route('admin.properties.versions', $property) }}" class="flex-1 bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-medium hover:bg-blue-200 transition-colors text-center text-sm">
+                <a href="{{ route('admin.properties.versions', $property) }}" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-medium hover:bg-blue-200 transition-colors text-center text-sm">
                     Versions
                 </a>
+                @if($property->status == 'approved')
+                    <form method="POST" action="{{ route('admin.properties.disable', $property) }}" class="inline">
+                        @csrf
+                        <button type="submit" class="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg font-medium hover:bg-yellow-200 transition-colors text-sm">
+                            Disable
+                        </button>
+                    </form>
+                    <a href="{{ route('admin.properties.edit', $property) }}" class="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg font-medium hover:bg-purple-200 transition-colors text-center text-sm">
+                        Edit
+                    </a>
+                @elseif($property->status == 'rejected')
+                    <form method="POST" action="{{ route('admin.properties.re-approve', $property) }}" class="inline">
+                        @csrf
+                        <button type="submit" class="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-medium hover:bg-green-200 transition-colors text-sm">
+                            Re-Approve
+                        </button>
+                    </form>
+                @elseif($property->status == 'canceled')
+                    <form method="POST" action="{{ route('admin.properties.re-enable', $property) }}" class="inline">
+                        @csrf
+                        <button type="submit" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-medium hover:bg-blue-200 transition-colors text-sm">
+                            Re-Enable
+                        </button>
+                    </form>
+                @endif
                 <button onclick="deleteProperty({{ $property->id }})" class="bg-red-100 text-red-700 px-4 py-2 rounded-lg font-medium hover:bg-red-200 transition-colors text-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>

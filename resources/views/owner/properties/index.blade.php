@@ -134,31 +134,6 @@
                 </button>
             </div>
 
-            <!-- Agent Assignment -->
-            <div class="mt-4 pt-4 border-t border-gray-200">
-                @if($property->agent)
-                    <div class="text-sm text-gray-600 mb-2">
-                        <strong>Assigned Agent:</strong> {{ $property->agent->name }}
-                    </div>
-                    <button onclick="unassignAgent({{ $property->id }})" class="w-full bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg font-medium hover:bg-yellow-200 transition-colors text-sm">
-                        Unassign Agent
-                    </button>
-                @else
-                    <form method="POST" action="{{ route('owner.properties.assignAgent', $property) }}" class="space-y-2">
-                        @csrf
-                        <select name="agent_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent">
-                            <option value="">Select Agent</option>
-                            @foreach($agents as $agent)
-                                <option value="{{ $agent->id }}">{{ $agent->name }}</option>
-                            @endforeach
-                        </select>
-                        <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors text-sm">
-                            Assign Agent
-                        </button>
-                    </form>
-                @endif
-            </div>
-
             <!-- Featured Status and Controls -->
             <div class="mt-4 pt-4 border-t border-gray-200">
                 @if($property->featured)
@@ -234,11 +209,6 @@
     </div>
 </div>
 
-<!-- Unassign Agent Form -->
-<form id="unassignForm" method="POST" style="display: none;">
-    @csrf
-</form>
-
 <script>
 function deleteProperty(id) {
     document.getElementById('deleteForm').action = `/owner/properties/${id}`;
@@ -247,13 +217,6 @@ function deleteProperty(id) {
 
 function closeDeleteModal() {
     document.getElementById('deleteModal').classList.add('hidden');
-}
-
-function unassignAgent(propertyId) {
-    if (confirm('Are you sure you want to unassign the agent from this property?')) {
-        document.getElementById('unassignForm').action = `/owner/properties/${propertyId}/unassign-agent`;
-        document.getElementById('unassignForm').submit();
-    }
 }
 
 function featureProperty(propertyId) {

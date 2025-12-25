@@ -3,6 +3,138 @@
 @section('title', 'Add New Property')
 
 @section('content')
+<style>
+/* Loading Overlay Styles */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-overlay.active {
+    display: flex;
+}
+
+.loading-content {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+}
+
+.property-loader {
+    margin-bottom: 24px;
+}
+
+.progress-container {
+    margin-bottom: 16px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #059669);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.step-indicator {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.step-item {
+    flex: 1;
+    text-align: center;
+    position: relative;
+}
+
+.step-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: calc(100% - 16px);
+    height: 2px;
+    background: #e5e7eb;
+    z-index: 1;
+}
+
+.step-item.completed:not(:last-child)::after {
+    background: #10b981;
+}
+
+.step-circle {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    margin: 0 auto 8px;
+    position: relative;
+    z-index: 2;
+    transition: background 0.3s ease;
+}
+
+.step-item.completed .step-circle {
+    background: #10b981;
+}
+
+.step-item.active .step-circle {
+    background: #10b981;
+    animation: pulse 1.5s infinite;
+}
+
+.step-text {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.step-item.completed .step-text {
+    color: #10b981;
+}
+
+.step-item.active .step-text {
+    color: #10b981;
+}
+
+.loading-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 8px;
+}
+
+.loading-subtext {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+</style>
 <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-900 mb-2">Add New Property</h1>
     <p class="text-gray-600">Create a new property listing in 3 easy steps.</p>
@@ -224,14 +356,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 @foreach($category->subcategories as $subcategory)
                                     <div class="bg-white border border-gray-200 rounded-lg p-4">
-                                        <h5 class="text-sm font-semibold text-gray-800 mb-3 flex items-center">
-                                            <svg class="w-4 h-4 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                            </svg>
-                                            {{ $subcategory->name }}
-                                        </h5>
-
-                                        <div class="space-y-2">
+                                  <div class="space-y-2">
                                             @foreach($subcategory->amenities as $amenity)
                                                 <label class="flex items-start">
                                                     <input type="checkbox"
@@ -484,6 +609,35 @@
     </form>
 </div>
 
+<!-- Loading Indicator -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-content">
+        <div class="property-loader">
+            <div class="step-indicator">
+                <div class="step-item" id="step-upload">
+                    <div class="step-circle"></div>
+                    <div class="step-text">Uploading Images</div>
+                </div>
+                <div class="step-item" id="step-save">
+                    <div class="step-circle"></div>
+                    <div class="step-text">Saving Property</div>
+                </div>
+                <div class="step-item" id="step-process">
+                    <div class="step-circle"></div>
+                    <div class="step-text">Processing</div>
+                </div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+        </div>
+        <div class="loading-text" id="loadingText">Preparing your property...</div>
+        <div class="loading-subtext" id="loadingSubtext">This may take a few moments</div>
+    </div>
+</div>
+
 <script>
 // Validation rules
 const imageRules = {
@@ -535,6 +689,51 @@ function hideError(elementId) {
     if (element) {
         element.classList.add('hidden');
     }
+}
+
+function showLoading() {
+    document.getElementById('loadingOverlay').classList.add('active');
+    resetLoader();
+}
+
+function hideLoading() {
+    document.getElementById('loadingOverlay').classList.remove('active');
+}
+
+function resetLoader() {
+    // Reset all steps
+    document.querySelectorAll('.step-item').forEach(item => {
+        item.classList.remove('completed', 'active');
+    });
+    // Reset progress
+    document.getElementById('progressFill').style.width = '0%';
+    // Reset text
+    document.getElementById('loadingText').textContent = 'Preparing your property...';
+    document.getElementById('loadingSubtext').textContent = 'This may take a few moments';
+}
+
+function updateLoaderStep(step, progress, text, subtext) {
+    // Update step indicators
+    const steps = ['step-upload', 'step-save', 'step-process'];
+    steps.forEach((stepId, index) => {
+        const element = document.getElementById(stepId);
+        if (index < step) {
+            element.classList.add('completed');
+            element.classList.remove('active');
+        } else if (index === step) {
+            element.classList.add('active');
+            element.classList.remove('completed');
+        } else {
+            element.classList.remove('completed', 'active');
+        }
+    });
+
+    // Update progress bar
+    document.getElementById('progressFill').style.width = progress + '%';
+
+    // Update text
+    if (text) document.getElementById('loadingText').textContent = text;
+    if (subtext) document.getElementById('loadingSubtext').textContent = subtext;
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -649,8 +848,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     showStep(currentStep);
 
-    // Form validation
+    // Form validation and submission
     document.getElementById('propertyForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent default form submission
+
         const imageInput = document.getElementById('property_images');
         const videoInput = document.getElementById('property_video');
 
@@ -662,17 +863,94 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (imageError) {
             showError('property_images_error', imageError);
-            e.preventDefault();
             imageInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
 
         if (videoError) {
             showError('property_video_error', videoError);
-            e.preventDefault();
             videoInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
+
+        // Show loading indicator and disable submit button
+        showLoading();
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('submitBtn').textContent = 'Creating...';
+
+        // Start progress simulation
+        let currentStep = 0;
+        const progressIntervals = [
+            { step: 0, progress: 30, text: 'Uploading images...', subtext: 'Processing your property images', delay: 500 },
+            { step: 1, progress: 70, text: 'Saving property details...', subtext: 'Storing your property information', delay: 1500 },
+            { step: 2, progress: 100, text: 'Finalizing...', subtext: 'Almost done!', delay: 2000 }
+        ];
+
+        let intervalIndex = 0;
+        const progressTimer = setInterval(() => {
+            if (intervalIndex < progressIntervals.length) {
+                const interval = progressIntervals[intervalIndex];
+                updateLoaderStep(interval.step, interval.progress, interval.text, interval.subtext);
+                intervalIndex++;
+            } else {
+                clearInterval(progressTimer);
+            }
+        }, 500);
+
+        // Prepare form data
+        const formData = new FormData(this);
+
+        // Submit via AJAX
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+            }
+        })
+        .then(response => {
+            clearInterval(progressTimer);
+            if (response.redirected) {
+                updateLoaderStep(2, 100, 'Property created successfully!', 'Redirecting...');
+                setTimeout(() => {
+                    window.location.href = response.url;
+                }, 1000);
+            } else if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Server error');
+            }
+        })
+        .then(data => {
+            if (data.success) {
+                updateLoaderStep(2, 100, 'Property created successfully!', 'Redirecting...');
+                setTimeout(() => {
+                    window.location.href = data.redirect || '{{ route("owner.properties.index") }}';
+                }, 1000);
+            } else {
+                // Handle validation errors
+                hideLoading();
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('submitBtn').textContent = 'Add Property';
+                if (data.errors) {
+                    for (const [field, messages] of Object.entries(data.errors)) {
+                        const errorElement = document.getElementById(field + '_error') || document.getElementById(field + '_error');
+                        if (errorElement) {
+                            showError(field + '_error', messages[0]);
+                        }
+                    }
+                }
+            }
+        })
+        .catch(error => {
+            clearInterval(progressTimer);
+            console.error('Error:', error);
+            hideLoading();
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('submitBtn').textContent = 'Add Property';
+            alert('An error occurred. Please try again.');
+        });
     });
 
     // Clear errors on change

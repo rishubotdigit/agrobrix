@@ -3,7 +3,13 @@
         <div class="flex justify-between items-center h-16">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
-                    <a href="{{ route('home') }}" class="text-2xl font-bold gradient-bg bg-clip-text text-transparent">Agrobrix</a>
+                    <a href="{{ route('home') }}">
+                        @if(App\Models\Setting::get('logo'))
+                            <img src="{{ asset(App\Models\Setting::get('logo')) }}" alt="Agrobrix" class="h-8">
+                        @else
+                            <span class="text-2xl font-bold gradient-bg bg-clip-text text-transparent">Agrobrix</span>
+                        @endif
+                    </a>
                 </div>
             </div>
             <div class="flex items-center">

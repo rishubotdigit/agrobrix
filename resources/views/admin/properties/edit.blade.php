@@ -1,4 +1,4 @@
-@extends('layouts.agent.app')
+@extends('layouts.admin.app')
 
 @section('title', 'Edit Property')
 
@@ -11,7 +11,7 @@
 
 <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-900 mb-2">Edit Property</h1>
-    <p class="text-gray-600">Update your property listing information.</p>
+    <p class="text-gray-600">Update property listing information.</p>
 </div>
 
 <!-- Multi-Step Form -->
@@ -36,7 +36,7 @@
         </div>
     </div>
 
-    <form id="propertyForm" action="{{ route('agent.my-properties.update', $property) }}" method="POST" enctype="multipart/form-data">
+    <form id="propertyForm" action="{{ route('admin.properties.update', $property) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
@@ -49,8 +49,8 @@
                 <div class="md:col-span-2">
                     <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Property Title <span class="text-red-500">*</span></label>
                     <input type="text" name="title" id="title" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                           placeholder="Enter property title" value="{{ old('title', $property->title) }}">
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                            placeholder="Enter property title" value="{{ old('title', $property->title) }}">
                     @error('title')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -70,7 +70,6 @@
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
-
 
                 <!-- Plot Area -->
                 <div>
@@ -424,7 +423,7 @@
             </button>
 
             <div class="flex space-x-4">
-                <a href="{{ route('agent.my-properties.index') }}" class="px-6 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
+                <a href="{{ route('admin.properties.index') }}" class="px-6 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
                     Cancel
                 </a>
 
@@ -586,73 +585,75 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('property_video').addEventListener('change', function() {
         hideError('property_video_error');
     });
+});
 
-    // Google Maps Integration
-    let map;
-    let marker;
+// Google Maps Integration
+let map;
+let marker;
 
-    function initializeMap() {
-        // Check if map container exists and is visible
-        const mapElement = document.getElementById('map');
-        if (!mapElement || mapElement.classList.contains('hidden')) return;
+function initializeMap() {
+    // Check if map container exists and is visible
+    const mapElement = document.getElementById('map');
+    if (!mapElement || mapElement.classList.contains('hidden')) return;
 
-        // Check if Google Maps API is loaded
-        if (!window.google || !window.google.maps) return;
+    // Check if Google Maps API is loaded
+    if (!window.google || !window.google.maps) return;
 
-        // Default center (India)
-        const defaultCenter = { lat: 20.5937, lng: 78.9629 };
+    // Default center (India)
+    const defaultLat = 20.5937;
+    const defaultLng = 78.9629;
 
-        // Initialize map
-        map = new google.maps.Map(mapElement, {
-            zoom: 5,
-            center: defaultCenter,
-            mapTypeId: google.maps.MapTypeId.ROADMAP
-        });
+    // Initialize map
+    map = new google.maps.Map(mapElement, {
+        center: { lat: defaultLat, lng: defaultLng },
+        zoom: 5,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    });
 
-        // Add click listener to place marker
-        map.addListener('click', function(event) {
-            placeMarker(event.latLng);
-        });
+    // Add click listener to map
+    map.addListener('click', function(event) {
+        const lat = event.latLng.lat();
+        const lng = event.latLng.lng();
 
-        // If coordinates already exist, show marker
-        const latInput = document.getElementById('google_map_lat');
-        const lngInput = document.getElementById('google_map_lng');
+        // Update form fields
+        document.getElementById('google_map_lat').value = lat.toFixed(6);
+        document.getElementById('google_map_lng').value = lng.toFixed(6);
 
-        if (latInput && latInput.value && lngInput && lngInput.value) {
-            const position = {
-                lat: parseFloat(latInput.value),
-                lng: parseFloat(lngInput.value)
-            };
-            placeMarker(position);
-            map.setCenter(position);
-            map.setZoom(15);
-        }
-    }
-
-    function placeMarker(location) {
         // Remove existing marker
         if (marker) {
             marker.setMap(null);
         }
 
-        // Create new marker
+        // Add new marker
         marker = new google.maps.Marker({
-            position: location,
+            position: { lat: lat, lng: lng },
             map: map,
-            draggable: true
+            title: 'Property Location'
         });
 
-        // Update form fields
-        document.getElementById('google_map_lat').value = location.lat();
-        document.getElementById('google_map_lng').value = location.lng();
+        // Center map on clicked location
+        map.setCenter({ lat: lat, lng: lng });
+        map.setZoom(15);
+    });
 
-        // Add drag listener to update coordinates
-        marker.addListener('dragend', function(event) {
-            document.getElementById('google_map_lat').value = event.latLng.lat();
-            document.getElementById('google_map_lng').value = event.latLng.lng();
+    // If coordinates already exist, show marker
+    const existingLat = document.getElementById('google_map_lat').value;
+    const existingLng = document.getElementById('google_map_lng').value;
+
+    if (existingLat && existingLng) {
+        const lat = parseFloat(existingLat);
+        const lng = parseFloat(existingLng);
+
+        marker = new google.maps.Marker({
+            position: { lat: lat, lng: lng },
+            map: map,
+            title: 'Property Location'
         });
+
+        map.setCenter({ lat: lat, lng: lng });
+        map.setZoom(15);
     }
-});
+}
 
 // Load Google Maps API
 function loadGoogleMapsAPI() {
@@ -673,56 +674,56 @@ function onGoogleMapsLoaded() {
 }
 
 // Load API when page loads
+loadGoogleMapsAPI();
+
+// AJAX for dependent dropdowns
+document.getElementById('state').addEventListener('change', function() {
+    const stateId = this.value;
+    const districtSelect = document.getElementById('district');
+    const citySelect = document.getElementById('city_id');
+
+    // Reset district and city
+    districtSelect.innerHTML = '<option value="">Select District</option>';
+    citySelect.innerHTML = '<option value="">Select City</option>';
+    districtSelect.disabled = true;
+    citySelect.disabled = true;
+
+    if (stateId) {
+        fetch(`/api/districts/${stateId}`)
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(district => {
+                    districtSelect.innerHTML += `<option value="${district.id}">${district.name}</option>`;
+                });
+                districtSelect.disabled = false;
+            })
+            .catch(error => console.error('Error loading districts:', error));
+    }
+});
+
+document.getElementById('district').addEventListener('change', function() {
+    const districtId = this.value;
+    const citySelect = document.getElementById('city_id');
+
+    // Reset city
+    citySelect.innerHTML = '<option value="">Select City</option>';
+    citySelect.disabled = true;
+
+    if (districtId) {
+        fetch(`/api/cities/${districtId}`)
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(city => {
+                    citySelect.innerHTML += `<option value="${city.id}">${city.name}</option>`;
+                });
+                citySelect.disabled = false;
+            })
+            .catch(error => console.error('Error loading cities:', error));
+    }
+});
+
+// Initialize dropdowns on page load if values exist
 document.addEventListener('DOMContentLoaded', function() {
-    loadGoogleMapsAPI();
-
-    // AJAX for dependent dropdowns
-    document.getElementById('state').addEventListener('change', function() {
-        const stateId = this.value;
-        const districtSelect = document.getElementById('district');
-        const citySelect = document.getElementById('city_id');
-
-        // Reset district and city
-        districtSelect.innerHTML = '<option value="">Select District</option>';
-        citySelect.innerHTML = '<option value="">Select City</option>';
-        districtSelect.disabled = true;
-        citySelect.disabled = true;
-
-        if (stateId) {
-            fetch(`/api/districts/${stateId}`)
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(district => {
-                        districtSelect.innerHTML += `<option value="${district.id}">${district.name}</option>`;
-                    });
-                    districtSelect.disabled = false;
-                })
-                .catch(error => console.error('Error loading districts:', error));
-        }
-    });
-
-    document.getElementById('district').addEventListener('change', function() {
-        const districtId = this.value;
-        const citySelect = document.getElementById('city_id');
-
-        // Reset city
-        citySelect.innerHTML = '<option value="">Select City</option>';
-        citySelect.disabled = true;
-
-        if (districtId) {
-            fetch(`/api/cities/${districtId}`)
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(city => {
-                        citySelect.innerHTML += `<option value="${city.id}">${city.name}</option>`;
-                    });
-                    citySelect.disabled = false;
-                })
-                .catch(error => console.error('Error loading cities:', error));
-        }
-    });
-
-    // Initialize dropdowns on page load if values exist
     const stateSelect = document.getElementById('state');
     const districtSelect = document.getElementById('district');
     const citySelect = document.getElementById('city_id');
