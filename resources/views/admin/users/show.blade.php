@@ -36,6 +36,12 @@
             <a href="{{ route('admin.users.index') }}" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Back to Users</a>
             <a href="{{ route('admin.users.plans', $user) }}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 ml-2">View Plans</a>
             <a href="{{ route('admin.users.edit', $user) }}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ml-2">Edit User</a>
+            @if($user->role !== 'admin' && !$is_impersonating)
+                <form method="POST" action="{{ route('admin.users.impersonate', $user) }}" class="inline ml-2">
+                    @csrf
+                    <button type="submit" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">Login as User</button>
+                </form>
+            @endif
         </div>
     </div>
 @endsection

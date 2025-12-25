@@ -31,6 +31,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     // Users
     Route::resource('users', UserController::class, ['except' => ['create', 'store']])->names('admin.users');
     Route::get('users/{user}/plans', [UserController::class, 'showPlans'])->name('admin.users.plans');
+    Route::post('users/{user}/impersonate', [UserController::class, 'impersonate'])->name('admin.users.impersonate');
+    Route::post('stop-impersonating', [UserController::class, 'stopImpersonating'])->name('admin.stop-impersonating');
 
     // Properties
     Route::get('properties', [PropertyController::class, 'index'])->name('admin.properties.index');
@@ -100,9 +102,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
 
     // Contact Messages
     Route::get('contact-messages', [AdminContactController::class, 'index'])->name('admin.contact-messages.index');
+    Route::get('contact-messages/{contactMessage}', [AdminContactController::class, 'show'])->name('admin.contact-messages.show');
     Route::delete('contact-messages/{contactMessage}', [AdminContactController::class, 'destroy'])->name('admin.contact-messages.destroy');
 
-    // Notifications
     Route::get('notifications', [NotificationController::class, 'index'])->name('admin.notifications.index');
     Route::get('notifications/count', [NotificationController::class, 'count'])->name('admin.notifications.count');
     Route::get('notifications/dropdown', [NotificationController::class, 'dropdown'])->name('admin.notifications.dropdown');

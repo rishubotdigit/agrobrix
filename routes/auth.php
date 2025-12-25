@@ -28,4 +28,7 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/auth/facebook', [SocialAuthController::class, 'redirectToFacebook'])->name('auth.facebook');
     Route::get('/auth/facebook/callback', [SocialAuthController::class, 'handleFacebookCallback'])->name('auth.facebook.callback');
+
+    Route::get('/auth/role-selection', [SocialAuthController::class, 'showRoleSelection'])->name('auth.role.selection');
+    Route::post('/auth/role-selection', [SocialAuthController::class, 'storeRoleSelection'])->name('auth.role.selection.store');
 });

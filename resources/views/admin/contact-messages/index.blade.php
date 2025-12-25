@@ -29,6 +29,7 @@
                     <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{{ $message->message }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $message->created_at->format('M j, Y H:i') }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <a href="{{ route('admin.contact-messages.show', $message) }}" class="text-blue-600 hover:text-blue-900 mr-2">View</a>
                         <form action="{{ route('admin.contact-messages.destroy', $message) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this contact message?')">
                             @csrf
                             @method('DELETE')

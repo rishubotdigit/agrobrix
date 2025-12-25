@@ -36,6 +36,15 @@
 </head>
 <body class="bg-gray-50">
     @include('layouts.admin.navbar')
+    @if($is_impersonating)
+        <div class="bg-yellow-500 text-white p-4 text-center">
+            You are currently impersonating a user.
+            <form method="POST" action="{{ route('admin.stop-impersonating') }}" class="inline ml-4">
+                @csrf
+                <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Stop Impersonating</button>
+            </form>
+        </div>
+    @endif
     @include('layouts.partials.alerts')
 
     <div class="flex min-h-screen">

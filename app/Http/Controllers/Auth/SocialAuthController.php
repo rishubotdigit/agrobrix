@@ -75,17 +75,14 @@ class SocialAuthController extends Controller
                 }
                 Auth::login($user);
             } else {
-                // Create new user
-                $user = User::create([
+                // New user, redirect to role selection
+                session(['social_user' => [
                     'name' => $googleUser->getName(),
                     'email' => $googleUser->getEmail(),
-                    'email_verified_at' => now(),
-                    'password' => bcrypt(Str::random(16)), // Random password since OAuth
-                    'role' => 'buyer', // Default role
-                    'google_id' => $googleUser->getId(),
-                ]);
-                UserRegistered::dispatch($user);
-                Auth::login($user);
+                    'provider' => 'google',
+                    'provider_id' => $googleUser->getId(),
+                ]]);
+                return redirect()->route('auth.role.selection');
             }
 
             return redirect($this->getRedirectUrl($user))->with('success', 'Logged in successfully with Google!');
@@ -137,23 +134,63 @@ class SocialAuthController extends Controller
                 }
                 Auth::login($user);
             } else {
-                // Create new user
-                $user = User::create([
+                // New user, redirect to role selection
+                session(['social_user' => [
                     'name' => $facebookUser->getName(),
                     'email' => $facebookUser->getEmail(),
-                    'email_verified_at' => now(),
-                    'password' => bcrypt(Str::random(16)), // Random password since OAuth
-                    'role' => 'buyer', // Default role
-                    'facebook_id' => $facebookUser->getId(),
-                ]);
-                UserRegistered::dispatch($user);
-                Auth::login($user);
+                    'provider' => 'facebook',
+                    'provider_id' => $facebookUser->getId(),
+                ]]);
+                return redirect()->route('auth.role.selection');
             }
 
             return redirect($this->getRedirectUrl($user))->with('success', 'Logged in successfully with Facebook!');
         } catch (\Exception $e) {
             return redirect()->route('login')->withErrors(['social' => 'Failed to login with Facebook. Please try again.']);
         }
+    }
+
+    public function showRoleSelection()
+    {
+        if (!session()->has('social_user')) {
+            return redirect()->route('login');
+        }
+
+        return view('auth.role-selection');
+    }
+
+    public function storeRoleSelection(Request $request)
+    {
+        $request->validate([
+            'role' => 'required|in:buyer,agent,owner',
+        ]);
+
+        $socialUser = session('social_user');
+        if (!$socialUser) {
+            return redirect()->route('login');
+        }
+
+        $userData = [
+            'name' => $socialUser['name'],
+            'email' => $socialUser['email'],
+            'email_verified_at' => now(),
+            'password' => bcrypt(Str::random(16)),
+            'role' => $request->role,
+        ];
+
+        if ($socialUser['provider'] === 'google') {
+            $userData['google_id'] = $socialUser['provider_id'];
+        } elseif ($socialUser['provider'] === 'facebook') {
+            $userData['facebook_id'] = $socialUser['provider_id'];
+        }
+
+        $user = User::create($userData);
+        UserRegistered::dispatch($user);
+        Auth::login($user);
+
+        session()->forget('social_user');
+
+        return redirect($this->getRedirectUrl($user))->with('success', 'Account created and logged in successfully!');
     }
 
     private function getRedirectUrl(User $user): string
