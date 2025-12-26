@@ -5,6 +5,7 @@ use App\Http\Controllers\Buyer\DashboardController;
 use App\Http\Controllers\Buyer\ProfileController;
 use App\Http\Controllers\Buyer\SearchController;
 use App\Http\Controllers\Buyer\WishlistController;
+use App\Http\Controllers\Buyer\NotificationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PlanPurchaseController;
 use App\Http\Controllers\InquiryController;
@@ -30,6 +31,14 @@ Route::prefix('buyer')->middleware(['auth', 'role:buyer'])->group(function () {
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('buyer.wishlist.index');
     Route::post('/wishlist/add', [WishlistController::class, 'add'])->name('buyer.wishlist.add');
     Route::delete('/wishlist/remove/{propertyId}', [WishlistController::class, 'remove'])->name('buyer.wishlist.remove');
+
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('buyer.notifications.index');
+    Route::get('/notifications/count', [NotificationController::class, 'count'])->name('buyer.notifications.count');
+    Route::get('/notifications/dropdown', [NotificationController::class, 'dropdown'])->name('buyer.notifications.dropdown');
+    Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsSeen'])->name('buyer.notifications.markAsRead');
+    Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAsSeen'])->name('buyer.notifications.markAllAsRead');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'delete'])->name('buyer.notifications.delete');
 
     // Plan Purchases
     Route::get('/plan-purchases', [PlanPurchaseController::class, 'index'])->name('buyer.plan-purchases.index');

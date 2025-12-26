@@ -8,11 +8,13 @@ use App\Models\Notification;
 use App\Models\Setting;
 use App\Models\EmailLog;
 use App\Traits\DynamicSmtpTrait;
+use App\Traits\EmailQueueTrait;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class CreateNotificationForPropertyApproved
 {
+    use EmailQueueTrait;
 
     /**
      * Create the event listener.
@@ -56,34 +58,14 @@ class CreateNotificationForPropertyApproved
         if (Setting::get('property_approval_email_enabled', '1') === '1') {
             $user = $event->property->owner;
             if ($user && $user->email) {
-                DynamicSmtpTrait::loadSmtpSettings();
-                try {
-                    Mail::to($user->email)->send(new PropertyApprovedMail($event->property));
-                    Log::info('Property approval email sent to user: ' . $user->email);
-                    EmailLog::create([
-                        'email_type' => 'property_approved',
-                        'recipient_email' => $user->email,
-                        'user_id' => $userId,
-                        'model_type' => 'App\Models\Property',
-                        'model_id' => $event->property->id,
-                        'status' => 'sent',
-                    ]);
-                } catch (\Exception $e) {
-                    Log::error('Failed to send property approval email to user', [
-                        'property_id' => $event->property->id,
-                        'user_email' => $user->email,
-                        'error' => $e->getMessage(),
-                    ]);
-                    EmailLog::create([
-                        'email_type' => 'property_approved',
-                        'recipient_email' => $user->email,
-                        'user_id' => $userId,
-                        'model_type' => 'App\Models\Property',
-                        'model_id' => $event->property->id,
-                        'status' => 'failed',
-                        'error_message' => $e->getMessage(),
-                    ]);
-                }
+                $this->sendOrQueueEmail(
+                    new PropertyApprovedMail($event->property),
+                    $user->email,
+                    $userId,
+                    'App\Models\Property',
+                    $event->property->id,
+                    'property_approved'
+                );
             } else {
                 Log::warning('No user email found for property approval notification', [
                     'property_id' => $event->property->id,

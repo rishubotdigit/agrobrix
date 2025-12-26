@@ -2,25 +2,26 @@
 
 namespace App\Mail;
 
-use App\Models\User;
+use App\Models\Property;
 use App\Traits\DynamicSmtpTrait;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 
-class WelcomeUser extends Mailable
+class InquiryConfirmation extends Mailable
 {
     use DynamicSmtpTrait;
 
-    public User $user;
+    public Property $property;
+    public array $inquiryData;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(User $user)
+    public function __construct(Property $property, array $inquiryData)
     {
-        $this->user = $user;
-        \Illuminate\Support\Facades\Log::info('WelcomeUser mail constructed', ['user_id' => $user->id, 'role' => $user->role]);
+        $this->property = $property;
+        $this->inquiryData = $inquiryData;
     }
 
     /**
@@ -29,7 +30,8 @@ class WelcomeUser extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Welcome to ' . config('app.name') . ' - Account Confirmation',
+            subject: 'Inquiry Confirmation - ' . config('app.name'),
+            to: $this->inquiryData['buyer_email'],
         );
     }
 
@@ -38,11 +40,11 @@ class WelcomeUser extends Mailable
      */
     public function content(): Content
     {
-        \Illuminate\Support\Facades\Log::info('WelcomeUser content method', ['user_id' => $this->user->id, 'role' => $this->user->role]);
         return new Content(
-            html: 'emails.welcome-user',
+            html: 'emails.inquiry-confirmation',
             with: [
-                'user' => $this->user,
+                'property' => $this->property,
+                'inquiryData' => $this->inquiryData,
             ],
         );
     }

@@ -55,6 +55,14 @@
                     <input type="checkbox" id="whatsapp_notifications_enabled" name="whatsapp_notifications_enabled" value="1" {{ $settings['whatsapp_notifications_enabled'] == '1' ? 'checked' : '' }} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                     <label for="whatsapp_notifications_enabled" class="ml-3 block text-sm font-medium text-gray-900">Enable WhatsApp Notifications</label>
                 </div>
+                <div class="col-span-2">
+                    <label for="queue_mode" class="block text-sm font-medium text-gray-700">Email Queue Mode</label>
+                    <select id="queue_mode" name="queue_mode" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="disabled" {{ $settings['queue_mode'] == 'disabled' ? 'selected' : '' }}>Disabled (Send emails synchronously)</option>
+                        <option value="enabled" {{ $settings['queue_mode'] == 'enabled' ? 'selected' : '' }}>Enabled (Queue emails for background processing)</option>
+                    </select>
+                    <p class="mt-1 text-sm text-gray-500">Choose whether to send emails immediately or queue them for background processing.</p>
+                </div>
             </div>
         </div>
 

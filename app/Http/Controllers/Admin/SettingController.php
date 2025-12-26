@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -19,6 +20,7 @@ class SettingController extends Controller
             'otp_verification_enabled' => Setting::get('otp_verification_enabled', '1'),
             'mobile_integration_enabled' => Setting::get('mobile_integration_enabled', '1'),
             'whatsapp_notifications_enabled' => Setting::get('whatsapp_notifications_enabled', '1'),
+            'queue_mode' => Setting::get('queue_mode', 'disabled'),
             'user_registration_welcome_email_enabled' => Setting::get('user_registration_welcome_email_enabled', '1'),
             'admin_new_user_notification_enabled' => Setting::get('admin_new_user_notification_enabled', '1'),
             'user_plan_purchase_confirmation_enabled' => Setting::get('user_plan_purchase_confirmation_enabled', '1'),
@@ -47,17 +49,22 @@ class SettingController extends Controller
             'favicon' => Setting::get('favicon', ''),
         ];
 
+        Log::info('Settings index: queue_mode retrieved as ' . $settings['queue_mode']);
+
         return view('admin.settings.index', compact('settings'));
     }
 
     public function update(Request $request)
     {
+        Log::info('Settings update: request data', $request->all());
+
         $request->validate([
             'login_enabled' => 'nullable|boolean',
             'registration_enabled' => 'nullable|boolean',
             'otp_verification_enabled' => 'nullable|boolean',
             'mobile_integration_enabled' => 'nullable|boolean',
             'whatsapp_notifications_enabled' => 'nullable|boolean',
+            'queue_mode' => 'nullable|in:enabled,disabled',
             'user_registration_welcome_email_enabled' => 'nullable|boolean',
             'admin_new_user_notification_enabled' => 'nullable|boolean',
             'user_plan_purchase_confirmation_enabled' => 'nullable|boolean',
@@ -91,6 +98,7 @@ class SettingController extends Controller
         Setting::set('otp_verification_enabled', $request->has('otp_verification_enabled') ? '1' : '0');
         Setting::set('mobile_integration_enabled', $request->has('mobile_integration_enabled') ? '1' : '0');
         Setting::set('whatsapp_notifications_enabled', $request->has('whatsapp_notifications_enabled') ? '1' : '0');
+        Setting::set('queue_mode', $request->input('queue_mode', 'disabled'));
         Setting::set('user_registration_welcome_email_enabled', $request->has('user_registration_welcome_email_enabled') ? '1' : '0');
         Setting::set('admin_new_user_notification_enabled', $request->has('admin_new_user_notification_enabled') ? '1' : '0');
         Setting::set('user_plan_purchase_confirmation_enabled', $request->has('user_plan_purchase_confirmation_enabled') ? '1' : '0');

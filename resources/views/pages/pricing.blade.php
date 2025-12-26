@@ -31,7 +31,7 @@
                         @endif
                         <div class="text-4xl font-bold text-primary">
                             @if($plan->price > 0)
-                                ₹{{ number_format($plan->price, 0) }}<span class="text-lg text-gray-500">/mo</span>
+                                ₹{{ number_format($plan->price, 0) }}<span class="text-lg text-gray-500"></span>
                             @else
                                 Custom
                             @endif

@@ -44,31 +44,20 @@ class CreateNotificationForPaymentSubmittedForApproval
         // Send email notification to admins if enabled
         if (Setting::get('admin_payment_submitted_notification_enabled', '1') === '1') {
             $admins = User::where('role', 'admin')->get();
-            foreach ($admins as $admin) {
-                DynamicSmtpTrait::loadSmtpSettings();
-                try {
-                    Mail::to($admin->email)->send(new NotifyAdminPaymentSubmitted($event->payment));
-                    EmailLog::create([
-                        'email_type' => 'notify_admin_payment_submitted',
-                        'recipient_email' => $admin->email,
-                        'user_id' => $event->payment->user_id,
-                        'model_type' => 'App\Models\Payment',
-                        'model_id' => $event->payment->id,
-                        'status' => 'sent',
-                    ]);
-                } catch (\Exception $e) {
-                    \Log::error('Failed to send admin payment submitted email: ' . $e->getMessage());
-                    EmailLog::create([
-                        'email_type' => 'notify_admin_payment_submitted',
-                        'recipient_email' => $admin->email,
-                        'user_id' => $event->payment->user_id,
-                        'model_type' => 'App\Models\Payment',
-                        'model_id' => $event->payment->id,
-                        'status' => 'failed',
-                        'error_message' => $e->getMessage(),
-                    ]);
-                }
-            }
+            $recipients = $admins->map(function ($admin) use ($event) {
+                return [
+                    'email' => $admin->email,
+                    'user_id' => $admin->id,
+                    'model_type' => 'App\Models\Payment',
+                    'model_id' => $event->payment->id,
+                ];
+            })->toArray();
+
+            \App\Jobs\SendBulkEmailJob::dispatch(
+                new NotifyAdminPaymentSubmitted($event->payment),
+                $recipients,
+                'notify_admin_payment_submitted'
+            );
         }
     }
 }

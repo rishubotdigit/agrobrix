@@ -3,17 +3,18 @@
 namespace App\Listeners;
 
 use App\Events\PlanPurchaseCreated;
+use App\Jobs\SendBulkEmailJob;
 use App\Mail\NotifyAdminPlanPurchase;
 use App\Mail\PlanPurchaseConfirmation;
 use App\Models\Notification;
 use App\Models\Setting;
-use App\Traits\DynamicSmtpTrait;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
+use App\Models\User;
+use App\Traits\EmailQueueTrait;
 
 class CreateNotificationForPlanPurchaseCreated
 {
-    /**
+    use EmailQueueTrait;
+ /**
      * Create the event listener.
      */
     public function __construct()
@@ -41,31 +42,52 @@ class CreateNotificationForPlanPurchaseCreated
             ]);
         }
 
+        // Create notification for the purchaser (buyer)
+        $buyerExists = Notification::where('type', 'plan_purchase_buyer')
+            ->where('user_id', $event->planPurchase->user_id)
+            ->where('data->plan_purchase_id', $event->planPurchase->id)
+            ->exists();
+
+        if (!$buyerExists) {
+            Notification::create([
+                'user_id' => $event->planPurchase->user_id,
+                'type' => 'plan_purchase_buyer',
+                'message' => 'You have successfully purchased the plan "' . ($event->planPurchase->plan->name ?? 'Unknown Plan') . '".',
+                'data' => [
+                    'plan_purchase_id' => $event->planPurchase->id,
+                ],
+            ]);
+        }
+
         // Send confirmation email to user if enabled
         if (Setting::get('user_plan_purchase_confirmation_enabled', '1') === '1') {
-            DynamicSmtpTrait::loadSmtpSettings();
-            try {
-                Mail::to($event->planPurchase->user->email)->send(new PlanPurchaseConfirmation($event->planPurchase));
-            } catch (\Exception $e) {
-                Log::error('Failed to send plan purchase confirmation email to user', [
-                    'plan_purchase_id' => $event->planPurchase->id,
-                    'user_email' => $event->planPurchase->user->email,
-                    'error' => $e->getMessage(),
-                ]);
-            }
+            $this->sendOrQueueEmail(
+                new PlanPurchaseConfirmation($event->planPurchase),
+                $event->planPurchase->user->email,
+                $event->planPurchase->user_id,
+                'App\Models\PlanPurchase',
+                $event->planPurchase->id,
+                'plan_purchase_confirmation'
+            );
         }
 
         // Send notification email to admins if enabled
         if (Setting::get('admin_plan_purchase_notification_enabled', '1') === '1') {
-            DynamicSmtpTrait::loadSmtpSettings();
-            try {
-                Mail::send(new NotifyAdminPlanPurchase($event->planPurchase));
-            } catch (\Exception $e) {
-                Log::error('Failed to send plan purchase notification email to admins', [
-                    'plan_purchase_id' => $event->planPurchase->id,
-                    'error' => $e->getMessage(),
-                ]);
-            }
+            $admins = User::where('role', 'admin')->get();
+            $recipients = $admins->map(function ($admin) use ($event) {
+                return [
+                    'email' => $admin->email,
+                    'user_id' => $admin->id,
+                    'model_type' => 'App\Models\PlanPurchase',
+                    'model_id' => $event->planPurchase->id,
+                ];
+            })->toArray();
+
+            SendBulkEmailJob::dispatch(
+                new NotifyAdminPlanPurchase($event->planPurchase),
+                $recipients,
+                'notify_admin_plan_purchase'
+            );
         }
     }
 }

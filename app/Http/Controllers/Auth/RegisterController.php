@@ -51,6 +51,8 @@ class RegisterController extends Controller
             'verified_at' => now(),
         ]);
 
+        \Illuminate\Support\Facades\Log::info('User created in register method', ['user_id' => $user->id, 'role' => $user->role, 'request_role' => $request->role]);
+
         $this->assignBasicPlanIfApplicable($user);
 
         UserRegistered::dispatch($user);
@@ -102,6 +104,8 @@ class RegisterController extends Controller
                 'email_verified_at' => now(),
                 'verified_at' => now(),
             ]);
+
+            \Illuminate\Support\Facades\Log::info('User created in verifyOtp method', ['user_id' => $user->id, 'role' => $user->role, 'session_role' => $registrationData['role']]);
 
             $this->assignBasicPlanIfApplicable($user);
 

@@ -20,9 +20,6 @@ class Lead extends Model
         'buyer_email',
         'buyer_phone',
         'status',
-        'buying_purpose',
-        'buying_timeline',
-        'interested_in_site_visit',
         'additional_message',
         'buyer_type'
     ];

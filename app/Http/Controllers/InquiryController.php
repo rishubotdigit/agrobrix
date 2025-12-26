@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\InquiryCreated;
+use App\Mail\InquiryConfirmation;
 use App\Models\Lead;
 use App\Models\PlanPurchase;
 use App\Models\Property;
@@ -9,6 +11,7 @@ use App\Models\Setting;
 use App\Models\ViewedContact;
 use App\OtpService;
 use App\Traits\CapabilityTrait;
+use App\Traits\EmailQueueTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -18,19 +21,24 @@ use Illuminate\Support\Facades\Validator;
 
 class InquiryController extends Controller
 {
-    use CapabilityTrait;
+    use CapabilityTrait, EmailQueueTrait;
     public function submitInquiry(Request $request, Property $property)
     {
-        $validator = Validator::make($request->all(), [
+        $rules = [
             'buyer_name' => 'required|string|max:255',
-            'buyer_email' => 'required|email|max:255',
-            'buyer_phone' => 'required|string|max:15',
             'buyer_type' => 'required|in:agent,buyer',
-            'buying_purpose' => 'nullable|string|max:255',
-            'buying_timeline' => 'nullable|in:3 months,6 months,More than 6 months',
-            'interested_in_site_visit' => 'nullable|boolean',
             'additional_message' => 'nullable|string|max:1000',
-        ]);
+        ];
+
+        if (!Auth::check() || !Auth::user()->mobile) {
+            $rules['buyer_phone'] = 'required|string|max:15';
+        }
+
+        if (!Auth::check() || !Auth::user()->email) {
+            $rules['buyer_email'] = 'required|email|max:255';
+        }
+
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             \Log::warning('Inquiry validation failed', [
@@ -44,8 +52,9 @@ class InquiryController extends Controller
             ], 422);
         }
 
-        // If user is logged in, use their email
-        $buyerEmail = Auth::check() ? Auth::user()->email : $request->buyer_email;
+        // If user is logged in, use their email and phone if available
+        $buyerEmail = Auth::check() && Auth::user()->email ? Auth::user()->email : $request->buyer_email;
+        $buyerPhone = Auth::check() && Auth::user()->mobile ? Auth::user()->mobile : $request->buyer_phone;
 
         \Log::info('Buyer inquiry submitted successfully', [
             'user_id' => Auth::id(),
@@ -59,11 +68,8 @@ class InquiryController extends Controller
             'property_id' => $property->id,
             'buyer_name' => $request->buyer_name,
             'buyer_email' => $buyerEmail,
-            'buyer_phone' => $request->buyer_phone,
+            'buyer_phone' => $buyerPhone,
             'buyer_type' => $request->buyer_type,
-            'buying_purpose' => $request->buying_purpose,
-            'buying_timeline' => $request->buying_timeline,
-            'interested_in_site_visit' => $request->interested_in_site_visit ?? false,
             'additional_message' => $request->additional_message,
         ]);
 
@@ -71,7 +77,7 @@ class InquiryController extends Controller
         if (Setting::get('otp_verification_enabled') == '1') {
             $otpService = new OtpService();
             $otp = $otpService->generateOtp();
-            $result = $otpService->sendOtpToMobile($request->buyer_phone, $otp);
+            $result = $otpService->sendOtpToMobile($buyerPhone, $otp);
 
             if (!$result['success']) {
                 return response()->json([
@@ -215,6 +221,9 @@ class InquiryController extends Controller
                     'property_owner_role' => $property->owner ? $property->owner->role : null,
                     'buyer_email' => $inquiryData['buyer_email']
                 ]);
+
+                // Fire the InquiryCreated event
+                event(new InquiryCreated($lead));
             }
         }
 
@@ -427,9 +436,8 @@ class InquiryController extends Controller
         // Return contact information
         return response()->json([
             'contact' => [
-                'owner_name' => $property->owner->name,
-                'owner_email' => $property->owner->email,
-                'owner_mobile' => $property->owner->mobile,
+                'contact_name' => $property->contact_name,
+                'contact_mobile' => $property->contact_mobile,
             ]
         ]);
     }

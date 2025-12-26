@@ -29,8 +29,7 @@ class NotifyAdminPlanPurchase extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'New Plan Purchase Notification',
-            to: User::where('role', 'admin')->pluck('email')->toArray(),
+            subject: 'New Plan Purchase Requires Approval - ' . $this->planPurchase->plan->name,
         );
     }
 

@@ -22,14 +22,18 @@
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
                         <input type="text" name="buyer_name" value="{{ auth()->check() ? auth()->user()->name : '' }}" required class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors">
                     </div>
+                    @if(!auth()->check() || !auth()->user()->mobile)
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Mobile Number *</label>
-                        <input type="text" name="buyer_phone" value="{{ auth()->check() ? auth()->user()->mobile : '' }}" required class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors">
+                        <input type="text" name="buyer_phone" value="{{ session('inquiry_data')['buyer_phone'] ?? '' }}" required class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors">
                     </div>
+                    @endif
+                    @if(!auth()->check() || !auth()->user()->email)
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
-                        <input type="email" name="buyer_email" value="{{ auth()->check() ? auth()->user()->email : '' }}" required class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors">
+                        <input type="email" name="buyer_email" value="{{ session('inquiry_data')['buyer_email'] ?? '' }}" required class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors">
                     </div>
+                    @endif
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Are you an agent? *</label>
                         <div class="mt-2 space-y-2">
@@ -39,32 +43,6 @@
                             </label>
                             <label class="inline-flex items-center ml-6">
                                 <input type="radio" name="buyer_type" value="buyer" required class="form-radio text-emerald-600 focus:ring-emerald-500" checked>
-                                <span class="ml-2 text-gray-700">No</span>
-                            </label>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Reason to buy</label>
-                        <input type="text" name="buying_purpose" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">When do you plan to buy?</label>
-                        <select name="buying_timeline" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors">
-                            <option value="">Select timeline</option>
-                            <option value="3 months">3 months</option>
-                            <option value="6 months">6 months</option>
-                            <option value="More than 6 months">More than 6 months</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Interested in site visit?</label>
-                        <div class="mt-2 space-y-2">
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="interested_in_site_visit" value="1" class="form-radio text-emerald-600 focus:ring-emerald-500">
-                                <span class="ml-2 text-gray-700">Yes</span>
-                            </label>
-                            <label class="inline-flex items-center ml-6">
-                                <input type="radio" name="interested_in_site_visit" value="0" class="form-radio text-emerald-600 focus:ring-emerald-500">
                                 <span class="ml-2 text-gray-700">No</span>
                             </label>
                         </div>
@@ -114,8 +92,8 @@
     </div>
 </div>
 
-<!-- Confirmation Modal -->
-<div id="confirmationModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+{{-- Confirmation Modal - Commented out as per flow change --}}
+{{-- <div id="confirmationModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-10 mx-auto p-5 border w-full max-w-lg shadow-xl rounded-2xl bg-white border-emerald-100">
         <div class="mt-3">
             <div class="flex items-center justify-between mb-6">
@@ -140,7 +118,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> --}}
 
 <!-- Contact Modal -->
 <div id="contactModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
@@ -242,65 +220,7 @@
         document.getElementById('otpForm').reset();
     }
 
-    function showConfirmationModal(inquiry, contact) {
-        const confirmationHtml = `
-            <div class="bg-emerald-50 rounded-lg p-4 mb-4">
-                <h4 class="font-semibold text-emerald-800 mb-3">Your Inquiry Details</h4>
-                <div class="grid grid-cols-1 gap-3 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Name:</span>
-                        <span class="font-medium text-gray-900">${inquiry.buyer_name}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Phone:</span>
-                        <span class="font-medium text-gray-900">${inquiry.buyer_phone}</span>
-                    </div>
-                    ${inquiry.buyer_email ? `
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Email:</span>
-                        <span class="font-medium text-gray-900">${inquiry.buyer_email}</span>
-                    </div>
-                    ` : ''}
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Type:</span>
-                        <span class="font-medium text-gray-900">${inquiry.buyer_type === 'agent' ? 'Agent' : 'Buyer'}</span>
-                    </div>
-                    ${inquiry.buying_purpose ? `
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Purpose:</span>
-                        <span class="font-medium text-gray-900">${inquiry.buying_purpose}</span>
-                    </div>
-                    ` : ''}
-                    ${inquiry.buying_timeline ? `
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Timeline:</span>
-                        <span class="font-medium text-gray-900">${inquiry.buying_timeline}</span>
-                    </div>
-                    ` : ''}
-                    ${inquiry.interested_in_site_visit ? `
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Site Visit:</span>
-                        <span class="font-medium text-gray-900">${inquiry.interested_in_site_visit == '1' ? 'Yes' : 'No'}</span>
-                    </div>
-                    ` : ''}
-                    ${inquiry.additional_message ? `
-                    <div class="flex flex-col gap-1">
-                        <span class="text-gray-600">Message:</span>
-                        <span class="font-medium text-gray-900 bg-white p-2 rounded border">${inquiry.additional_message}</span>
-                    </div>
-                    ` : ''}
-                </div>
-            </div>
-            <p class="text-gray-600 text-sm">Your inquiry has been submitted successfully. Click "View Contact" to see the property owner's contact information.</p>
-        `;
-        document.getElementById('confirmationDetails').innerHTML = confirmationHtml;
-        window.currentContact = contact;
-        document.getElementById('confirmationModal').classList.remove('hidden');
-    }
-
-    function closeConfirmationModal() {
-        document.getElementById('confirmationModal').classList.add('hidden');
-    }
+    // showConfirmationModal and closeConfirmationModal removed as confirmation modal is no longer used
 
     function showContactDetails(contact) {
         const contactHtml = `
@@ -311,16 +231,7 @@
                     </svg>
                     <div>
                         <p class="text-xs text-gray-500 uppercase tracking-wide">Name</p>
-                        <p class="font-semibold text-gray-900">${contact.owner_name}</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg">
-                    <svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                    </svg>
-                    <div>
-                        <p class="text-xs text-gray-500 uppercase tracking-wide">Email</p>
-                        <p class="font-semibold text-gray-900">${contact.owner_email}</p>
+                        <p class="font-semibold text-gray-900">${contact.contact_name}</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg">
@@ -329,7 +240,7 @@
                     </svg>
                     <div>
                         <p class="text-xs text-gray-500 uppercase tracking-wide">Mobile</p>
-                        <p class="font-semibold text-gray-900">${contact.owner_mobile}</p>
+                        <p class="font-semibold text-gray-900">${contact.contact_mobile}</p>
                     </div>
                 </div>
             </div>
@@ -438,7 +349,7 @@
                             openOtpModal();
                         } else {
                             closeInquiryModal();
-                            showConfirmationModal(data.inquiry, data.contact);
+                            fetchContactDirectly(propertyId);
                         }
                     } else {
                         alert(data.message || 'An error occurred');
@@ -472,7 +383,8 @@
                 .then(data => {
                     if (data.success) {
                         closeOtpModal();
-                        showConfirmationModal(data.inquiry, data.contact);
+                        const propertyId = document.getElementById('propertyId').value;
+                        fetchContactDirectly(propertyId);
                     } else {
                         alert(data.message || 'Invalid OTP');
                     }
@@ -484,17 +396,10 @@
             });
         }
 
-        // View Contact button in confirmation modal
-        const viewContactBtnModal = document.getElementById('viewContactBtnModal');
-        if (viewContactBtnModal) {
-            viewContactBtnModal.addEventListener('click', function() {
-                closeConfirmationModal();
-                showContactDetails(window.currentContact);
-            });
-        }
+        // View Contact button in confirmation modal - removed as confirmation modal is no longer used
 
         // Close modals when clicking outside
-        ['inquiryModal', 'otpModal', 'confirmationModal', 'contactModal'].forEach(modalId => {
+        ['inquiryModal', 'otpModal', 'contactModal'].forEach(modalId => {
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.addEventListener('click', function(e) {

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Events\InquiryCreated;
 use App\Events\PaymentApproved;
 use App\Events\PaymentCreated;
 use App\Events\PaymentSubmittedForApproval;
@@ -21,6 +22,8 @@ use App\Listeners\CreateNotificationForUserRegistered;
 use App\Listeners\NotifyAdminsOfPaymentApproved;
 use App\Listeners\NotifyAdminsOfPlanPurchase;
 use App\Listeners\NotifyAdminsOfPropertyApproved;
+use App\Listeners\NotifyBuyerOfInquiryConfirmation;
+use App\Listeners\NotifyOwnerOfNewInquiry;
 use App\Listeners\SendInvoiceEmail;
 use App\Listeners\SendPaymentApprovedEmail;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -33,6 +36,10 @@ class EventServiceProvider extends ServiceProvider
      * @var array<class-string, array<int, class-string>>
      */
     protected $listen = [
+        InquiryCreated::class => [
+            NotifyBuyerOfInquiryConfirmation::class,
+            NotifyOwnerOfNewInquiry::class,
+        ],
         PlanPurchaseCreated::class => [
             CreateNotificationForPlanPurchaseCreated::class,
             NotifyAdminsOfPlanPurchase::class,

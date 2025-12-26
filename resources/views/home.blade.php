@@ -376,116 +376,269 @@
                 <p class="text-xl text-gray-600">Choose a plan that works for you. Upgrade anytime.</p>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                @foreach($plans as $index => $plan)
-                    <div class="bg-white p-8 rounded-xl {{ $plan->name === 'Pro' ? 'border-2 border-primary' : 'border-2 border-gray-200' }} card-hover relative">
-                        @if($plan->name === 'Pro')
-                            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-sm font-semibold">Popular</div>
-                        @endif
-                        @if(isset($currentPlanId) && $plan->id == $currentPlanId)
-                            <div class="absolute -top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Current Plan</div>
-                        @endif
-                        <h3 class="text-2xl font-bold mb-2 text-gray-900">{{ $plan->name }}</h3>
-                        <div class="mb-4">
-                            @if($plan->original_price && $plan->original_price > $plan->price)
-                                <div class="text-lg text-gray-500 line-through">₹{{ number_format($plan->original_price, 0) }}</div>
+            @guest
+                @php
+                    $plansByRole = $plans->groupBy('role');
+                @endphp
+                @foreach($plansByRole as $role => $rolePlans)
+                    <div class="mb-20">
+                        <h3 class="text-3xl font-bold text-gray-900 mb-4 flex items-center justify-center">
+                            @if($role === 'owner')
+                                <svg class="w-8 h-8 text-primary mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                                </svg>
+                            @elseif($role === 'agent')
+                                <svg class="w-8 h-8 text-primary mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            @elseif($role === 'buyer')
+                                <svg class="w-8 h-8 text-primary mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
                             @endif
-                            <div class="text-4xl font-bold text-primary">
-                                @if($plan->price > 0)
-                                    ₹{{ number_format($plan->price, 0) }}<span class="text-lg text-gray-500">/mo</span>
-                                @else
-                                    Custom
-                                @endif
-                            </div>
-                            @if($plan->discount > 0)
-                                <div class="text-sm text-green-600 font-semibold">{{ $plan->discount }}% off</div>
+                            {{ ucfirst($role) }} Plans
+                        </h3>
+                        <p class="text-lg text-gray-600 mb-8 text-center">
+                            @if($role === 'owner')
+                                Perfect for property owners looking to list and sell their properties.
+                            @elseif($role === 'agent')
+                                Ideal for real estate agents managing multiple listings and clients.
+                            @elseif($role === 'buyer')
+                                Designed for buyers searching for their ideal property.
                             @endif
-                        </div>
-                        @if($plan->validity_days)
-                            <div class="text-sm text-gray-600 mb-4">Validity: {{ $plan->validity_days }} days</div>
-                        @endif
-                        <ul class="space-y-3 mb-8">
-                            <li class="flex items-start">
-                                <span class="text-primary mr-2">✓</span>
-                                <span>
-                                    {{ $plan->capabilities['max_listings'] ?? 0 }}
-                                    {{ ($plan->capabilities['max_listings'] ?? 0) == 0 ? 'Unlimited' : '' }}
-                                    Property Listing{{ ($plan->capabilities['max_listings'] ?? 0) != 1 ? 's' : '' }}
-                                </span>
-                            </li>
-                            <li class="flex items-start">
-                                <span class="text-primary mr-2">✓</span>
-                                <span>
-                                    {{ $plan->capabilities['max_contacts'] ?? 0 }}
-                                    {{ ($plan->capabilities['max_contacts'] ?? 0) == 0 ? 'Unlimited' : '' }}
-                                    Contact View{{ ($plan->capabilities['max_contacts'] ?? 0) != 1 ? 's' : '' }}
-                                </span>
-                            </li>
-                            @if($plan->getMaxFeaturedListings() > 0)
-                            <li class="flex items-start">
-                                <span class="text-primary mr-2">✓</span>
-                                <span>Includes {{ $plan->getMaxFeaturedListings() }} Featured Properties @if($plan->getFeaturedDurationDays() > 0) for {{ $plan->getFeaturedDurationDays() }} days @endif</span>
-                            </li>
-                            @endif
-                            @if($plan->name === 'Basic')
-                                <li class="flex items-start">
-                                    <span class="text-primary mr-2">✓</span>
-                                    <span>Basic Support</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <span class="text-primary mr-2">✓</span>
-                                    <span>Task Management</span>
-                                </li>
-                            @elseif($plan->name === 'Pro')
-                                <li class="flex items-start">
-                                    <span class="text-primary mr-2">✓</span>
-                                    <span>Priority Support</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <span class="text-primary mr-2">✓</span>
-                                    <span>Advanced Analytics</span>
-                                </li>
-                            @elseif($plan->name === 'Enterprise')
-                                <li class="flex items-start">
-                                    <span class="text-primary mr-2">✓</span>
-                                    <span>24/7 Support</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <span class="text-primary mr-2">✓</span>
-                                    <span>Custom Features</span>
-                                </li>
-                            @endif
-                        </ul>
-                        @if($plan->features && is_array($plan->features))
-                            <div class="mb-4">
-                                <h4 class="font-semibold text-gray-900 mb-2">Features:</h4>
-                                <ul class="space-y-1">
-                                    @foreach($plan->features as $feature)
-                                        <li class="flex items-start text-sm">
-                                            <span class="text-primary mr-2">•</span>
-                                            <span>{{ $feature }}</span>
+                        </p>
+                        <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">
+                            @foreach($rolePlans as $plan)
+                                <div class="bg-white p-8 rounded-xl {{ $plan->name === 'Pro' ? 'border-2 border-primary' : 'border-2 border-gray-200' }} card-hover relative">
+                                    @if($plan->name === 'Pro')
+                                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-sm font-semibold">Popular</div>
+                                    @endif
+                                    @if(isset($currentPlanId) && $plan->id == $currentPlanId)
+                                        <div class="absolute -top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Current Plan</div>
+                                    @endif
+                                    <div class="mb-2">
+                                        <h3 class="text-2xl font-bold text-gray-900">{{ $plan->name }}</h3>
+                                    </div>
+                                    <div class="mb-4">
+                                        @if($plan->original_price && $plan->original_price > $plan->price)
+                                            <div class="text-lg text-gray-500 line-through">₹{{ number_format($plan->original_price, 0) }}</div>
+                                        @endif
+                                        <div class="text-4xl font-bold text-primary">
+                                            @if($plan->price > 0)
+                                                ₹{{ number_format($plan->price, 0) }}<span class="text-lg text-gray-500"></span>
+                                            @else
+                                                Custom
+                                            @endif
+                                        </div>
+                                        @if($plan->discount > 0)
+                                            <div class="text-sm text-green-600 font-semibold">{{ $plan->discount }}% off</div>
+                                        @endif
+                                    </div>
+                                    @if($plan->validity_days)
+                                        <div class="text-sm text-gray-600 mb-4">Validity: {{ $plan->validity_days }} days</div>
+                                    @endif
+                                    <ul class="space-y-3 mb-8">
+                                        <li class="flex items-start">
+                                            <span class="text-primary mr-2">✓</span>
+                                            <span>
+                                                {{ $plan->capabilities['max_listings'] ?? 0 }}
+                                                {{ ($plan->capabilities['max_listings'] ?? 0) == 0 ? 'Unlimited' : '' }}
+                                                Property Listing{{ ($plan->capabilities['max_listings'] ?? 0) != 1 ? 's' : '' }}
+                                            </span>
                                         </li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-                        @if(isset($currentPlanId) && $plan->id == $currentPlanId)
-                            <button disabled class="block text-center w-full bg-gray-300 text-gray-500 px-6 py-3 rounded-lg font-semibold cursor-not-allowed">Current Plan</button>
-                        @elseif($plan->price == 0)
-                            <button disabled class="block text-center w-full bg-gray-300 text-gray-500 px-6 py-3 rounded-lg font-semibold cursor-not-allowed">Default Plan</button>
-                        @else
-                            @php
-                                $buttonText = isset($currentPlanPrice) && $plan->price > $currentPlanPrice ? 'Upgrade' : 'Buy';
-                            @endphp
-                            @if(auth()->check())
-                                <a href="{{ route('plans.index') }}" class="block text-center {{ $plan->name === 'Pro' ? 'gradient-bg text-white hover:opacity-90' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} px-6 py-3 rounded-lg font-semibold transition">{{ $buttonText }}</a>
-                            @else
-                                <a href="/register" class="block text-center {{ $plan->name === 'Pro' ? 'gradient-bg text-white hover:opacity-90' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} px-6 py-3 rounded-lg font-semibold transition">Get Started</a>
-                            @endif
+                                        <li class="flex items-start">
+                                            <span class="text-primary mr-2">✓</span>
+                                            <span>
+                                                {{ $plan->capabilities['max_contacts'] ?? 0 }}
+                                                {{ ($plan->capabilities['max_contacts'] ?? 0) == 0 ? 'Unlimited' : '' }}
+                                                Contact View{{ ($plan->capabilities['max_contacts'] ?? 0) != 1 ? 's' : '' }}
+                                            </span>
+                                        </li>
+                                        @if($plan->getMaxFeaturedListings() > 0)
+                                        <li class="flex items-start">
+                                            <span class="text-primary mr-2">✓</span>
+                                            <span>Includes {{ $plan->getMaxFeaturedListings() }} Featured Properties @if($plan->getFeaturedDurationDays() > 0) for {{ $plan->getFeaturedDurationDays() }} days @endif</span>
+                                        </li>
+                                        @endif
+                                        @if($plan->name === 'Basic')
+                                            <li class="flex items-start">
+                                                <span class="text-primary mr-2">✓</span>
+                                                <span>Basic Support</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <span class="text-primary mr-2">✓</span>
+                                                <span>Task Management</span>
+                                            </li>
+                                        @elseif($plan->name === 'Pro')
+                                            <li class="flex items-start">
+                                                <span class="text-primary mr-2">✓</span>
+                                                <span>Priority Support</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <span class="text-primary mr-2">✓</span>
+                                                <span>Advanced Analytics</span>
+                                            </li>
+                                        @elseif($plan->name === 'Enterprise')
+                                            <li class="flex items-start">
+                                                <span class="text-primary mr-2">✓</span>
+                                                <span>24/7 Support</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <span class="text-primary mr-2">✓</span>
+                                                <span>Custom Features</span>
+                                            </li>
+                                        @endif
+                                    </ul>
+                                    @if($plan->features && is_array($plan->features))
+                                        <div class="mb-4">
+                                            <h4 class="font-semibold text-gray-900 mb-2">Features:</h4>
+                                            <ul class="space-y-1">
+                                                @foreach($plan->features as $feature)
+                                                    <li class="flex items-start text-sm">
+                                                        <span class="text-primary mr-2">•</span>
+                                                        <span>{{ $feature }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @endif
+                                    @if(isset($currentPlanId) && $plan->id == $currentPlanId)
+                                        <button disabled class="block text-center w-full bg-gray-300 text-gray-500 px-6 py-3 rounded-lg font-semibold cursor-not-allowed">Current Plan</button>
+                                    @elseif($plan->price == 0)
+                                        <button disabled class="block text-center w-full bg-gray-300 text-gray-500 px-6 py-3 rounded-lg font-semibold cursor-not-allowed">Default Plan</button>
+                                    @else
+                                        @php
+                                            $buttonText = isset($currentPlanPrice) && $plan->price > $currentPlanPrice ? 'Upgrade' : 'Buy';
+                                        @endphp
+                                        @if(auth()->check())
+                                            <a href="{{ route('plans.index') }}" class="block text-center {{ $plan->name === 'Pro' ? 'gradient-bg text-white hover:opacity-90' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} px-6 py-3 rounded-lg font-semibold transition">{{ $buttonText }}</a>
+                                        @else
+                                            <a href="/register" class="block text-center {{ $plan->name === 'Pro' ? 'gradient-bg text-white hover:opacity-90' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} px-6 py-3 rounded-lg font-semibold transition">Get Started</a>
+                                        @endif
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                        @if(!$loop->last)
+                            <div class="border-t border-gray-200 mt-16 mb-16"></div>
                         @endif
                     </div>
                 @endforeach
-            </div>
+            @endguest
+            @auth
+                <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                    @foreach($plans as $index => $plan)
+                        <div class="bg-white p-8 rounded-xl {{ $plan->name === 'Pro' ? 'border-2 border-primary' : 'border-2 border-gray-200' }} card-hover relative">
+                            @if($plan->name === 'Pro')
+                                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-sm font-semibold">Popular</div>
+                            @endif
+                            @if(isset($currentPlanId) && $plan->id == $currentPlanId)
+                                <div class="absolute -top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Current Plan</div>
+                            @endif
+                            <div class="mb-2">
+                                <h3 class="text-2xl font-bold text-gray-900">{{ $plan->name }}</h3>
+                            </div>
+                            <div class="mb-4">
+                                @if($plan->original_price && $plan->original_price > $plan->price)
+                                    <div class="text-lg text-gray-500 line-through">₹{{ number_format($plan->original_price, 0) }}</div>
+                                @endif
+                                <div class="text-4xl font-bold text-primary">
+                                    @if($plan->price > 0)
+                                        ₹{{ number_format($plan->price, 0) }}<span class="text-lg text-gray-500"></span>
+                                    @else
+                                        Custom
+                                    @endif
+                                </div>
+                                @if($plan->discount > 0)
+                                    <div class="text-sm text-green-600 font-semibold">{{ $plan->discount }}% off</div>
+                                @endif
+                            </div>
+                            @if($plan->validity_days)
+                                <div class="text-sm text-gray-600 mb-4">Validity: {{ $plan->validity_days }} days</div>
+                            @endif
+                            <ul class="space-y-3 mb-8">
+                                <li class="flex items-start">
+                                    <span class="text-primary mr-2">✓</span>
+                                    <span>
+                                        {{ $plan->capabilities['max_listings'] ?? 0 }}
+                                        {{ ($plan->capabilities['max_listings'] ?? 0) == 0 ? 'Unlimited' : '' }}
+                                        Property Listing{{ ($plan->capabilities['max_listings'] ?? 0) != 1 ? 's' : '' }}
+                                    </span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-primary mr-2">✓</span>
+                                    <span>
+                                        {{ $plan->capabilities['max_contacts'] ?? 0 }}
+                                        {{ ($plan->capabilities['max_contacts'] ?? 0) == 0 ? 'Unlimited' : '' }}
+                                        Contact View{{ ($plan->capabilities['max_contacts'] ?? 0) != 1 ? 's' : '' }}
+                                    </span>
+                                </li>
+                                @if($plan->getMaxFeaturedListings() > 0)
+                                <li class="flex items-start">
+                                    <span class="text-primary mr-2">✓</span>
+                                    <span>Includes {{ $plan->getMaxFeaturedListings() }} Featured Properties @if($plan->getFeaturedDurationDays() > 0) for {{ $plan->getFeaturedDurationDays() }} days @endif</span>
+                                </li>
+                                @endif
+                                @if($plan->name === 'Basic')
+                                    <li class="flex items-start">
+                                        <span class="text-primary mr-2">✓</span>
+                                        <span>Basic Support</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary mr-2">✓</span>
+                                        <span>Task Management</span>
+                                    </li>
+                                @elseif($plan->name === 'Pro')
+                                    <li class="flex items-start">
+                                        <span class="text-primary mr-2">✓</span>
+                                        <span>Priority Support</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary mr-2">✓</span>
+                                        <span>Advanced Analytics</span>
+                                    </li>
+                                @elseif($plan->name === 'Enterprise')
+                                    <li class="flex items-start">
+                                        <span class="text-primary mr-2">✓</span>
+                                        <span>24/7 Support</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary mr-2">✓</span>
+                                        <span>Custom Features</span>
+                                    </li>
+                                @endif
+                            </ul>
+                            @if($plan->features && is_array($plan->features))
+                                <div class="mb-4">
+                                    <h4 class="font-semibold text-gray-900 mb-2">Features:</h4>
+                                    <ul class="space-y-1">
+                                        @foreach($plan->features as $feature)
+                                            <li class="flex items-start text-sm">
+                                                <span class="text-primary mr-2">•</span>
+                                                <span>{{ $feature }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+                            @if(isset($currentPlanId) && $plan->id == $currentPlanId)
+                                <button disabled class="block text-center w-full bg-gray-300 text-gray-500 px-6 py-3 rounded-lg font-semibold cursor-not-allowed">Current Plan</button>
+                            @elseif($plan->price == 0)
+                                <button disabled class="block text-center w-full bg-gray-300 text-gray-500 px-6 py-3 rounded-lg font-semibold cursor-not-allowed">Default Plan</button>
+                            @else
+                                @php
+                                    $buttonText = isset($currentPlanPrice) && $plan->price > $currentPlanPrice ? 'Upgrade' : 'Buy';
+                                @endphp
+                                @if(auth()->check())
+                                    <a href="{{ route('plans.index') }}" class="block text-center {{ $plan->name === 'Pro' ? 'gradient-bg text-white hover:opacity-90' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} px-6 py-3 rounded-lg font-semibold transition">{{ $buttonText }}</a>
+                                @else
+                                    <a href="/register" class="block text-center {{ $plan->name === 'Pro' ? 'gradient-bg text-white hover:opacity-90' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} px-6 py-3 rounded-lg font-semibold transition">Get Started</a>
+                                @endif
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            @endauth
         </div>
     </section>
 

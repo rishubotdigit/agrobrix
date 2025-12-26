@@ -7,12 +7,18 @@ use App\Models\EmailLog;
 use App\Models\User;
 use App\Traits\DynamicSmtpTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class EmailLogController extends Controller
 {
     public function index(Request $request)
     {
+        \Log::info('EmailLogController index called', [
+            'user_id' => auth()->id(),
+            'user_role' => auth()->user()->role ?? null,
+            'request_params' => $request->all()
+        ]);
 
         $query = EmailLog::with('user')->orderBy('created_at', 'desc');
 
@@ -36,24 +42,41 @@ class EmailLogController extends Controller
 
         $emailLogs = $query->paginate(20);
 
+        \Log::info('EmailLogController query executed', [
+            'total_logs' => $emailLogs->total(),
+            'current_page' => $emailLogs->currentPage(),
+            'per_page' => $emailLogs->perPage(),
+            'filters' => [
+                'email_type' => $request->email_type,
+                'status' => $request->status,
+                'date_from' => $request->date_from,
+                'date_to' => $request->date_to,
+            ]
+        ]);
+
         return view('admin.email-logs.index', compact('emailLogs'));
     }
 
     public function resend(Request $request, $id)
     {
         $emailLog = EmailLog::findOrFail($id);
+        Log::info("Resending email log ID: {$id}, model_type: {$emailLog->model_type}, model_id: {$emailLog->model_id}");
         if (!$emailLog->model_type || !is_string($emailLog->model_type) || !class_exists($emailLog->model_type)) {
-            return response()->json(['error' => 'Invalid model type'], 400);
+            Log::error("Invalid model type for email log ID: {$id}");
+            return redirect()->back()->with('error', 'Invalid model type for this email log.');
         }
 
         if (!$emailLog->model_id) {
-            return response()->json(['error' => 'Invalid model id'], 400);
+            Log::error("Invalid model id for email log ID: {$id}");
+            return redirect()->back()->with('error', 'Invalid model ID for this email log.');
         }
 
         $model = $emailLog->model_type::find($emailLog->model_id);
         if (!$model) {
-            return response()->json(['error' => 'Related model not found'], 404);
+            Log::error("Related model not found for email log ID: {$id}, model_type: {$emailLog->model_type}, model_id: {$emailLog->model_id}");
+            return redirect()->back()->with('error', 'The related record has been deleted, email cannot be resent.');
         }
+        Log::info("Related model found for email log ID: {$id}");
 
         $mailClass = $this->getMailClass($emailLog->email_type);
         if (!$mailClass) {

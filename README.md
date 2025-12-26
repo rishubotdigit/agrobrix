@@ -30,6 +30,36 @@ A comprehensive Laravel-based property management platform that connects propert
 - **Todo System**: Built-in task management for all user roles
 - **Status Tracking**: Pending, In Progress, Completed status management
 
+## Email Queue System
+
+✅ Queue is ON:
+
+When you set Email Queue Mode ON in Admin Settings, every email is now processed properly via cron.
+
+All emails like user registration, inquiry forms, or system notifications are automatically sent in the background.
+
+Admin email logs show all emails accurately.
+
+🔹 Key features working now:
+
+Cron job runs automatically every minute.
+
+No duplicate emails are sent.
+
+Failed emails are retried automatically.
+
+Test emails can be sent immediately, whether the queue is ON or OFF.
+
+No manual commands or supervisor processes required.
+
+Summary:
+
+Queue ON → emails reliably processed in the background.
+
+Queue OFF → emails not queued (except test emails).
+
+✅ The system is now fully production-ready and email processing is fully automated. and admin email log properly show
+
 ## Architecture Overview
 
 ### Tech Stack

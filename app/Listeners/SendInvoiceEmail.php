@@ -5,12 +5,11 @@ namespace App\Listeners;
 use App\Events\PaymentApproved;
 use App\Mail\InvoiceEmail;
 use App\Models\Setting;
-use App\Models\EmailLog;
-use App\Traits\DynamicSmtpTrait;
-use Illuminate\Support\Facades\Mail;
+use App\Traits\EmailQueueTrait;
 
 class SendInvoiceEmail
 {
+    use EmailQueueTrait;
 
     /**
      * Create the event listener.
@@ -32,26 +31,14 @@ class SendInvoiceEmail
 
         // Send invoice email to user if enabled
         if (Setting::get('invoice_email_enabled', '1') === '1') {
-            DynamicSmtpTrait::loadSmtpSettings();
-            try {
-                Mail::to($event->payment->user->email)->send(new InvoiceEmail($event->payment));
-                EmailLog::create([
-                    'email_type' => 'invoice',
-                    'recipient_email' => $event->payment->user->email,
-                    'user_id' => $event->payment->user_id,
-                    'status' => 'sent',
-                ]);
-            } catch (\Exception $e) {
-                // Log error but don't fail the job
-                \Log::error('Failed to send invoice email: ' . $e->getMessage());
-                EmailLog::create([
-                    'email_type' => 'invoice',
-                    'recipient_email' => $event->payment->user->email,
-                    'user_id' => $event->payment->user_id,
-                    'status' => 'failed',
-                    'error_message' => $e->getMessage(),
-                ]);
-            }
+            $this->sendOrQueueEmail(
+                new InvoiceEmail($event->payment),
+                $event->payment->user->email,
+                $event->payment->user_id,
+                'App\Models\Payment',
+                $event->payment->id,
+                'invoice'
+            );
         }
     }
 }

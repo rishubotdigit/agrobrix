@@ -15,7 +15,7 @@ trait DynamicSmtpTrait
 
         if ($smtpHost) {
             // Set default mailer to SMTP if database has SMTP host configured
-            config(['mail.default' => 'smtp']);
+            // config(['mail.default' => 'smtp']); // Commented out to use log for testing
 
             // Configure SMTP mailer with database settings, falling back to .env
             config(['mail.mailers.smtp.host' => $smtpHost]);

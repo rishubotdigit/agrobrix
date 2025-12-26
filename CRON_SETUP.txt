@@ -1,0 +1,1 @@
+* * * * * cd /Users/botdigit2/Desktop/new_agrobrix && php artisan schedule:run >> /dev/null 2>&1

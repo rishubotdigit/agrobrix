@@ -14,6 +14,11 @@
                     <option value="">All</option>
                     <option value="welcome_user" {{ request('email_type') == 'welcome_user' ? 'selected' : '' }}>Welcome User</option>
                     <option value="notify_admin_new_user" {{ request('email_type') == 'notify_admin_new_user' ? 'selected' : '' }}>Notify Admin New User</option>
+                    <option value="notify_admin_payment_submitted" {{ request('email_type') == 'notify_admin_payment_submitted' ? 'selected' : '' }}>Notify Admin Payment Submitted</option>
+                    <option value="notify_admin_plan_purchase" {{ request('email_type') == 'notify_admin_plan_purchase' ? 'selected' : '' }}>Notify Admin Plan Purchase</option>
+                    <option value="payment_approved" {{ request('email_type') == 'payment_approved' ? 'selected' : '' }}>Payment Approved</option>
+                    <option value="notify_admin_payment_approved" {{ request('email_type') == 'notify_admin_payment_approved' ? 'selected' : '' }}>Notify Admin Payment Approved</option>
+                    <option value="invoice" {{ request('email_type') == 'invoice' ? 'selected' : '' }}>Invoice</option>
                     <!-- Add more as needed -->
                 </select>
             </div>
