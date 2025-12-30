@@ -62,7 +62,7 @@
                             @endforeach
                         @endif
                     </div>
-                    <a href="{{ route('register') }}" class="block text-center {{ $plan->name === 'Pro' ? 'gradient-bg text-white hover:opacity-90' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} px-6 py-3 rounded-lg font-semibold transition">Get Started</a>
+                    <a href="{{ auth()->check() ? route('plans.purchase', $plan->id) : route('register', ['plan' => $plan->id]) }}" class="block text-center {{ $plan->name === 'Pro' ? 'gradient-bg text-white hover:opacity-90' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} px-6 py-3 rounded-lg font-semibold transition">Get Started</a>
                 </div>
             @empty
                 <div class="col-span-3 text-center py-12">
