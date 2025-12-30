@@ -22,7 +22,7 @@ class DashboardController extends Controller
         $activities = collect();
 
         // Properties Added
-        $properties = Property::where('user_id', $ownerId)->latest()->limit(20)->get();
+        $properties = Property::where('owner_id', $ownerId)->latest()->limit(20)->get();
         foreach ($properties as $property) {
             $activities->push([
                 'type' => 'Property Added',
