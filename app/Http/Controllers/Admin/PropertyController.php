@@ -316,6 +316,43 @@ class PropertyController extends Controller
         return redirect()->route('admin.properties.index')->with('success', 'Property deleted successfully');
     }
 
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids');
+        
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'No properties selected.');
+        }
+
+        $properties = Property::whereIn('id', $ids)->get();
+
+        foreach ($properties as $property) {
+            // Delete associated files
+            if ($property->property_images) {
+                $images = json_decode($property->property_images, true);
+                if (is_array($images)) {
+                    foreach ($images as $image) {
+                        $imagePath = storage_path('app/public/' . $image);
+                        if (file_exists($imagePath)) {
+                            unlink($imagePath);
+                        }
+                    }
+                }
+            }
+
+            if ($property->property_video) {
+                $videoPath = storage_path('app/public/' . $property->property_video);
+                if (file_exists($videoPath)) {
+                    unlink($videoPath);
+                }
+            }
+
+            $property->delete();
+        }
+
+        return redirect()->route('admin.properties.index')->with('success', 'Selected properties deleted successfully');
+    }
+
     public function cancelVersion(PropertyVersion $version)
     {
         Log::info('Canceling version ID: ' . $version->id . ' for property ID: ' . $version->property_id);

@@ -47,6 +47,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::post('properties/{property}/re-approve', [PropertyController::class, 'reApprove'])->name('admin.properties.re-approve');
     Route::post('properties/{property}/re-enable', [PropertyController::class, 'reEnable'])->name('admin.properties.re-enable');
     Route::delete('properties/{property}', [PropertyController::class, 'destroy'])->name('admin.properties.destroy');
+    Route::post('properties/bulk-destroy', [PropertyController::class, 'bulkDestroy'])->name('admin.properties.bulk-destroy');
     Route::get('properties/{property}/versions', [PropertyController::class, 'versions'])->name('admin.properties.versions');
     Route::post('versions/{version}/approve', [PropertyController::class, 'approveVersion'])->name('admin.versions.approve');
     Route::post('versions/{version}/reject', [PropertyController::class, 'rejectVersion'])->name('admin.versions.reject');

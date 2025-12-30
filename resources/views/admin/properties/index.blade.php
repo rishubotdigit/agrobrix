@@ -441,12 +441,33 @@
 
 <!-- All Properties Section -->
 <div class="mb-12">
-    <h2 class="text-2xl font-bold text-gray-900 mb-4">All Properties</h2>
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold text-gray-900">All Properties</h2>
+        <div id="bulkActions" class="hidden transition-opacity duration-300">
+            <button onclick="confirmBulkDelete()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center shadow-md">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                Delete Selected (<span id="selectedCount">0</span>)
+            </button>
+        </div>
+    </div>
+    
     @if($properties->count() > 0)
+    <form id="bulkDeleteForm" action="{{ route('admin.properties.bulk-destroy') }}" method="POST" style="display: none;">
+        @csrf
+        <div id="bulkDeleteInputs"></div>
+    </form>
+
     @if($viewMode == 'grid')
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($properties as $property)
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 relative group">
+            <!-- Checkbox -->
+            <div class="absolute top-3 left-3 z-10">
+                <input type="checkbox" value="{{ $property->id }}" class="property-checkbox w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary shadow-sm cursor-pointer" onchange="updateBulkState()">
+            </div>
+
             <!-- Property Image -->
             <div class="relative h-48 bg-gray-200">
                 @if($property->property_images && is_array(json_decode($property->property_images, true)))
@@ -560,6 +581,9 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-4">
+                            <input type="checkbox" id="selectAll" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" onchange="toggleSelectAll()">
+                        </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
@@ -574,6 +598,9 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach($properties as $property)
                     <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <input type="checkbox" value="{{ $property->id }}" class="property-checkbox w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" onchange="updateBulkState()">
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden">
                                 @if($property->property_images && is_array(json_decode($property->property_images, true)))
@@ -743,6 +770,46 @@ function toggleFilters() {
 function toggleImportModal() {
     const modal = document.getElementById('importModal');
     modal.classList.toggle('hidden');
+}
+
+// Bulk Actions Logic
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.property-checkbox');
+    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+    updateBulkState();
+}
+
+function updateBulkState() {
+    const checkboxes = document.querySelectorAll('.property-checkbox:checked');
+    const count = checkboxes.length;
+    const bulkActions = document.getElementById('bulkActions');
+    const selectedCount = document.getElementById('selectedCount');
+    
+    if (count > 0) {
+        bulkActions.classList.remove('hidden');
+        selectedCount.textContent = count;
+    } else {
+        bulkActions.classList.add('hidden');
+    }
+}
+
+function confirmBulkDelete() {
+    if (confirm('Are you sure you want to delete the selected properties? This action cannot be undone.')) {
+        const checkboxes = document.querySelectorAll('.property-checkbox:checked');
+        const formContainer = document.getElementById('bulkDeleteInputs');
+        formContainer.innerHTML = ''; // Clear previous
+        
+        checkboxes.forEach(cb => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids[]';
+            input.value = cb.value;
+            formContainer.appendChild(input);
+        });
+        
+        document.getElementById('bulkDeleteForm').submit();
+    }
 }
 </script>
 @endsection
