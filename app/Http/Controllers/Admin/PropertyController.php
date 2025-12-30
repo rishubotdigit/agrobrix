@@ -435,4 +435,154 @@ class PropertyController extends Controller
 
         return redirect()->route('admin.properties.show', $property)->with('success', 'Property updated successfully');
     }
+
+    public function export()
+    {
+        $fileName = 'properties_' . date('Y-m-d_H-i-s') . '.csv';
+        $properties = Property::with('district')->get();
+
+        $headers = array(
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        );
+
+        $columns = [
+            'Title', 'Land Type', 'Description', 'Price', 'Area', 'State', 'District', 
+            'Full Address', 'Plot Area', 'Plot Area Unit', 'Frontage', 'Road Width', 
+            'Corner Plot', 'Gated Community', 'Contact Name', 'Contact Mobile', 'Status'
+        ];
+
+        $callback = function() use($properties, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($properties as $property) {
+                $row = [
+                    $property->title,
+                    $property->land_type,
+                    $property->description,
+                    $property->price,
+                    $property->area,
+                    $property->state,
+                    $property->district->name ?? '',
+                    $property->full_address,
+                    $property->plot_area,
+                    $property->plot_area_unit,
+                    $property->frontage,
+                    $property->road_width,
+                    $property->corner_plot ? 'Yes' : 'No',
+                    $property->gated_community ? 'Yes' : 'No',
+                    $property->contact_name,
+                    $property->contact_mobile,
+                    $property->status
+                ];
+
+                fputcsv($file, $row);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt'
+        ]);
+
+        $file = $request->file('csv_file');
+        $handle = fopen($file->getRealPath(), 'r');
+        
+        // Skip header
+        $header = fgetcsv($handle);
+        
+        $count = 0;
+        $errors = [];
+        $rowNum = 1;
+
+        while (($data = fgetcsv($handle)) !== FALSE) {
+            $rowNum++;
+            if (count($data) < 16) {
+                $errors[] = "Row $rowNum: Invalid column count.";
+                continue;
+            }
+
+            // Map columns
+            $title = trim($data[0]);
+            $landType = trim($data[1]);
+            $description = trim($data[2]);
+            $price = trim($data[3]);
+            $area = trim($data[4]);
+            $stateName = trim($data[5]);
+            $districtName = trim($data[6]);
+            $fullAddress = trim($data[7]);
+            $plotArea = trim($data[8]);
+            $plotAreaUnit = trim($data[9]);
+            $frontage = trim($data[10]);
+            $roadWidth = trim($data[11]);
+            $cornerPlot = strtolower(trim($data[12])) === 'yes';
+            $gatedCommunity = strtolower(trim($data[13])) === 'yes';
+            $contactName = trim($data[14]);
+            $contactMobile = trim($data[15]);
+
+            // Resolve State and District
+            $state = \App\Models\State::where('name', $stateName)->first();
+            if (!$state) {
+                $errors[] = "Row $rowNum: State '$stateName' not found.";
+                continue;
+            }
+
+            $district = \App\Models\District::where('name', $districtName)
+                ->where('state_id', $state->id)
+                ->first();
+            
+            if (!$district) {
+                $errors[] = "Row $rowNum: District '$districtName' not found in state '$stateName'.";
+                continue;
+            }
+
+            try {
+                Property::create([
+                    'title' => $title,
+                    'land_type' => $landType,
+                    'description' => $description,
+                    'price' => $price,
+                    'area' => $area,
+                    'state' => $state->name,
+                    'district_id' => $district->id,
+                    'full_address' => $fullAddress,
+                    'plot_area' => $plotArea,
+                    'plot_area_unit' => $plotAreaUnit,
+                    'frontage' => $frontage,
+                    'road_width' => $roadWidth,
+                    'corner_plot' => $cornerPlot,
+                    'gated_community' => $gatedCommunity,
+                    'contact_name' => $contactName,
+                    'contact_mobile' => $contactMobile,
+                    'status' => 'pending',
+                    'owner_id' => auth()->id(),
+                ]);
+                $count++;
+            } catch (\Exception $e) {
+                $errors[] = "Row $rowNum: " . $e->getMessage();
+            }
+        }
+
+        fclose($handle);
+
+        $message = "Successfully imported $count properties.";
+        if (!empty($errors)) {
+            $message .= " Remaining rows had errors: " . implode('; ', array_slice($errors, 0, 5));
+            if (count($errors) > 5) {
+                $message .= " ... and " . (count($errors) - 5) . " more errors.";
+            }
+        }
+
+        return redirect()->back()->with(empty($errors) ? 'success' : 'warning', $message);
+    }
 }

@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
+            SettingSeeder::class,
+            CategorySeeder::class,
             StateSeeder::class,
             DistrictSeeder::class,
             PlanSeeder::class,

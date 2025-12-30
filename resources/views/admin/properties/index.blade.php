@@ -9,12 +9,26 @@
             <h1 class="text-3xl font-bold text-gray-900 mb-2">Properties Management</h1>
             <p class="text-gray-600">Manage all properties in the system.</p>
         </div>
-        <a href="{{ route('admin.properties.create') }}" class="bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors inline-flex items-center">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-            </svg>
-            Create Property
-        </a>
+        <div class="flex items-center space-x-3">
+            <a href="{{ route('admin.properties.export') }}" class="bg-gray-100 text-gray-700 px-4 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors inline-flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Export CSV
+            </a>
+            <button onclick="toggleImportModal()" class="bg-white border border-gray-300 text-gray-700 px-4 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors inline-flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                </svg>
+                Import CSV
+            </button>
+            <a href="{{ route('admin.properties.create') }}" class="bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors inline-flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                Create Property
+            </a>
+        </div>
     </div>
 </div>
 
@@ -603,6 +617,39 @@
     @endif
 </div>
 
+<!-- Import CSV Modal -->
+<div id="importModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50 px-4">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-xl bg-white">
+        <div class="mt-3">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Import Properties from CSV</h3>
+            <form action="{{ route('admin.properties.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Select CSV File</label>
+                    <input type="file" name="csv_file" accept=".csv,.txt" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                </div>
+                <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                    <h4 class="text-sm font-semibold text-gray-900 mb-2">Expected Column Order:</h4>
+                    <p class="text-xs text-gray-600 leading-relaxed">
+                        1. Title, 2. Land Type, 3. Description, 4. Price, 5. Area, 6. State, 7. District, 
+                        8. Full Address, 9. Plot Area, 10. Plot Area Unit, 11. Frontage, 12. Road Width, 
+                        13. Corner Plot (Yes/No), 14. Gated Community (Yes/No), 15. Contact Name, 16. Contact Mobile.
+                    </p>
+                    <p class="text-xs text-primary mt-2 font-medium">All imported properties will be set to 'Pending' status.</p>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="toggleImportModal()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-emerald-700 shadow-sm">
+                        Start Import
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Delete Confirmation Modal -->
 <div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
@@ -638,6 +685,11 @@ function closeDeleteModal() {
 function toggleFilters() {
     const filterForm = document.getElementById('filterForm');
     filterForm.style.display = filterForm.style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleImportModal() {
+    const modal = document.getElementById('importModal');
+    modal.classList.toggle('hidden');
 }
 </script>
 @endsection

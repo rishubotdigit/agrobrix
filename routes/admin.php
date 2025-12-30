@@ -35,6 +35,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::post('stop-impersonating', [UserController::class, 'stopImpersonating'])->name('admin.stop-impersonating');
 
     // Properties
+    Route::get('properties/export', [PropertyController::class, 'export'])->name('admin.properties.export');
+    Route::post('properties/import', [PropertyController::class, 'import'])->name('admin.properties.import');
     Route::get('properties', [PropertyController::class, 'index'])->name('admin.properties.index');
     Route::get('properties/create', [PropertyController::class, 'create'])->name('admin.properties.create');
     Route::post('properties', [PropertyController::class, 'store'])->name('admin.properties.store');
