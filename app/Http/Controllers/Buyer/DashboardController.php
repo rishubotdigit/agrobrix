@@ -21,7 +21,7 @@ class DashboardController extends Controller
         $contactsViewed = $user->viewedContacts()->count();
         $savedProperties = Wishlist::where('user_id', auth()->id())->count();
         $totalSpent = Payment::where('user_id', auth()->id())->where('status', 'completed')->sum('amount');
-        $activeSearches = ViewedContact::where('user_id', auth()->id())->count();
+        $activeSearches = ViewedContact::where('buyer_id', auth()->id())->count();
 
         // Plan information
         $activePlanPurchases = $user->activePlanPurchases();
@@ -96,7 +96,7 @@ class DashboardController extends Controller
         $contactsViewed = $user->viewedContacts()->count();
         $savedProperties = Wishlist::where('user_id', auth()->id())->count();
         $totalSpent = Payment::where('user_id', auth()->id())->where('status', 'completed')->sum('amount');
-        $activeSearches = ViewedContact::where('user_id', auth()->id())->count();
+        $activeSearches = ViewedContact::where('buyer_id', auth()->id())->count();
 
         // Plan stats
         $activePlanPurchases = $user->activePlanPurchases();
