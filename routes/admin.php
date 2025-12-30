@@ -66,6 +66,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::put('subcategories/{subcategory}', [CategoryController::class, 'updateSubcategory'])->name('admin.subcategories.update');
     Route::delete('subcategories/{subcategory}', [CategoryController::class, 'destroySubcategory'])->name('admin.subcategories.destroy');
 
+    // Amenities Management
+    Route::resource('amenities', \App\Http\Controllers\Admin\AmenityController::class)->names('admin.amenities');
+
 
     // Plans Management
     Route::resource('plans', PlanController::class)->names('admin.plans');
