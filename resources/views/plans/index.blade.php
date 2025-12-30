@@ -229,7 +229,7 @@
                 <button onclick="closeLoginModal()" class="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition">
                     Cancel
                 </button>
-                <a href="{{ route('login') }}" class="flex-1 bg-primary text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition text-center">
+                <a href="{{ route('login') }}" id="modalLoginLink" class="flex-1 bg-primary text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition text-center">
                     Login Now
                 </a>
             </div>
@@ -276,6 +276,10 @@ function closeAuthModal() {
 
 function openLoginModal(planId) {
     selectedPlanId = planId;
+    const loginLink = document.getElementById('modalLoginLink');
+    if (loginLink) {
+        loginLink.href = `/plans/${planId}/purchase`;
+    }
     document.getElementById('loginModal').classList.remove('hidden');
 }
 

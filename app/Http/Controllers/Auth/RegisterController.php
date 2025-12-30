@@ -210,6 +210,18 @@ class RegisterController extends Controller
 
     private function getRedirectUrl(User $user): string
     {
+        if (request()->has('plan') && request()->get('plan')) {
+            return route('plans.purchase', request()->get('plan'));
+        }
+        
+        if ($user->role === 'owner' || $user->role === 'agent') {
+            return route('owner.dashboard');
+        }
+
+        if ($user->role === 'admin') {
+            return route('admin.dashboard');
+        }
+
         return route('home');
     }
 }

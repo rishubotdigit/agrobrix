@@ -129,6 +129,9 @@
             <!-- Registration Form -->
             <form id="register-form" action="{{ route('register') }}" method="POST" class="space-y-8">
                 @csrf
+                @if(request('plan'))
+                    <input type="hidden" name="plan" value="{{ request('plan') }}">
+                @endif
 
                 <!-- Personal Information -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
