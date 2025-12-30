@@ -515,11 +515,32 @@ class PropertyController extends Controller
             // Map columns
             $title = trim($data[0]);
             $landType = trim($data[1]);
+            // Map land type
+            if (strtolower($landType) === 'agricultural') {
+                $landType = 'Agriculture';
+            }
+
             $description = trim($data[2]);
             $price = trim($data[3]);
             $area = trim($data[4]);
             $stateName = trim($data[5]);
             $districtName = trim($data[6]);
+
+            // Map district names
+            $districtMap = [
+                'Tumkur' => 'Tumakuru',
+                'Sivagangai' => 'Sivaganga',
+                'Kanchipuram' => 'Kancheepuram',
+                'Mysore' => 'Mysuru',
+                'Belgaum' => 'Belagavi',
+                'Chamraja Nagar' => 'Chamarajanagar',
+                'Thiruvallur' => 'Tiruvallur',
+                'Bangalore' => 'Bengaluru Urban',
+            ];
+            
+            if (isset($districtMap[$districtName])) {
+                $districtName = $districtMap[$districtName];
+            }
             $fullAddress = trim($data[7]);
             $plotArea = trim($data[8]);
             $plotAreaUnit = trim($data[9]);

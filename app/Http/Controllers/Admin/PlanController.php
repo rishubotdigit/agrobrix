@@ -71,6 +71,9 @@ class PlanController extends Controller
             }
 
             $price = $validated['offer_price'] ?? $validated['original_price'];
+            if ($price === '' || $price === null) {
+                $price = 0;
+            }
             $validity_period_days = $validated['validity_days'];
             $capabilities = [];
             if ($validated['role'] === 'buyer') {
