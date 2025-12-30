@@ -12,8 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('properties', function (Blueprint $table) {
-            $table->dropForeign(['city_id']);
-            $table->dropColumn('city_id');
+            // Check if column exists before trying to drop it
+            if (Schema::hasColumn('properties', 'city_id')) {
+                // Try to drop foreign key if it exists
+                try {
+                    $table->dropForeign(['city_id']);
+                } catch (\Exception $e) {
+                    // Foreign key doesn't exist, continue
+                }
+                $table->dropColumn('city_id');
+            }
         });
     }
 
