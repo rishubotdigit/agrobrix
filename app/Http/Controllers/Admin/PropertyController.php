@@ -353,6 +353,37 @@ class PropertyController extends Controller
         return redirect()->route('admin.properties.index')->with('success', 'Selected properties deleted successfully');
     }
 
+    public function bulkPropertyApprove(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (empty($ids)) return redirect()->back()->with('error', 'No properties selected.');
+        Property::whereIn('id', $ids)->update(['status' => 'approved']);
+        return redirect()->route('admin.properties.index')->with('success', 'Selected properties approved successfully');
+    }
+
+    public function bulkPropertyReject(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (empty($ids)) return redirect()->back()->with('error', 'No properties selected.');
+        Property::whereIn('id', $ids)->update(['status' => 'rejected']);
+        return redirect()->route('admin.properties.index')->with('success', 'Selected properties rejected successfully');
+    }
+
+    public function bulkPropertyEnable(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (empty($ids)) return redirect()->back()->with('error', 'No properties selected.');
+        Property::whereIn('id', $ids)->update(['status' => 'approved']); // Assuming 'approved' means enabled/active
+        return redirect()->route('admin.properties.index')->with('success', 'Selected properties enabled successfully');
+    }
+
+    public function bulkPropertyDisable(Request $request) {
+        $ids = $request->input('ids');
+        if (empty($ids)) return redirect()->back()->with('error', 'No properties selected.');
+        Property::whereIn('id', $ids)->update(['status' => 'disabled']);
+        return redirect()->route('admin.properties.index')->with('success', 'Selected properties disabled successfully');
+    }
+
     public function cancelVersion(PropertyVersion $version)
     {
         Log::info('Canceling version ID: ' . $version->id . ' for property ID: ' . $version->property_id);
