@@ -20,22 +20,19 @@ class PropertyController extends Controller
         session(['admin_properties_view_mode' => $viewMode]);
 
         // Build base queries
-        $myPropertiesQuery = Property::where('owner_id', auth()->id())->with(['owner', 'district.state']);
         $propertiesQuery = Property::with(['owner', 'district.state']);
 
         // Apply filters
-        $this->applyFilters($request, $myPropertiesQuery);
         $this->applyFilters($request, $propertiesQuery);
 
         // Paginate
-        $myProperties = $myPropertiesQuery->paginate(9)->appends($request->query());
-        $properties = $propertiesQuery->paginate(9)->appends($request->query());
+        $properties = $propertiesQuery->paginate(20)->appends($request->query());
 
         // Get filter data for dropdowns
         $states = \App\Models\State::orderBy('name')->get();
         $districts = \App\Models\District::orderBy('name')->get();
 
-        return view('admin.properties.index', compact('properties', 'myProperties', 'viewMode', 'states', 'districts'));
+        return view('admin.properties.index', compact('properties', 'viewMode', 'states', 'districts'));
     }
 
     private function applyFilters(Request $request, $query)
@@ -357,7 +354,13 @@ class PropertyController extends Controller
     {
         $ids = $request->input('ids');
         if (empty($ids)) return redirect()->back()->with('error', 'No properties selected.');
-        Property::whereIn('id', $ids)->update(['status' => 'approved']);
+        
+        $properties = Property::whereIn('id', $ids)->get();
+        foreach ($properties as $property) {
+            $property->update(['status' => 'approved']);
+            event(new PropertyApproved($property, auth()->id()));
+        }
+
         return redirect()->route('admin.properties.index')->with('success', 'Selected properties approved successfully');
     }
 
@@ -365,7 +368,13 @@ class PropertyController extends Controller
     {
         $ids = $request->input('ids');
         if (empty($ids)) return redirect()->back()->with('error', 'No properties selected.');
-        Property::whereIn('id', $ids)->update(['status' => 'rejected']);
+        
+        $properties = Property::whereIn('id', $ids)->get();
+        foreach ($properties as $property) {
+            $property->update(['status' => 'rejected']);
+            event(new \App\Events\PropertyRejected($property, auth()->id()));
+        }
+
         return redirect()->route('admin.properties.index')->with('success', 'Selected properties rejected successfully');
     }
 
@@ -373,14 +382,25 @@ class PropertyController extends Controller
     {
         $ids = $request->input('ids');
         if (empty($ids)) return redirect()->back()->with('error', 'No properties selected.');
-        Property::whereIn('id', $ids)->update(['status' => 'approved']); // Assuming 'approved' means enabled/active
+        
+        $properties = Property::whereIn('id', $ids)->get();
+        foreach ($properties as $property) {
+            $property->update(['status' => 'approved']);
+            // reEnable fires PropertyApproved event in individual method, so we do it here too
+            event(new PropertyApproved($property, auth()->id()));
+        }
+
         return redirect()->route('admin.properties.index')->with('success', 'Selected properties enabled successfully');
     }
 
     public function bulkPropertyDisable(Request $request) {
         $ids = $request->input('ids');
         if (empty($ids)) return redirect()->back()->with('error', 'No properties selected.');
+        
+        // Disable does not fire an event in the simple method, so we can use bulk update or loop. 
+        // Keeping it consistent with others:
         Property::whereIn('id', $ids)->update(['status' => 'disabled']);
+        
         return redirect()->route('admin.properties.index')->with('success', 'Selected properties disabled successfully');
     }
 
