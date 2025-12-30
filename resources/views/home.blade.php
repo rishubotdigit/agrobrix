@@ -51,12 +51,12 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-4xl mx-auto">
                 <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">
-                    <span class="text-primary">Find Your Perfect</span><br>
-                    <span class="text-gray-800">Agricultural Property</span>
+                    <span class="text-primary">India's Premier Marketplace</span><br>
+                    <span class="text-gray-800">for Land & Farms</span>
                 </h1>
                 
                 <p class="text-lg text-gray-700 mb-8">
-                    Discover prime agricultural land across India
+                    Discover exceptional agricultural properties, plantations, and rural estates nationwide
                 </p>
 
                 <!-- Search Form with Filters -->
