@@ -67,7 +67,7 @@
     <div class="bg-white shadow-md rounded-xl border border-gray-200 p-6 mb-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">Location</h2>
         <div class="mb-4">
-            <strong>Address:</strong> {{ $property->full_address }}, {{ $property->area }}
+            <strong>Address:</strong> {{ $property->full_address }}, {{ $property->area }}, {{ $property->district->name ?? '' }}, {{ $property->state }}
         </div>
         @if($property->google_map_lat && $property->google_map_lng)
             @if(\App\Models\Setting::get('google_maps_api_key', '') && \App\Models\Setting::get('map_enabled', '0') == '1')

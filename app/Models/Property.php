@@ -18,7 +18,7 @@ class Property extends Model
         });
     }
     protected $fillable = [
-        'title', 'land_type', 'description', 'area', 'full_address',
+        'title', 'land_type', 'description', 'state', 'district_id', 'area', 'full_address',
         'google_map_lat', 'google_map_lng', 'plot_area', 'plot_area_unit', 'frontage',
         'road_width', 'corner_plot', 'gated_community',
         'price', 'price_negotiable', 'contact_name', 'contact_mobile',
@@ -38,6 +38,7 @@ class Property extends Model
         'property_images' => 'array',
         'featured' => 'boolean',
         'featured_until' => 'datetime',
+        'district_id' => 'integer',
     ];
 
     public function getLatitudeAttribute()
@@ -58,11 +59,6 @@ class Property extends Model
     public function agent()
     {
         return $this->belongsTo(User::class, 'agent_id');
-    }
-
-    public function state()
-    {
-        return $this->belongsTo(State::class);
     }
 
     public function district()

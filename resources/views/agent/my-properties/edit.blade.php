@@ -573,72 +573,117 @@ document.addEventListener('DOMContentLoaded', function() {
         hideError('property_video_error');
     });
 
-    // Google Maps Integration
-    let map;
-    let marker;
+    // AJAX for dependent dropdowns
+    const stateSelect = document.getElementById('state');
+    const districtSelect = document.getElementById('district');
+    const currentDistrictId = "{{ $property->district_id }}";
 
-    function initializeMap() {
-        // Check if map container exists and is visible
-        const mapElement = document.getElementById('map');
-        if (!mapElement || mapElement.classList.contains('hidden')) return;
+    stateSelect.addEventListener('change', function() {
+        const stateId = this.value;
 
-        // Check if Google Maps API is loaded
-        if (!window.google || !window.google.maps) return;
+        // Reset district
+        districtSelect.innerHTML = '<option value="">Select District</option>';
+        districtSelect.disabled = true;
 
-        // Default center (India)
-        const defaultCenter = { lat: 20.5937, lng: 78.9629 };
-
-        // Initialize map
-        map = new google.maps.Map(mapElement, {
-            zoom: 5,
-            center: defaultCenter,
-            mapTypeId: google.maps.MapTypeId.ROADMAP
-        });
-
-        // Add click listener to place marker
-        map.addListener('click', function(event) {
-            placeMarker(event.latLng);
-        });
-
-        // If coordinates already exist, show marker
-        const latInput = document.getElementById('google_map_lat');
-        const lngInput = document.getElementById('google_map_lng');
-
-        if (latInput && latInput.value && lngInput && lngInput.value) {
-            const position = {
-                lat: parseFloat(latInput.value),
-                lng: parseFloat(lngInput.value)
-            };
-            placeMarker(position);
-            map.setCenter(position);
-            map.setZoom(15);
+        if (stateId) {
+            fetch(`/api/districts/${stateId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(district => {
+                        const isSelected = district.id == currentDistrictId ? 'selected' : '';
+                        districtSelect.innerHTML += `<option value="${district.id}" ${isSelected}>${district.name}</option>`;
+                    });
+                    districtSelect.disabled = false;
+                })
+                .catch(error => console.error('Error loading districts:', error));
         }
-    }
+    });
 
-    function placeMarker(location) {
+    // Initialize districts on load
+    if (stateSelect.value) {
+        fetch(`/api/districts/${stateSelect.value}`)
+            .then(response => response.json())
+            .then(data => {
+                districtSelect.innerHTML = '<option value="">Select District</option>';
+                data.forEach(district => {
+                    const isSelected = district.id == currentDistrictId ? 'selected' : '';
+                    districtSelect.innerHTML += `<option value="${district.id}" ${isSelected}>${district.name}</option>`;
+                });
+                districtSelect.disabled = false;
+            })
+            .catch(error => console.error('Error loading districts:', error));
+    }
+    
+    loadGoogleMapsAPI();
+});
+
+// Google Maps Integration
+let map;
+let marker;
+
+function initializeMap() {
+    // Check if map container exists and is visible
+    const mapElement = document.getElementById('map');
+    if (!mapElement || mapElement.classList.contains('hidden')) return;
+
+    // Check if Google Maps API is loaded
+    if (!window.google || !window.google.maps) return;
+
+    // Default center (India)
+    const defaultLat = 20.5937;
+    const defaultLng = 78.9629;
+
+    // Initialize map
+    map = new google.maps.Map(mapElement, {
+        center: { lat: defaultLat, lng: defaultLng },
+        zoom: 5,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    });
+
+    // Add click listener to map
+    map.addListener('click', function(event) {
+        const lat = event.latLng.lat();
+        const lng = event.latLng.lng();
+
+        // Update form fields
+        document.getElementById('google_map_lat').value = lat.toFixed(6);
+        document.getElementById('google_map_lng').value = lng.toFixed(6);
+
         // Remove existing marker
         if (marker) {
             marker.setMap(null);
         }
 
-        // Create new marker
+        // Add new marker
         marker = new google.maps.Marker({
-            position: location,
+            position: { lat: lat, lng: lng },
             map: map,
-            draggable: true
+            title: 'Property Location'
         });
 
-        // Update form fields
-        document.getElementById('google_map_lat').value = location.lat();
-        document.getElementById('google_map_lng').value = location.lng();
+        // Center map on clicked location
+        map.setCenter({ lat: lat, lng: lng });
+        map.setZoom(15);
+    });
 
-        // Add drag listener to update coordinates
-        marker.addListener('dragend', function(event) {
-            document.getElementById('google_map_lat').value = event.latLng.lat();
-            document.getElementById('google_map_lng').value = event.latLng.lng();
+    // If coordinates already exist, show marker
+    const existingLat = document.getElementById('google_map_lat').value;
+    const existingLng = document.getElementById('google_map_lng').value;
+
+    if (existingLat && existingLng) {
+        const lat = parseFloat(existingLat);
+        const lng = parseFloat(existingLng);
+
+        marker = new google.maps.Marker({
+            position: { lat: lat, lng: lng },
+            map: map,
+            title: 'Property Location'
         });
+
+        map.setCenter({ lat: lat, lng: lng });
+        map.setZoom(15);
     }
-});
+}
 
 // Load Google Maps API
 function loadGoogleMapsAPI() {
@@ -655,51 +700,8 @@ function loadGoogleMapsAPI() {
 
 // Callback when Google Maps API is loaded
 function onGoogleMapsLoaded() {
-    // API is loaded, map will be initialized when step 4 is shown
+    // API is loaded, map will be initialized when step 3 is shown
 }
 
-// Load API when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    loadGoogleMapsAPI();
-
-    // AJAX for dependent dropdowns
-    document.getElementById('state').addEventListener('change', function() {
-        const stateId = this.value;
-        const districtSelect = document.getElementById('district');
-
-        // Reset district
-        districtSelect.innerHTML = '<option value="">Select District</option>';
-        districtSelect.disabled = true;
-
-        if (stateId) {
-            fetch(`/api/districts/${stateId}`)
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(district => {
-                        districtSelect.innerHTML += `<option value="${district.id}">${district.name}</option>`;
-                    });
-                    districtSelect.disabled = false;
-                })
-                .catch(error => console.error('Error loading districts:', error));
-        }
-    });
-
-    // Initialize dropdowns on page load if values exist
-    const stateSelect = document.getElementById('state');
-    const districtSelect = document.getElementById('district');
-
-    if (stateSelect.value) {
-        // Load districts for the selected state
-        fetch(`/api/districts/${stateSelect.value}`)
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(district => {
-                    districtSelect.innerHTML += `<option value="${district.id}">${district.name}</option>`;
-                });
-                districtSelect.disabled = false;
-            })
-            .catch(error => console.error('Error loading districts:', error));
-    }
-});
 </script>
 @endsection

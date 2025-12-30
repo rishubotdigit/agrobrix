@@ -397,11 +397,16 @@ class PropertyController extends Controller
             $videoPath = $request->file('property_video')->store('properties/videos', 'public');
         }
 
+        // Get state name from ID
+        $state = \App\Models\State::find($validated['state']);
+
         // Update property
         $property->update([
             'title' => $validated['title'],
             'land_type' => $validated['land_type'],
             'description' => $validated['description'],
+            'state' => $state ? $state->name : null,
+            'district_id' => $validated['district'],
             'area' => $validated['area'],
             'full_address' => $validated['full_address'],
             'google_map_lat' => $validated['google_map_lat'] ?? null,

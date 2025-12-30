@@ -571,6 +571,49 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('property_video').addEventListener('change', function() {
         hideError('property_video_error');
     });
+
+    // AJAX for dependent dropdowns
+    const stateSelect = document.getElementById('state');
+    const districtSelect = document.getElementById('district');
+    const currentDistrictId = "{{ $property->district_id }}";
+
+    stateSelect.addEventListener('change', function() {
+        const stateId = this.value;
+
+        // Reset district
+        districtSelect.innerHTML = '<option value="">Select District</option>';
+        districtSelect.disabled = true;
+
+        if (stateId) {
+            fetch(`/api/districts/${stateId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(district => {
+                        const isSelected = district.id == currentDistrictId ? 'selected' : '';
+                        districtSelect.innerHTML += `<option value="${district.id}" ${isSelected}>${district.name}</option>`;
+                    });
+                    districtSelect.disabled = false;
+                })
+                .catch(error => console.error('Error loading districts:', error));
+        }
+    });
+
+    // Initialize districts on load
+    if (stateSelect.value) {
+        fetch(`/api/districts/${stateSelect.value}`)
+            .then(response => response.json())
+            .then(data => {
+                districtSelect.innerHTML = '<option value="">Select District</option>';
+                data.forEach(district => {
+                    const isSelected = district.id == currentDistrictId ? 'selected' : '';
+                    districtSelect.innerHTML += `<option value="${district.id}" ${isSelected}>${district.name}</option>`;
+                });
+                districtSelect.disabled = false;
+            })
+            .catch(error => console.error('Error loading districts:', error));
+    }
+    
+    loadGoogleMapsAPI();
 });
 
 // Google Maps Integration
@@ -656,51 +699,8 @@ function loadGoogleMapsAPI() {
 
 // Callback when Google Maps API is loaded
 function onGoogleMapsLoaded() {
-    // API is loaded, map will be initialized when step 4 is shown
+    // API is loaded, map will be initialized when step 3 is shown
 }
 
-// Load API when page loads
-loadGoogleMapsAPI();
-
-// AJAX for dependent dropdowns
-document.getElementById('state').addEventListener('change', function() {
-    const stateId = this.value;
-    const districtSelect = document.getElementById('district');
-
-    // Reset district
-    districtSelect.innerHTML = '<option value="">Select District</option>';
-    districtSelect.disabled = true;
-
-    if (stateId) {
-        fetch(`/api/districts/${stateId}`)
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(district => {
-                    districtSelect.innerHTML += `<option value="${district.id}">${district.name}</option>`;
-                });
-                districtSelect.disabled = false;
-            })
-            .catch(error => console.error('Error loading districts:', error));
-    }
-});
-
-// Initialize dropdowns on page load if values exist
-document.addEventListener('DOMContentLoaded', function() {
-    const stateSelect = document.getElementById('state');
-    const districtSelect = document.getElementById('district');
-
-    if (stateSelect.value) {
-        // Load districts for the selected state
-        fetch(`/api/districts/${stateSelect.value}`)
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(district => {
-                    districtSelect.innerHTML += `<option value="${district.id}">${district.name}</option>`;
-                });
-                districtSelect.disabled = false;
-            })
-            .catch(error => console.error('Error loading districts:', error));
-    }
-});
 </script>
 @endsection
