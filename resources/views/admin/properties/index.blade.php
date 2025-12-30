@@ -321,39 +321,65 @@
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="grid grid-cols-2 gap-2 text-xs">
-                     <a href="{{ route('admin.properties.show', $property) }}" class="col-span-1 bg-gray-50 text-gray-600 py-1.5 rounded hover:bg-gray-100 transition-colors text-center border border-gray-200">
-                        View
-                    </a>
-                    <a href="{{ route('admin.properties.edit', $property) }}" class="col-span-1 bg-gray-50 text-gray-600 py-1.5 rounded hover:bg-gray-100 transition-colors text-center border border-gray-200">
-                        Edit
-                    </a>
+                <div class="space-y-2 text-xs">
+                     <div class="grid grid-cols-2 gap-2">
+                        <a href="{{ route('admin.properties.show', $property) }}" class="bg-gray-50 text-gray-600 py-1.5 rounded hover:bg-gray-100 transition-colors text-center border border-gray-200">
+                            View
+                        </a>
+                        <a href="{{ route('admin.properties.edit', $property) }}" class="bg-gray-50 text-gray-600 py-1.5 rounded hover:bg-gray-100 transition-colors text-center border border-gray-200">
+                            Edit
+                        </a>
+                     </div>
                    
-                    <div class="col-span-2 flex justify-between gap-2 mt-1">
-                        @if($property->status == 'approved')
+                    <div class="flex gap-2">
+                        @if($property->status == 'pending')
+                            <form method="POST" action="{{ route('admin.properties.re-approve', $property) }}" class="flex-1">
+                                @csrf
+                                <button type="submit" class="w-full bg-green-50 text-green-700 py-1.5 rounded hover:bg-green-100 transition-colors border border-green-100 text-center">
+                                    Approve
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ route('admin.properties.reject', $property) }}" class="flex-1">
+                                @csrf
+                                <button type="submit" class="w-full bg-red-50 text-red-700 py-1.5 rounded hover:bg-red-100 transition-colors border border-red-100 text-center">
+                                    Reject
+                                </button>
+                            </form>
+                        @elseif($property->status == 'approved')
                             <form method="POST" action="{{ route('admin.properties.disable', $property) }}" class="flex-1">
                                 @csrf
-                                <button type="submit" class="w-full bg-yellow-50 text-yellow-700 py-1.5 rounded hover:bg-yellow-100 transition-colors border border-yellow-100">
+                                <button type="submit" class="w-full bg-yellow-50 text-yellow-700 py-1.5 rounded hover:bg-yellow-100 transition-colors border border-yellow-100 text-center">
                                     Disable
                                 </button>
                             </form>
+                            <button onclick="deleteProperty({{ $property->id }})" class="bg-red-50 text-red-700 py-1.5 px-3 rounded hover:bg-red-100 transition-colors border border-red-100" title="Delete">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
                         @elseif($property->status == 'rejected')
                             <form method="POST" action="{{ route('admin.properties.re-approve', $property) }}" class="flex-1">
                                 @csrf
-                                <button type="submit" class="w-full bg-green-50 text-green-700 py-1.5 rounded hover:bg-green-100 transition-colors border border-green-100">
+                                <button type="submit" class="w-full bg-green-50 text-green-700 py-1.5 rounded hover:bg-green-100 transition-colors border border-green-100 text-center">
                                     Re-Approve
                                 </button>
                             </form>
-                         @elseif($property->status == 'pending')
-                         <!-- Pending actions usually handled inside view, but add quick approve/reject here? -->
-                            <a href="{{ route('admin.properties.show', $property) }}" class="flex-1 bg-blue-50 text-blue-700 py-1.5 rounded hover:bg-blue-100 transition-colors text-center border border-blue-100">Review</a>
+                            <button onclick="deleteProperty({{ $property->id }})" class="bg-red-50 text-red-700 py-1.5 px-3 rounded hover:bg-red-100 transition-colors border border-red-100" title="Delete">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                         @elseif($property->status == 'disabled')
+                            <form method="POST" action="{{ route('admin.properties.re-enable', $property) }}" class="flex-1">
+                                @csrf
+                                <button type="submit" class="w-full bg-blue-50 text-blue-700 py-1.5 rounded hover:bg-blue-100 transition-colors border border-blue-100 text-center">
+                                    Enable
+                                </button>
+                            </form>
+                            <button onclick="deleteProperty({{ $property->id }})" class="bg-red-50 text-red-700 py-1.5 px-3 rounded hover:bg-red-100 transition-colors border border-red-100" title="Delete">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        @else
+                           <button onclick="deleteProperty({{ $property->id }})" class="flex-1 bg-red-50 text-red-700 py-1.5 px-3 rounded hover:bg-red-100 transition-colors border border-red-100" title="Delete">
+                                Delete
+                           </button>
                         @endif
-
-                        <button onclick="deleteProperty({{ $property->id }})" class="bg-red-50 text-red-700 py-1.5 px-3 rounded hover:bg-red-100 transition-colors border border-red-100" title="Delete">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                            </svg>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -438,22 +464,30 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex space-x-2">
                                 <a href="{{ route('admin.properties.show', $property) }}" class="text-gray-600 hover:text-gray-900">View</a>
-                                <a href="{{ route('admin.properties.versions', $property) }}" class="text-blue-600 hover:text-blue-900">Versions</a>
-                                @if($property->status == 'approved')
+                                <a href="{{ route('admin.properties.edit', $property) }}" class="text-purple-600 hover:text-purple-900">Edit</a>
+                                @if($property->status == 'pending')
+                                    <form method="POST" action="{{ route('admin.properties.re-approve', $property) }}" class="inline">
+                                        @csrf
+                                        <button type="submit" class="text-green-600 hover:text-green-900">Approve</button>
+                                    </form>
+                                    <form method="POST" action="{{ route('admin.properties.reject', $property) }}" class="inline">
+                                        @csrf
+                                        <button type="submit" class="text-red-600 hover:text-red-900">Reject</button>
+                                    </form>
+                                @elseif($property->status == 'approved')
                                     <form method="POST" action="{{ route('admin.properties.disable', $property) }}" class="inline">
                                         @csrf
                                         <button type="submit" class="text-yellow-600 hover:text-yellow-900">Disable</button>
                                     </form>
-                                    <a href="{{ route('admin.properties.edit', $property) }}" class="text-purple-600 hover:text-purple-900">Edit</a>
                                 @elseif($property->status == 'rejected')
                                     <form method="POST" action="{{ route('admin.properties.re-approve', $property) }}" class="inline">
                                         @csrf
                                         <button type="submit" class="text-green-600 hover:text-green-900">Re-Approve</button>
                                     </form>
-                                @elseif($property->status == 'canceled')
+                                @elseif($property->status == 'disabled')
                                     <form method="POST" action="{{ route('admin.properties.re-enable', $property) }}" class="inline">
                                         @csrf
-                                        <button type="submit" class="text-blue-600 hover:text-blue-900">Re-Enable</button>
+                                        <button type="submit" class="text-blue-600 hover:text-blue-900">Enable</button>
                                     </form>
                                 @endif
                                 <button onclick="deleteProperty({{ $property->id }})" class="text-red-600 hover:text-red-900">Delete</button>

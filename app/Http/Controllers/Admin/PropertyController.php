@@ -440,6 +440,14 @@ class PropertyController extends Controller
         return redirect()->back()->with('success', 'Property re-enabled.');
     }
 
+    public function reject(Property $property)
+    {
+        $property->update(['status' => 'rejected']);
+        Log::info('Firing PropertyRejected event for property ID: ' . $property->id);
+        event(new \App\Events\PropertyRejected($property, auth()->id()));
+        return redirect()->back()->with('success', 'Property rejected.');
+    }
+
     public function edit(Request $request, Property $property)
     {
         $step = $request->get('step', 1);
