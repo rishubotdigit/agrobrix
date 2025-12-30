@@ -45,6 +45,13 @@ class PlanPurchaseController extends Controller
             ], 400);
         }
 
+        // Enforce role-based restrictions
+        if ($user->role !== $plan->role) {
+            return response()->json([
+                'error' => 'You can only purchase plans that match your account role (' . ucfirst($user->role) . '). This plan is for ' . ucfirst($plan->role) . 's.'
+            ], 403);
+        }
+
         // Validate gateway parameter
         $request->validate([
             'gateway' => 'nullable|string|in:razorpay,phonepe,upi_static',
