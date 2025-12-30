@@ -11,7 +11,7 @@ class DistrictController extends Controller
 {
     public function index()
     {
-        $states = State::with(['districts.cities'])->get();
+        $states = State::with(['districts'])->get();
         return view('admin.districts.index', compact('states'));
     }
 

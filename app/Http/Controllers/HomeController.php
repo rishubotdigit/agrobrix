@@ -53,7 +53,28 @@ class HomeController extends Controller
             });
         }
 
-        return view('home', compact('plans', 'featuredProperties', 'latestProperties', 'currentPlanId', 'currentPlanPrice'));
+        // Fetch state-wise properties for admin-selected states
+        $homepageStatesJson = \App\Models\Setting::get('homepage_states', json_encode(['Punjab', 'Haryana', 'Chandigarh', 'Himachal Pradesh']));
+        $stateNames = json_decode($homepageStatesJson, true) ?? [];
+        $stateWiseProperties = [];
+        
+        foreach ($stateNames as $stateName) {
+            $properties = Property::with(['owner', 'amenities', 'district'])
+                ->where('status', 'approved')
+                ->where('state', $stateName)
+                ->orderBy('created_at', 'desc')
+                ->limit(4)
+                ->get();
+                
+            if ($properties->isNotEmpty()) {
+                $stateWiseProperties[$stateName] = [
+                    'state' => (object)['name' => $stateName],
+                    'properties' => $properties
+                ];
+            }
+        }
+
+        return view('home', compact('plans', 'featuredProperties', 'latestProperties', 'currentPlanId', 'currentPlanPrice', 'stateWiseProperties'));
     }
 
     public function about()
@@ -115,12 +136,16 @@ class HomeController extends Controller
 
     public function forBuyers()
     {
-        return view('pages.for-buyers');
+        $plans = Plan::where('role', 'buyer')->where('status', 'active')->get();
+        return view('pages.for-buyers', compact('plans'));
     }
 
     public function forSellers()
     {
-        return view('pages.for-sellers');
+        $ownerPlans = Plan::where('role', 'owner')->where('status', 'active')->get();
+        $agentPlans = Plan::where('role', 'agent')->where('status', 'active')->get();
+        $plans = $ownerPlans->merge($agentPlans);
+        return view('pages.for-sellers', compact('plans'));
     }
 
     public function postProperty()

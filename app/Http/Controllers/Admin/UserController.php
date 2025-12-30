@@ -12,9 +12,44 @@ use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::paginate(20);
+        $query = User::query();
+
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('mobile', 'like', "%{$search}%");
+            });
+        }
+
+        // Role filter
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        // Verification status filter
+        if ($request->filled('verified')) {
+            if ($request->verified === 'yes') {
+                $query->whereNotNull('verified_at');
+            } elseif ($request->verified === 'no') {
+                $query->whereNull('verified_at');
+            }
+        }
+
+        // Date range filter
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $users = $query->latest()->paginate(20)->withQueryString();
         return view('admin.users.index', compact('users'));
     }
 
@@ -32,7 +67,9 @@ class UserController extends Controller
     }
     public function edit(User $user)
     {
-        return view('admin.users.edit', compact('user'));
+        $plans = \App\Models\Plan::where('status', 'active')->get();
+        $activePlanId = $user->activePlanPurchase()?->plan_id;
+        return view('admin.users.edit', compact('user', 'plans', 'activePlanId'));
     }
 
 
@@ -41,10 +78,38 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'role' => 'required|in:owner,agent,buyer',
+            'role' => 'required|in:admin,owner,agent,buyer',
+            'profile_photo' => 'nullable|image|max:2048',
+            'plan_id' => 'nullable|exists:plans,id',
         ]);
 
-        $user->update($request->only(['name', 'email', 'role']));
+        $data = $request->only(['name', 'email', 'role']);
+
+        if ($request->hasFile('profile_photo')) {
+            $path = $request->file('profile_photo')->store('profile-photos', 'public');
+            $data['profile_photo'] = $path;
+        }
+
+        $user->update($data);
+
+        if ($request->filled('plan_id')) {
+            $planId = $request->plan_id;
+            $activePurchase = $user->activePlanPurchase();
+            
+            if (!$activePurchase || $activePurchase->plan_id != $planId) {
+                // Deactivate all existing active plans
+                \App\Models\PlanPurchase::deactivateActivePlansForUser($user->id);
+                
+                $plan = \App\Models\Plan::find($planId);
+                \App\Models\PlanPurchase::create([
+                    'user_id' => $user->id,
+                    'plan_id' => $planId,
+                    'status' => 'activated',
+                    'activated_at' => now(),
+                    'expires_at' => now()->addDays($plan->getValidityDays()),
+                ]);
+            }
+        }
 
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }

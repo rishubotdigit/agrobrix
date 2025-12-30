@@ -16,10 +16,26 @@ class PlanPurchaseController extends Controller
     {
         $query = PlanPurchase::with(['user', 'plan', 'payment']);
 
+        // Status filter
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
+        // User search filter
+        if ($request->filled('user_search')) {
+            $search = $request->user_search;
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Plan filter
+        if ($request->filled('plan_id')) {
+            $query->where('plan_id', $request->plan_id);
+        }
+
+        // Date range filters
         if ($request->filled('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
@@ -28,8 +44,10 @@ class PlanPurchaseController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        $purchases = $query->orderBy('created_at', 'desc')->get();
-        return view('admin.plan-purchases.index', compact('purchases'));
+        $purchases = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
+        $plans = \App\Models\Plan::where('status', 'active')->get();
+        
+        return view('admin.plan-purchases.index', compact('purchases', 'plans'));
     }
 
     /**
@@ -68,6 +86,22 @@ class PlanPurchaseController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Plan purchase expired successfully');
+    }
+
+    /**
+     * Deactivate a plan purchase manually.
+     */
+    public function deactivate(PlanPurchase $planPurchase)
+    {
+        if ($planPurchase->status !== 'activated') {
+            return redirect()->back()->with('error', 'Only activated plans can be deactivated');
+        }
+
+        $planPurchase->update(['status' => 'deactivated']);
+
+        Log::info('Plan purchase deactivated', ['purchase_id' => $planPurchase->id, 'admin_id' => auth()->id()]);
+
+        return redirect()->back()->with('success', 'Plan purchase deactivated successfully');
     }
 
     /**

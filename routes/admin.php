@@ -75,6 +75,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::post('plan-purchases/{planPurchase}/expire', [PlanPurchaseController::class, 'expire'])->name('admin.plan-purchases.expire');
     Route::post('plan-purchases/{planPurchase}/approve', [PlanPurchaseController::class, 'approve'])->name('admin.plan-purchases.approve');
     Route::post('plan-purchases/{planPurchase}/reject', [PlanPurchaseController::class, 'reject'])->name('admin.plan-purchases.reject');
+    Route::post('plan-purchases/{planPurchase}/deactivate', [PlanPurchaseController::class, 'deactivate'])->name('admin.plan-purchases.deactivate');
 
     // Payments Management
     Route::get('payments', [PaymentController::class, 'index'])->name('admin.payments.index');
@@ -93,6 +94,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('settings', [SettingController::class, 'index'])->name('admin.settings.index');
     Route::post('settings', [SettingController::class, 'update'])->name('admin.settings.update');
     Route::post('settings/test-email', [SettingController::class, 'testEmail'])->name('admin.settings.test-email');
+    Route::delete('settings/logo', [SettingController::class, 'deleteLogo'])->name('admin.settings.delete-logo');
 
     // SMS Gateways
     Route::get('sms-gateways', [SmsGatewayController::class, 'index'])->name('admin.sms-gateways.index');

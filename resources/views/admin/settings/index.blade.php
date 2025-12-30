@@ -24,6 +24,9 @@
                 <button type="button" class="tab-button whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="map">
                     Map Settings
                 </button>
+                <button type="button" class="tab-button whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="homepage">
+                    Homepage Content
+                </button>
                 <button type="button" class="tab-button whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="branding">
                     Branding
                 </button>
@@ -228,29 +231,131 @@
             </div>
         </div>
 
+        <!-- Homepage Content Tab -->
+        <div id="homepage" class="tab-content bg-white shadow-md rounded-lg p-6 hidden">
+            <h3 class="text-xl font-semibold text-gray-900 mb-6">Homepage Content Settings</h3>
+            
+            <div class="bg-gray-50 p-6 rounded-lg border-2 border-gray-200">
+                <h4 class="text-lg font-medium text-gray-900 mb-4">Featured State Sections</h4>
+                <p class="text-sm text-gray-600 mb-4">Select which states to display in dedicated property sections on the homepage. Properties from these states will be shown in separate sections below the main listings.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    @php
+                        $allStates = [
+                            'Punjab', 'Haryana', 'Chandigarh', 'Himachal Pradesh', 'Uttarakhand',
+                            'Delhi', 'Rajasthan', 'Uttar Pradesh', 'Madhya Pradesh', 'Gujarat',
+                            'Maharashtra', 'Karnataka', 'Tamil Nadu', 'Kerala', 'Andhra Pradesh',
+                            'Telangana', 'West Bengal', 'Bihar', 'Jharkhand', 'Odisha'
+                        ];
+                        $selectedStates = json_decode($settings['homepage_states'], true) ?? [];
+                    @endphp
+                    
+                    @foreach($allStates as $state)
+                        <div class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-white">
+                            <input 
+                                type="checkbox" 
+                                id="state_{{ str_replace(' ', '_', $state) }}" 
+                                name="homepage_states[]" 
+                                value="{{ $state }}"
+                                {{ in_array($state, $selectedStates) ? 'checked' : '' }}
+                                class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                            >
+                            <label for="state_{{ str_replace(' ', '_', $state) }}" class="ml-3 block text-sm font-medium text-gray-900 cursor-pointer">
+                                {{ $state }}
+                            </label>
+                        </div>
+                    @endforeach
+                </div>
+                
+                <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div class="flex">
+                        <svg class="w-5 h-5 text-blue-600 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        <div class="text-sm text-blue-800">
+                            <p class="font-semibold mb-1">How it works:</p>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Each checked state will appear as a separate section on the homepage</li>
+                                <li>Up to 4 latest properties from each state will be displayed</li>
+                                <li>Sections are shown in the order selected above</li>
+                                <li>If a state has no properties, its section won't be displayed</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Branding Tab -->
         <div id="branding" class="tab-content bg-white shadow-md rounded-lg p-6 hidden">
-            <h3 class="text-xl font-semibold text-gray-900 mb-4">Branding Settings</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="logo" class="block text-sm font-medium text-gray-700">Logo</label>
-                    <input type="file" id="logo" name="logo" accept="image/*" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                    @if($settings['logo'])
-                        <div class="mt-2">
-                            <img src="{{ asset(App\Models\Setting::get('logo')) }}" alt="Agrobrix" class="h-8">
-                            <p class="text-sm text-gray-500">Current logo</p>
+            <h3 class="text-xl font-semibold text-gray-900 mb-6">Branding Settings</h3>
+            
+            <!-- Logo Section -->
+            <div class="mb-8">
+                <h4 class="text-lg font-medium text-gray-900 mb-4">Website Logo</h4>
+                <div class="bg-gray-50 p-6 rounded-lg border-2 border-gray-200">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Logo Upload -->
+                        <div>
+                            <label for="logo" class="block text-sm font-medium text-gray-700 mb-2">Upload Logo</label>
+                            <input type="file" id="logo" name="logo" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:opacity-90">
+                            <p class="mt-2 text-xs text-gray-500">Recommended: PNG or SVG, max 2MB</p>
+                            
+                            @if($settings['logo'])
+                                <div class="mt-4 p-4 bg-white rounded-lg border border-gray-200">
+                                    <p class="text-sm font-medium text-gray-700 mb-2">Current Logo:</p>
+                                    <img src="{{ asset(App\Models\Setting::get('logo')) }}" alt="Current Logo" class="h-12 mb-3">
+                                    <button type="button" onclick="deleteLogo()" class="text-sm bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
+                                        Delete Logo
+                                    </button>
+                                </div>
+                            @endif
                         </div>
-                    @endif
+                        
+                        <!-- Branding Preview -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Branding Preview</label>
+                            <div class="bg-white p-6 rounded-lg border border-gray-300">
+                                <p class="text-xs text-gray-500 mb-3">With Logo:</p>
+                                @if($settings['logo'])
+                                    <div class="mb-6">
+                                        <img src="{{ asset(App\Models\Setting::get('logo')) }}" alt="Logo Preview" class="h-10">
+                                    </div>
+                                @else
+                                    <p class="text-sm text-gray-400 mb-6 italic">No logo uploaded</p>
+                                @endif
+                                
+                                <p class="text-xs text-gray-500 mb-3 border-t pt-3">Without Logo (Text Branding):</p>
+                                <div class="font-bold text-2xl tracking-tight" style="color: #10b981; font-family: system-ui, -apple-system, sans-serif;">
+                                    Agrobrix
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2">Simple, bold green text branding automatically used when no logo is uploaded.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label for="favicon" class="block text-sm font-medium text-gray-700">Favicon</label>
-                    <input type="file" id="favicon" name="favicon" accept="image/*,.ico" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                    @if($settings['favicon'])
-                        <div class="mt-2">
-                            <img src="{{ asset(App\Models\Setting::get('favicon')) }}" alt="Current Favicon" class="h-8 w-8">
-                            <p class="text-sm text-gray-500">Current favicon</p>
+            </div>
+            
+            <!-- Favicon Section -->
+            <div>
+                <h4 class="text-lg font-medium text-gray-900 mb-4">Favicon</h4>
+                <div class="bg-gray-50 p-6 rounded-lg border-2 border-gray-200">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="favicon" class="block text-sm font-medium text-gray-700 mb-2">Upload Favicon</label>
+                            <input type="file" id="favicon" name="favicon" accept="image/*,.ico" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:opacity-90">
+                            <p class="mt-2 text-xs text-gray-500">Recommended: 32x32px PNG or ICO, max 1MB</p>
                         </div>
-                    @endif
+                        
+                        @if($settings['favicon'])
+                            <div class="flex items-center">
+                                <div class="p-4 bg-white rounded-lg border border-gray-200">
+                                    <p class="text-sm font-medium text-gray-700 mb-2">Current Favicon:</p>
+                                    <img src="{{ asset(App\Models\Setting::get('favicon')) }}" alt="Current Favicon" class="h-8 w-8">
+                                </div>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -290,6 +395,32 @@
                 });
             });
         });
+
+        function deleteLogo() {
+            if (!confirm('Are you sure you want to delete the logo? Text branding will be used instead.')) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+            formData.append('_method', 'DELETE');
+
+            fetch('{{ route("admin.settings.delete-logo") }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Reload the page to show the updated state
+                    location.reload();
+                } else {
+                    alert('Failed to delete logo. Please try again.');
+                }
+            })
+            .catch(error => {
+                alert('An error occurred while deleting the logo.');
+            });
+        }
 
         document.getElementById('testEmailBtn').addEventListener('click', function() {
             const testEmail = document.getElementById('test_email').value;

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema;
 
 class Setting extends Model
 {
@@ -10,15 +11,21 @@ class Setting extends Model
 
     public static function get($key, $default = null)
     {
-        $setting = self::where('key', $key)->first();
-        if ($setting) {
-            return $setting->value;
+        // Prevent crash during app boot
+        if (!Schema::hasTable('settings')) {
+            return $default;
         }
-        return $default;
+
+        $setting = self::where('key', $key)->first();
+        return $setting ? $setting->value : $default;
     }
 
     public static function set($key, $value)
     {
+        if (!Schema::hasTable('settings')) {
+            return;
+        }
+
         self::updateOrCreate(['key' => $key], ['value' => $value]);
     }
 }

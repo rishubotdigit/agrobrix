@@ -256,12 +256,12 @@
 
                 @if($properties->count() > 0)
                     <!-- Grid View -->
-                    <div id="gridView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                    <div id="gridView" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                         @foreach($properties as $property)
-                            <!-- Grid View Card -->
-                            <div class="property-card bg-white rounded-xl card-shadow border border-gray-100 overflow-hidden transition-all duration-300">
+                            <!-- Compact Property Card -->
+                            <div class="property-card group">
                                 <!-- Property Image -->
-                                <div class="relative aspect-[4/3] bg-gray-100 overflow-hidden">
+                                <div class="relative h-52 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                                     @if($property->property_images && is_array(json_decode($property->property_images, true)))
                                         @php $images = json_decode($property->property_images, true); @endphp
                                         <img src="{{ asset('storage/' . $images[0]) }}"
@@ -280,17 +280,19 @@
                                             </svg>
                                         </div>
                                     @endif
+                                    
+                                    <!-- Featured Badge -->
                                     @if($property->featured)
-                                        <div class="absolute top-3 left-3 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
-                                            Featured
+                                        <div class="absolute top-2 left-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-md">
+                                            ⭐ Featured
                                         </div>
                                     @endif
 
-                                    <!-- Wishlist Heart for Buyers -->
+                                    <!-- Wishlist Button -->
                                     @auth
                                         @if(Auth::user()->role === 'buyer')
-                                            <button onclick="toggleWishlist({{ $property->id }}, this)" class="absolute top-3 right-3 bg-black/60 backdrop-blur-sm rounded-full p-3 shadow-lg hover:bg-black hover:scale-110 transition-all duration-200 z-10">
-                                                <svg class="w-6 h-6 {{ $property->is_in_wishlist ?? false ? 'text-red-500 fill-current' : 'text-white' }}" fill="{{ $property->is_in_wishlist ?? false ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                                            <button onclick="toggleWishlist({{ $property->id }}, this)" class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg hover:bg-white hover:scale-110 transition-all duration-200">
+                                                <svg class="w-5 h-5 {{ $property->is_in_wishlist ?? false ? 'text-red-500 fill-current' : 'text-gray-600' }}" fill="{{ $property->is_in_wishlist ?? false ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                                                 </svg>
                                             </button>
@@ -299,70 +301,57 @@
                                 </div>
 
                                 <!-- Property Details -->
-                                <div class="p-6">
+                                <div class="p-4">
                                     <!-- Title -->
-                                    <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{{ $property->title }}</h3>
+                                    <h3 class="font-bold text-gray-900 mb-2 line-clamp-2 text-base leading-tight">{{ $property->title }}</h3>
 
                                     <!-- Price -->
                                     <div class="mb-3">
-                                        <span class="text-2xl font-bold text-green-600">₹{{ number_format($property->price) }}</span>
+                                        <span class="text-xl font-bold text-emerald-600">₹{{ number_format($property->price) }}</span>
                                         @if($property->price_negotiable)
-                                            <span class="text-sm text-gray-500 ml-2">(Negotiable)</span>
+                                            <span class="text-xs text-gray-500 ml-1">(Negotiable)</span>
                                         @endif
                                     </div>
 
-                                    <!-- Location -->
-                                    <div class="flex items-center text-gray-600 mb-2">
-                                        <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                        </svg>
-                                        <span class="text-sm">{{ $property->district->name ?? 'N/A' }}, {{ $property->district->state->name ?? 'N/A' }}</span>
+                                    <!-- Info Grid -->
+                                    <div class="space-y-2 mb-3 text-sm">
+                                        <!-- Location -->
+                                        <div class="flex items-center text-gray-600">
+                                            <svg class="w-4 h-4 mr-1.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            </svg>
+                                            <span class="truncate">{{ $property->district->name ?? 'N/A' }}, {{ $property->district->state->name ?? 'N/A' }}</span>
+                                        </div>
+
+                                        <!-- Area & Type -->
+                                        <div class="flex items-center text-gray-600">
+                                            <svg class="w-4 h-4 mr-1.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                                            </svg>
+                                            <span>{{ number_format($property->plot_area) }} {{ $property->plot_area_unit }} • {{ $property->land_type }}</span>
+                                        </div>
                                     </div>
 
-                                    <!-- Area -->
-                                    <div class="flex items-center text-gray-600 mb-3">
-                                        <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                                        </svg>
-                                        <span class="text-sm">{{ $property->plot_area }} sq ft • {{ ucfirst($property->land_type) }}</span>
-                                    </div>
-
-                                    <!-- Owner/Agent -->
-                                    <div class="flex items-center text-gray-600 mb-4">
-                                        <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                        </svg>
-                                        <span class="text-sm">
-                                            @if($property->agent)
-                                                Agent: {{ $property->agent->name }}
-                                            @else
-                                                Owner: {{ $property->owner->name }}
-                                            @endif
-                                        </span>
-                                    </div>
-
-                                    <!-- Amenities -->
+                                    <!-- Amenities Tags -->
                                     @if($property->amenities->count() > 0)
-                                        <div class="mb-4">
-                                            <div class="flex flex-wrap gap-2">
-                                                @foreach($property->amenities->take(3) as $amenity)
-                                                    <span class="amenity-tag bg-blue-50 text-blue-700">
-                                                        {{ $amenity->name }}
-                                                    </span>
-                                                @endforeach
-                                                @if($property->amenities->count() > 3)
-                                                    <span class="amenity-tag bg-gray-50 text-gray-600">
-                                                        +{{ $property->amenities->count() - 3 }} more
-                                                    </span>
-                                                @endif
-                                            </div>
+                                        <div class="flex flex-wrap gap-1.5 mb-3">
+                                            @foreach($property->amenities->take(2) as $amenity)
+                                                <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                                                    {{ $amenity->name }}
+                                                </span>
+                                            @endforeach
+                                            @if($property->amenities->count() > 2)
+                                                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">
+                                                    +{{ $property->amenities->count() - 2 }}
+                                                </span>
+                                            @endif
                                         </div>
                                     @endif
 
                                     <!-- View Details Button -->
                                     <a href="{{ route('properties.show', $property) }}"
-                                       class="inline-block w-full bg-blue-600 text-white font-medium py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-center">
+                                       class="block w-full bg-blue-600 text-white text-center font-semibold py-2.5 rounded-lg hover:bg-blue-700 transition-colors duration-200">
                                         View Details
                                     </a>
                                 </div>

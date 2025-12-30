@@ -47,6 +47,7 @@ class SettingController extends Controller
             'smtp_from_name' => Setting::get('smtp_from_name', ''),
             'logo' => Setting::get('logo', ''),
             'favicon' => Setting::get('favicon', ''),
+            'homepage_states' => Setting::get('homepage_states', json_encode(['Punjab', 'Haryana', 'Chandigarh', 'Himachal Pradesh'])),
         ];
 
         Log::info('Settings index: queue_mode retrieved as ' . $settings['queue_mode']);
@@ -91,6 +92,8 @@ class SettingController extends Controller
             'smtp_from_name' => 'nullable|string|max:255',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'favicon' => 'nullable|image|mimes:jpeg,png,jpg,gif,ico|max:1024',
+            'homepage_states' => 'nullable|array',
+            'homepage_states.*' => 'string|max:100',
         ]);
 
         Setting::set('login_enabled', $request->has('login_enabled') ? '1' : '0');
@@ -123,6 +126,11 @@ class SettingController extends Controller
         Setting::set('smtp_password', $request->input('smtp_password', ''));
         Setting::set('smtp_encryption', $request->input('smtp_encryption', 'tls'));
         Setting::set('smtp_from_name', $request->input('smtp_from_name', ''));
+        
+        // Save homepage states
+        if ($request->has('homepage_states')) {
+            Setting::set('homepage_states', json_encode($request->input('homepage_states')));
+        }
 
         if ($request->hasFile('logo')) {
             $logoPath = $request->file('logo')->store('images', 'public');
@@ -135,6 +143,28 @@ class SettingController extends Controller
         }
 
         return redirect()->route('admin.settings.index')->with('success', 'Settings updated successfully.');
+    }
+
+    public function deleteLogo()
+    {
+        $currentLogo = Setting::get('logo');
+        
+        if ($currentLogo) {
+            // Remove 'storage/' prefix if it exists
+            $logoPath = str_replace('storage/', '', $currentLogo);
+            
+            // Delete the file from storage
+            if (Storage::disk('public')->exists($logoPath)) {
+                Storage::disk('public')->delete($logoPath);
+            }
+            
+            // Clear the setting
+            Setting::set('logo', '');
+            
+            return redirect()->route('admin.settings.index')->with('success', 'Logo deleted successfully. Text branding will be used.');
+        }
+        
+        return redirect()->route('admin.settings.index')->with('info', 'No logo to delete.');
     }
 
     public function testEmail(Request $request)

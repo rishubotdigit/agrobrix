@@ -46,7 +46,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-600">Total Payments</p>
-                <p class="text-3xl font-bold text-primary">{{ $totalPayments }}</p>
+                <p class="text-3xl font-bold text-primary">₹{{ number_format($totalPayments, 0) }}</p>
             </div>
             <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
                 <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">

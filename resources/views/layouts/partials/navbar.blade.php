@@ -2,15 +2,22 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
             <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <a href="{{ route('home') }}">
-                        @if(App\Models\Setting::get('logo'))
-                            <img src="{{ asset(App\Models\Setting::get('logo')) }}" alt="Agrobrix" class="h-8">
-                        @else
-                            <span class="text-2xl font-bold gradient-bg bg-clip-text text-transparent">Agrobrix</span>
-                        @endif
-                    </a>
-                </div>
+        <!-- Logo -->
+        <div class="flex items-center">
+            <a href="{{ route('home') }}" class="flex items-center">
+                @php
+                    $logo = App\Models\Setting::get('logo');
+                @endphp
+                
+                @if($logo)
+                    <img src="{{ asset($logo) }}" alt="Agrobrix" class="h-10">
+                @else
+                    <span class="font-bold text-2xl tracking-tight" style="color: #10b981; font-family: system-ui, -apple-system, sans-serif;">
+                        Agrobrix
+                    </span>
+                @endif
+            </a>
+        </div>
             </div>
 
             <!-- Desktop Menu -->

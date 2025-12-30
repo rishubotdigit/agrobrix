@@ -24,10 +24,40 @@ class PaymentController extends Controller
         $query = Payment::with(['user', 'planPurchase', 'planPurchase.plan'])
             ->whereNotNull('plan_purchase_id');
 
+        // Status filter
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
+        // Gateway filter
+        if ($request->filled('gateway')) {
+            $query->where('gateway', $request->gateway);
+        }
+
+        // Approval status filter
+        if ($request->filled('approval_status')) {
+            $query->where('approval_status', $request->approval_status);
+        }
+
+        // User search filter
+        if ($request->filled('user_search')) {
+            $search = $request->user_search;
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Amount range filters
+        if ($request->filled('amount_min')) {
+            $query->where('amount', '>=', $request->amount_min);
+        }
+
+        if ($request->filled('amount_max')) {
+            $query->where('amount', '<=', $request->amount_max);
+        }
+
+        // Date range filters
         if ($request->filled('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
@@ -36,7 +66,7 @@ class PaymentController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        $payments = $query->orderBy('created_at', 'desc')->paginate(15);
+        $payments = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
         return view('admin.payments.index', compact('payments'));
     }
 

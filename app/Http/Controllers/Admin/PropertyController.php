@@ -13,11 +13,103 @@ use Illuminate\Support\Facades\Log;
 
 class PropertyController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $myProperties = Property::where('owner_id', auth()->id())->with(['owner', 'district.state'])->paginate(9);
-        $properties = Property::with(['owner', 'district.state'])->paginate(9);
-        return view('admin.properties.index', compact('properties', 'myProperties'));
+        // Handle view mode
+        $viewMode = $request->get('view_mode', session('admin_properties_view_mode', 'grid'));
+        session(['admin_properties_view_mode' => $viewMode]);
+
+        // Build base queries
+        $myPropertiesQuery = Property::where('owner_id', auth()->id())->with(['owner', 'district.state']);
+        $propertiesQuery = Property::with(['owner', 'district.state']);
+
+        // Apply filters
+        $this->applyFilters($request, $myPropertiesQuery);
+        $this->applyFilters($request, $propertiesQuery);
+
+        // Paginate
+        $myProperties = $myPropertiesQuery->paginate(9)->appends($request->query());
+        $properties = $propertiesQuery->paginate(9)->appends($request->query());
+
+        // Get filter data for dropdowns
+        $states = \App\Models\State::orderBy('name')->get();
+        $districts = \App\Models\District::orderBy('name')->get();
+
+        return view('admin.properties.index', compact('properties', 'myProperties', 'viewMode', 'states', 'districts'));
+    }
+
+    private function applyFilters(Request $request, $query)
+    {
+        // General search across title and address
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('full_address', 'like', "%{$search}%");
+            });
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // State filter
+        if ($request->filled('state_id')) {
+            $query->whereHas('district', function($q) use ($request) {
+                $q->where('state_id', $request->state_id);
+            });
+        }
+
+        // District filter
+        if ($request->filled('district_id')) {
+            $query->where('district_id', $request->district_id);
+        }
+
+        // Land type filter
+        if ($request->filled('land_type')) {
+            $query->where('land_type', $request->land_type);
+        }
+
+        // Featured filter
+        if ($request->filled('featured')) {
+            if ($request->featured === 'yes') {
+                $query->where('featured', true);
+            } elseif ($request->featured === 'no') {
+                $query->where('featured', false);
+            }
+        }
+
+        // Price filters
+        if ($request->filled('price_min')) {
+            $query->where('price', '>=', $request->price_min);
+        }
+        if ($request->filled('price_max')) {
+            $query->where('price', '<=', $request->price_max);
+        }
+
+        // Area filters (using plot_area)
+        if ($request->filled('area_min')) {
+            $query->where('plot_area', '>=', $request->area_min);
+        }
+        if ($request->filled('area_max')) {
+            $query->where('plot_area', '<=', $request->area_max);
+        }
+
+        // Date filters
+        if ($request->filled('created_from')) {
+            $query->whereDate('created_at', '>=', $request->created_from);
+        }
+        if ($request->filled('created_to')) {
+            $query->whereDate('created_at', '<=', $request->created_to);
+        }
+
+        // Owner name filter
+        if ($request->filled('owner_name')) {
+            $query->whereHas('owner', function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->owner_name . '%');
+            });
+        }
     }
 
     public function create(Request $request)
@@ -52,11 +144,16 @@ class PropertyController extends Controller
         }
         Log::info('Video upload handled', ['video_path' => $videoPath]);
 
+        // Get state name from ID
+        $state = \App\Models\State::find($validated['state']);
+        
         // Create property
         $propertyData = [
             'title' => $validated['title'],
             'land_type' => $validated['land_type'],
             'description' => $validated['description'],
+            'state' => $state ? $state->name : null,
+            'district_id' => $validated['district'],
             'area' => $validated['area'],
             'full_address' => $validated['full_address'],
             'google_map_lat' => $validated['google_map_lat'] ?? null,

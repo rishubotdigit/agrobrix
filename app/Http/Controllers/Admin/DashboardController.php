@@ -16,9 +16,9 @@ class DashboardController extends Controller
     {
         $totalUsers = User::count();
         $totalProperties = Property::count();
-        $totalPayments = Payment::count();
+        $totalPayments = Payment::where('status', 'completed')->sum('amount');
         $pendingVersions = PropertyVersion::where('status', 'pending')->count();
-        $pendingPlanPurchases = PlanPurchase::where('status', 'purchased')->count();
+        $pendingPlanPurchases = PlanPurchase::where('status', 'pending')->count();
 
         $usersData = User::selectRaw('date(created_at) as date, COUNT(*) as count')->where('created_at', '>=', now()->subDays(7))->groupBy('date')->orderBy('date')->get();
         $propertyData = Property::selectRaw('status, COUNT(*) as count')->groupBy('status')->get();

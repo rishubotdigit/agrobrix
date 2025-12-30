@@ -141,7 +141,7 @@
         <p class="text-xl text-emerald-100 mb-8">Start your search or list your property today</p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="/register" class="bg-white text-primary px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition text-lg">Start Your Search</a>
-            <a href="/contact" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-primary transition text-lg">List Your Property</a>
+            <a href="{{ route('post-property') }}" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-primary transition text-lg">List Your Property</a>
         </div>
     </div>
 </section>

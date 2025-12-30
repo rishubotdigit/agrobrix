@@ -3,15 +3,29 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <!-- Left Section - Brand & Copyright -->
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center shadow-md">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="text-gray-800 text-lg font-bold">Agrobrix</h3>
-                    <p class="text-xs text-gray-600">&copy; 2026 Agrobrix. All rights reserved.</p>
-                </div>
+                @php
+                    $logo = App\Models\Setting::get('logo');
+                @endphp
+                
+                @if($logo)
+                    <img src="{{ asset($logo) }}" alt="Agrobrix" class="h-10">
+                @else
+                    <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center shadow-md">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-800 text-lg font-bold" style="color: #10b981;">Agrobrix</h3>
+                        <p class="text-xs text-gray-600">&copy; 2026 Agrobrix. All rights reserved.</p>
+                    </div>
+                @endif
+                
+                @if($logo)
+                    <div>
+                        <p class="text-xs text-gray-600">&copy; 2026 Agrobrix. All rights reserved.</p>
+                    </div>
+                @endif
             </div>
 
             <!-- Right Section - Navigation Links -->
