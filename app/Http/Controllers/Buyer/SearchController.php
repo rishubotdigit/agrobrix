@@ -34,7 +34,6 @@ class SearchController extends Controller
     public function advanced(Request $request)
     {
         $query = $request->get('q', '');
-        $city_id = $request->get('city_id', '');
         $minPrice = $request->get('min_price', '');
         $maxPrice = $request->get('max_price', '');
         $landType = $request->get('land_type', '');
@@ -42,22 +41,16 @@ class SearchController extends Controller
         $maxArea = $request->get('max_area', '');
         $amenities = $request->get('amenities', []);
 
-        $properties = Property::with(['owner', 'amenities', 'city.district.state'])
+        $properties = Property::with(['owner', 'amenities', 'district.state'])
             ->when($query, function ($q) use ($query) {
                 $q->where(function ($subQuery) use ($query) {
                     $subQuery->where('title', 'like', "%{$query}%")
                         ->orWhere('description', 'like', "%{$query}%")
                         ->orWhere('area', 'like', "%{$query}%")
-                        ->orWhereHas('city', function ($cityQuery) use ($query) {
-                            $cityQuery->where('name', 'like', "%{$query}%");
-                        })
-                        ->orWhereHas('city.district.state', function ($stateQuery) use ($query) {
+                        ->orWhereHas('district.state', function ($stateQuery) use ($query) {
                             $stateQuery->where('name', 'like', "%{$query}%");
                         });
                 });
-            })
-            ->when($city_id, function ($q) use ($city_id) {
-                $q->where('city_id', $city_id);
             })
             ->when($minPrice, function ($q) use ($minPrice) {
                 $q->where('price', '>=', $minPrice);
@@ -103,7 +96,6 @@ class SearchController extends Controller
         return view('search.advanced', compact(
             'properties',
             'query',
-            'city_id',
             'minPrice',
             'maxPrice',
             'landType',
@@ -128,7 +120,7 @@ class SearchController extends Controller
     public function getPropertiesApi(Request $request)
     {
         $user = Auth::user();
-        $query = Property::with(['owner', 'city.district.state']);
+        $query = Property::with(['owner', 'district.state']);
 
         // Apply filters
         $minPrice = $request->get('min_price');
@@ -143,10 +135,7 @@ class SearchController extends Controller
             $query->where('price', '<=', $maxPrice);
         }
         if ($location) {
-            $query->where(function ($q) use ($location) {
-                $q->where('city', 'like', "%{$location}%")
-                  ->orWhere('state', 'like', "%{$location}%");
-            });
+            $query->where('state', 'like', "%{$location}%");
         }
         if ($category) {
             $query->where('land_type', $category);

@@ -26,7 +26,6 @@ class StorePropertyRequest extends FormRequest
             'land_type' => 'required|in:Agriculture,Residential Plot,Commercial Plot',
             'state' => 'required|exists:states,id',
             'district' => 'required|exists:districts,id',
-            'city_id' => 'required|exists:cities,id',
             'area' => 'required|string|max:255',
             'full_address' => 'required|string',
             'plot_area' => 'required|numeric|min:0',
@@ -80,9 +79,6 @@ class StorePropertyRequest extends FormRequest
 
             'district.required' => 'Please select the district where the property is located.',
             'district.exists' => 'The selected district is invalid.',
-
-            'city_id.required' => 'Please select the city where the property is located.',
-            'city_id.exists' => 'The selected city is invalid.',
 
             'area.required' => 'Please enter the area or locality name.',
             'area.string' => 'The area name must be text.',
@@ -160,11 +156,6 @@ class StorePropertyRequest extends FormRequest
             $district = \App\Models\District::find($this->district);
             if ($district && $district->state_id != $this->state) {
                 $validator->errors()->add('district', 'The selected district does not belong to the selected state.');
-            }
-
-            $city = \App\Models\City::find($this->city_id);
-            if ($city && $city->district_id != $this->district) {
-                $validator->errors()->add('city_id', 'The selected city does not belong to the selected district.');
             }
         });
     }

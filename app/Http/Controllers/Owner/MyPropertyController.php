@@ -16,7 +16,7 @@ class MyPropertyController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $properties = $user->properties()->with('city.district.state')->paginate(10);
+        $properties = $user->properties()->with('district.state')->paginate(10);
 
         $usage = [
             'current_listings' => $properties->total(),
@@ -106,7 +106,6 @@ class MyPropertyController extends Controller
             'title' => $validated['title'],
             'land_type' => $validated['land_type'],
             'description' => $validated['description'],
-            'city_id' => $validated['city_id'],
             'area' => $validated['area'],
             'full_address' => $validated['full_address'],
             'google_map_lat' => $validated['google_map_lat'] ?? null,
@@ -157,7 +156,7 @@ class MyPropertyController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $property->load('amenities.subcategory.category', 'agent', 'city.district.state');
+        $property->load('amenities.subcategory.category', 'agent', 'district.state');
 
         return view('owner.properties.show', compact('property'));
     }
@@ -232,7 +231,6 @@ class MyPropertyController extends Controller
             'title' => $validated['title'],
             'land_type' => $validated['land_type'],
             'description' => $validated['description'],
-            'city_id' => $validated['city_id'],
             'area' => $validated['area'],
             'full_address' => $validated['full_address'],
             'google_map_lat' => $validated['google_map_lat'] ?? null,

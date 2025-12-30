@@ -32,7 +32,7 @@
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">{{ $inquiry->property->title ?? 'N/A' }}</div>
-                                <div class="text-sm text-gray-500">{{ $inquiry->property->city->name ?? 'N/A' }}, {{ $inquiry->property->state->name ?? 'N/A' }}</div>
+                                <div class="text-sm text-gray-500">{{ $inquiry->property->state->name ?? 'N/A' }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 {{ $inquiry->updated_at->format('M d, Y') }}

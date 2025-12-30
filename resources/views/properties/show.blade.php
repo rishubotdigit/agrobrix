@@ -23,10 +23,10 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                                 </svg>
-                                @if($property->city)
-                                    {{ $property->city->name }}
-                                    @if($property->city->district && $property->city->district->state)
-                                        , {{ $property->city->district->state->name }}
+                                @if($property->district)
+                                    {{ $property->district->name }}
+                                    @if($property->district->state)
+                                        , {{ $property->district->state->name }}
                                     @endif
                                 @endif
                             </p>
@@ -213,22 +213,6 @@
                             </div>
                         </div>
                         
-                        <div class="flex items-start gap-3">
-                            <svg class="w-6 h-6 text-emerald-600 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                            </svg>
-                            <div>
-                                <p class="text-sm text-gray-600">City & State</p>
-                                <p class="text-base sm:text-lg text-gray-900">
-                                    @if($property->city)
-                                        {{ $property->city->name }}
-                                        @if($property->city->district && $property->city->district->state)
-                                            , {{ $property->city->district->state->name }}
-                                        @endif
-                                    @endif
-                                </p>
-                            </div>
-                        </div>
                     </div>
 
                     @if($property->google_map_lat && $property->google_map_lng && \App\Models\Setting::get('map_enabled', '1') == '1')

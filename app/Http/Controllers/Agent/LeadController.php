@@ -67,7 +67,7 @@ class LeadController extends Controller
     {
         $lead = Lead::where('id', $id)
             ->where('agent_id', Auth::id())
-            ->with(['property.city.district.state', 'agent', 'visits', 'followUps'])
+            ->with(['property.district.state', 'agent', 'visits', 'followUps'])
             ->firstOrFail();
 
         return view('agent.leads.show', compact('lead'));

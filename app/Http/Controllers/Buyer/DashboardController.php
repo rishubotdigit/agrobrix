@@ -122,7 +122,7 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         $inquiries = ViewedContact::where('buyer_id', $user->id)
-            ->with('property.city.district.state')
+            ->with('property.district.state')
             ->orderBy('viewed_at', 'desc')
             ->get();
 

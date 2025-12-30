@@ -14,7 +14,7 @@
             <h3 class="text-lg font-semibold text-gray-900 mb-3">Property Information</h3>
             <div class="space-y-2">
                 <div><strong>Title:</strong> {{ $followUp->lead->property->title }}</div>
-                <div><strong>Location:</strong> {{ $followUp->lead->property->area }}, {{ $followUp->lead->property->city }}</div>
+                <div><strong>Location:</strong> {{ $followUp->lead->property->area }}</div>
                 <div><strong>Price:</strong> ₹{{ number_format($followUp->lead->property->price) }}</div>
             </div>
         </div>

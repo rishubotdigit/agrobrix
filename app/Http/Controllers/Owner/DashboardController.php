@@ -154,7 +154,7 @@ class DashboardController extends Controller
     {
         $leads = Lead::whereHas('property', function($q) {
             $q->where('owner_id', auth()->id());
-        })->with('property.city.district.state')->orderBy('created_at', 'desc')->get();
+        })->with('property.district.state')->orderBy('created_at', 'desc')->get();
 
         return view('owner.leads.index', compact('leads'));
     }
@@ -165,7 +165,7 @@ class DashboardController extends Controller
             ->whereHas('property', function($q) {
                 $q->where('owner_id', auth()->id());
             })
-            ->with(['property.city.district.state', 'visits', 'followUps'])
+            ->with(['property.district.state', 'visits', 'followUps'])
             ->firstOrFail();
 
         return view('owner.leads.show', compact('lead'));

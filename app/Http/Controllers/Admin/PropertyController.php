@@ -15,8 +15,8 @@ class PropertyController extends Controller
 {
     public function index()
     {
-        $myProperties = Property::where('owner_id', auth()->id())->with(['owner', 'city.district.state'])->paginate(9);
-        $properties = Property::with(['owner', 'city.district.state'])->paginate(9);
+        $myProperties = Property::where('owner_id', auth()->id())->with(['owner', 'district.state'])->paginate(9);
+        $properties = Property::with(['owner', 'district.state'])->paginate(9);
         return view('admin.properties.index', compact('properties', 'myProperties'));
     }
 
@@ -57,7 +57,6 @@ class PropertyController extends Controller
             'title' => $validated['title'],
             'land_type' => $validated['land_type'],
             'description' => $validated['description'],
-            'city_id' => $validated['city_id'],
             'area' => $validated['area'],
             'full_address' => $validated['full_address'],
             'google_map_lat' => $validated['google_map_lat'] ?? null,
@@ -113,7 +112,7 @@ class PropertyController extends Controller
 
     public function show(Property $property)
     {
-        $property->load(['owner', 'agent', 'amenities', 'versions', 'city.district.state']);
+        $property->load(['owner', 'agent', 'amenities', 'versions', 'district.state']);
         $versions = $property->versions()->orderBy('version', 'desc')->get();
         Log::info('Showing property', ['property_id' => $property->id, 'contact_name' => $property->contact_name, 'contact_mobile' => $property->contact_mobile, 'contact_role' => $property->contact_role]);
         return view('admin.properties.show', compact('property', 'versions'));
@@ -306,7 +305,6 @@ class PropertyController extends Controller
             'title' => $validated['title'],
             'land_type' => $validated['land_type'],
             'description' => $validated['description'],
-            'city_id' => $validated['city_id'],
             'area' => $validated['area'],
             'full_address' => $validated['full_address'],
             'google_map_lat' => $validated['google_map_lat'] ?? null,

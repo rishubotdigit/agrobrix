@@ -161,9 +161,6 @@
                             </svg>
                             <div>
                                 {{ $lead->property->full_address ?? 'N/A' }}
-                                @if($lead->property->city)
-                                <br><span class="text-sm text-gray-500">{{ $lead->property->city->name ?? 'N/A' }}</span>
-                                @endif
                             </div>
                         </div>
                     </div>

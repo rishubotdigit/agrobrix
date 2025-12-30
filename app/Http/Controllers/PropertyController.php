@@ -12,7 +12,7 @@ class PropertyController extends Controller
     public function index(Request $request)
     {
         // Public property listing
-        $properties = Property::with(['owner', 'amenities', 'city.district.state'])->where('status', 'approved')
+        $properties = Property::with(['owner', 'amenities', 'district.state'])->where('status', 'approved')
             ->orderByRaw('CASE WHEN featured_until > ? THEN 1 ELSE 0 END DESC', [now()])
             ->orderBy('created_at', 'desc')
             ->paginate(8);
@@ -34,7 +34,7 @@ class PropertyController extends Controller
     public function show(Property $property)
     {
         // Public property details
-        $property->load(['owner', 'amenities', 'city.district.state']);
+        $property->load(['owner', 'amenities', 'district.state']);
         return view('properties.show', compact('property'));
     }
 }

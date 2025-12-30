@@ -14,14 +14,7 @@
             <h3 class="text-lg font-semibold text-gray-900 mb-3">Property Information</h3>
             <div class="space-y-2">
                 <div><strong>Title:</strong> {{ $lead->property->title }}</div>
-                <div><strong>Location:</strong> {{ $lead->property->area }}
-                    @if($lead->property->city)
-                        , {{ $lead->property->city->name }}
-                        @if($lead->property->city->district && $lead->property->city->district->state)
-                            , {{ $lead->property->city->district->state->name }}
-                        @endif
-                    @endif
-                </div>
+                <div><strong>Location:</strong> {{ $lead->property->area }}</div>
                 <div><strong>Price:</strong> ₹{{ number_format($lead->property->price) }}</div>
             </div>
         </div>

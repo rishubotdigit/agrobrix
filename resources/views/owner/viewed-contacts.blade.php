@@ -39,12 +39,6 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">{{ $viewedContact->property->title }}</div>
                             <div class="text-sm text-gray-500">
-                                @if($viewedContact->property->city)
-                                    {{ $viewedContact->property->city->name }}
-                                    @if($viewedContact->property->city->district && $viewedContact->property->city->district->state)
-                                        , {{ $viewedContact->property->city->district->state->name }}
-                                    @endif
-                                @endif
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

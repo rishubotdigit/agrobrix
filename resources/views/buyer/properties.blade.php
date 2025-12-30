@@ -32,7 +32,7 @@
                 </div>
                 <div>
                     <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
-                    <input type="text" id="location" name="location" placeholder="City or State" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <input type="text" id="location" name="location" placeholder="District or State" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
                     <label for="category" class="block text-sm font-medium text-gray-700">Category</label>

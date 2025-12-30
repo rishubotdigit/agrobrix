@@ -55,15 +55,6 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="ml-4 space-y-1">
-                                <h6 class="text-xs font-medium text-gray-600">Cities ({{ $district->cities->count() }})</h6>
-                                @foreach($district->cities as $city)
-                                    <div class="text-xs text-gray-500">- {{ $city->name }}</div>
-                                @endforeach
-                                <button onclick="openCityModal({{ $state->id }}, {{ $district->id }})" class="text-green-600 hover:text-green-700 text-xs font-medium">
-                                    + Add City
-                                </button>
-                            </div>
                         </div>
                     @endforeach
                     <button onclick="openDistrictModal({{ $state->id }})" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
@@ -106,39 +97,6 @@
     </div>
 </div>
 
-<!-- City Modal -->
-<div id="cityModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div class="mt-3">
-            <h3 class="text-lg font-medium text-gray-900 mb-4" id="cityModalTitle">Add City</h3>
-            <form id="cityForm" onsubmit="saveCity(event)">
-                @csrf
-                <input type="hidden" id="cityId" name="city_id">
-                <input type="hidden" id="cityStateId" name="state_id">
-                <div class="mb-4">
-                    <label for="cityName" class="block text-sm font-medium text-gray-700 mb-2">City Name</label>
-                    <input type="text" id="cityName" name="name" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
-                </div>
-                <div class="mb-4">
-                    <label for="cityDistrict" class="block text-sm font-medium text-gray-700 mb-2">District</label>
-                    <select id="cityDistrict" name="district_id" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
-                        <option value="">Select District</option>
-                    </select>
-                </div>
-                <div class="flex justify-end space-x-3">
-                    <button type="button" onclick="closeCityModal()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancel
-                    </button>
-                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-emerald-700">
-                        Save
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 <script>
 function showSuccessMessage(message) {
@@ -215,7 +173,7 @@ function saveState(event) {
 }
 
 function deleteState(id) {
-    if (confirm('Are you sure you want to delete this state? This will also delete all related districts and cities.')) {
+    if (confirm('Are you sure you want to delete this state? This will also delete all related districts.')) {
         fetch(`/admin/states/${id}`, {
             method: 'DELETE',
             headers: {
@@ -247,59 +205,5 @@ function openDistrictModal(stateId) {
     alert('District modal not implemented here. Please use the Districts page.');
 }
 
-// City modal functions
-function openCityModal(stateId, districtId) {
-    document.getElementById('cityModalTitle').textContent = 'Add City';
-    document.getElementById('cityId').value = '';
-    document.getElementById('cityName').value = '';
-    document.getElementById('cityStateId').value = stateId;
-    document.getElementById('cityDistrict').innerHTML = '<option value="' + districtId + '">Loading...</option>';
-    document.getElementById('cityDistrict').disabled = true;
-    document.getElementById('cityModal').classList.remove('hidden');
-
-    // Load districts for this state
-    fetch(`/api/districts/${stateId}`)
-        .then(response => response.json())
-        .then(data => {
-            let options = '<option value="">Select District</option>';
-            data.forEach(district => {
-                options += `<option value="${district.id}" ${district.id == districtId ? 'selected' : ''}>${district.name}</option>`;
-            });
-            document.getElementById('cityDistrict').innerHTML = options;
-            document.getElementById('cityDistrict').disabled = false;
-        })
-        .catch(error => {
-            console.error('Error loading districts:', error);
-            document.getElementById('cityDistrict').innerHTML = '<option value="" disabled>Error loading districts</option>';
-        });
-}
-
-function closeCityModal() {
-    document.getElementById('cityModal').classList.add('hidden');
-}
-
-function saveCity(event) {
-    event.preventDefault();
-    const form = event.target;
-    const formData = new FormData(form);
-
-    fetch('/admin/cities', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message) {
-            showSuccessMessage(data.message);
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        }
-    })
-    .catch(error => console.error('Error:', error));
-}
 </script>
 @endsection

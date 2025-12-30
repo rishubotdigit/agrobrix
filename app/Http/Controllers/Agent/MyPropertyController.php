@@ -108,7 +108,6 @@ class MyPropertyController extends Controller
             'title' => $validated['title'],
             'land_type' => $validated['land_type'],
             'description' => $validated['description'],
-            'city_id' => $validated['city_id'],
             'area' => $validated['area'],
             'full_address' => $validated['full_address'],
             'google_map_lat' => $validated['google_map_lat'] ?? null,
@@ -171,7 +170,7 @@ class MyPropertyController extends Controller
             $property->update(['owner_id' => $user->id]);
         }
 
-        $property->load('amenities.subcategory.category', 'city.district.state');
+        $property->load('amenities.subcategory.category', 'district.state');
 
         return view('agent.my-properties.show', compact('property'));
     }
@@ -247,7 +246,6 @@ class MyPropertyController extends Controller
             'title' => $validated['title'],
             'land_type' => $validated['land_type'],
             'description' => $validated['description'],
-            'city_id' => $validated['city_id'],
             'area' => $validated['area'],
             'full_address' => $validated['full_address'],
             'google_map_lat' => $validated['google_map_lat'] ?? null,

@@ -69,12 +69,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                     {{ $property->area }}
-                    @if($property->city)
-                        , {{ $property->city->name }}
-                        @if($property->city->district && $property->city->district->state)
-                            , {{ $property->city->district->state->name }}
-                        @endif
-                    @endif
                 </div>
 
                 <div class="flex items-center justify-between mb-4">
@@ -205,12 +199,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                     {{ $property->area }}
-                    @if($property->city)
-                        , {{ $property->city->name }}
-                        @if($property->city->district && $property->city->district->state)
-                            , {{ $property->city->district->state->name }}
-                        @endif
-                    @endif
                 </div>
 
                 <div class="flex items-center justify-between mb-4">

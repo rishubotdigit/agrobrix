@@ -25,7 +25,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
             StateSeeder::class,
             DistrictSeeder::class,
-            CitySeeder::class,
             PlanSeeder::class,
             AddonSeeder::class,
         ]);

@@ -33,7 +33,7 @@
                 <tr>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm font-medium text-gray-900">{{ $followUp->lead->property->title }}</div>
-                        <div class="text-sm text-gray-500">{{ $followUp->lead->property->area }}, {{ $followUp->lead->property->city }}</div>
+                        <div class="text-sm text-gray-500">{{ $followUp->lead->property->area }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm font-medium text-gray-900">{{ $followUp->lead->buyer_name }}</div>

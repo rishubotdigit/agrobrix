@@ -55,7 +55,7 @@
             <div class="property-details">
                 <h4 style="margin-top: 0; color: #047857;">Property Details:</h4>
                 <p><strong>Title:</strong> {{ $lead->property->title }}</p>
-                <p><strong>Location:</strong> {{ $lead->property->city }}, {{ $lead->property->state }}</p>
+                <p><strong>Location:</strong> {{ $lead->property->state }}</p>
                 <p><strong>Price:</strong> ₹{{ number_format($lead->property->price) }}</p>
             </div>
 

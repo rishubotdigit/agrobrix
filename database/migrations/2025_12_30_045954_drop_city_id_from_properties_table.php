@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('properties', function (Blueprint $table) {
-            $table->foreignId('city_id')->nullable()->constrained('cities')->after('land_type');
-            $table->dropColumn(['state', 'city']);
+            $table->dropForeign(['city_id']);
+            $table->dropColumn('city_id');
         });
     }
 
@@ -23,10 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('properties', function (Blueprint $table) {
-            $table->dropForeign(['city_id']);
-            $table->dropColumn('city_id');
-            $table->string('state')->nullable()->after('land_type');
-            $table->string('city')->nullable()->after('state');
+            $table->unsignedBigInteger('city_id')->nullable()->after('land_type');
+            $table->foreign('city_id')->references('id')->on('cities');
         });
     }
 };

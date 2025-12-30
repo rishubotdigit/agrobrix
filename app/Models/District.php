@@ -12,9 +12,4 @@ class District extends Model
     {
         return $this->belongsTo(State::class);
     }
-
-    public function cities()
-    {
-        return $this->hasMany(City::class);
-    }
 }

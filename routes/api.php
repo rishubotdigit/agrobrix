@@ -21,4 +21,3 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 // Location API routes for dependent dropdowns
 Route::get('/districts/{state_id}', [LocationController::class, 'getDistricts']);
-Route::get('/cities/{district_id}', [LocationController::class, 'getCities']);

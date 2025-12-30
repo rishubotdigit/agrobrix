@@ -33,7 +33,7 @@
                 <ul style="margin: 0; padding-left: 20px;">
                     <li><strong>Owner:</strong> {{ $property->owner->name ?? 'N/A' }} ({{ $property->owner->email ?? 'N/A' }})</li>
                     <li><strong>Title:</strong> {{ $property->title }}</li>
-                    <li><strong>Location:</strong> {{ $property->city }}, {{ $property->state }}</li>
+                    <li><strong>Location:</strong> {{ $property->state }}</li>
                     <li><strong>Price:</strong> ₹{{ number_format($property->price) }}</li>
                     <li><strong>Land Type:</strong> {{ $property->land_type }}</li>
                     <li><strong>Plot Area:</strong> {{ $property->plot_area }} {{ $property->plot_area_unit }}</li>

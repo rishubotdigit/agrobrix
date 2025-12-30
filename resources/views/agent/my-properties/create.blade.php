@@ -520,17 +520,6 @@
                     @enderror
                 </div>
 
-                <!-- City -->
-                <div>
-                    <label for="city_id" class="block text-sm font-medium text-gray-700 mb-2">City <span class="text-red-500">*</span></label>
-                    <select name="city_id" id="city_id" required
-                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" disabled>
-                        <option value="">Select City</option>
-                    </select>
-                    @error('city_id')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
 
                 <!-- Area/Locality -->
                 <div>
@@ -1055,13 +1044,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('state').addEventListener('change', function() {
         const stateId = this.value;
         const districtSelect = document.getElementById('district');
-        const citySelect = document.getElementById('city_id');
 
-        // Reset district and city
+        // Reset district
         districtSelect.innerHTML = '<option value="">Select District</option>';
-        citySelect.innerHTML = '<option value="">Select City</option>';
         districtSelect.disabled = true;
-        citySelect.disabled = true;
 
         if (stateId) {
             console.log(`Loading districts for state ID: ${stateId}`);
@@ -1090,45 +1076,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     districtSelect.innerHTML += '<option value="" disabled>Error loading districts - please refresh</option>';
                     districtSelect.disabled = false;
                     alert('Failed to load districts. Please check your connection and try again.');
-                });
-        }
-    });
-
-    document.getElementById('district').addEventListener('change', function() {
-        const districtId = this.value;
-        const citySelect = document.getElementById('city_id');
-
-        // Reset city
-        citySelect.innerHTML = '<option value="">Select City</option>';
-        citySelect.disabled = true;
-
-        if (districtId) {
-            console.log(`Loading cities for district ID: ${districtId}`);
-            fetch(`/api/cities/${districtId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Cities data received:', data);
-                    if (Array.isArray(data) && data.length > 0) {
-                        data.forEach(city => {
-                            citySelect.innerHTML += `<option value="${city.id}">${city.name}</option>`;
-                        });
-                        citySelect.disabled = false;
-                    } else {
-                        citySelect.innerHTML += '<option value="" disabled>No cities available</option>';
-                        citySelect.disabled = false;
-                        console.warn('No cities found for district ID:', districtId);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading cities:', error);
-                    citySelect.innerHTML += '<option value="" disabled>Error loading cities - please refresh</option>';
-                    citySelect.disabled = false;
-                    alert('Failed to load cities. Please check your connection and try again.');
                 });
         }
     });

@@ -33,7 +33,7 @@
             <div class="property-details">
                 <h3 style="margin-top: 0; color: #059669;">Property Details:</h3>
                 <p><strong>Title:</strong> {{ $property->title }}</p>
-                <p><strong>Location:</strong> {{ $property->city }}, {{ $property->state }}</p>
+                <p><strong>Location:</strong> {{ $property->state }}</p>
                 <p><strong>Price:</strong> ₹{{ number_format($property->price) }}</p>
                 <p><strong>Land Type:</strong> {{ $property->land_type }}</p>
                 <p><strong>Plot Area:</strong> {{ $property->plot_area }} {{ $property->plot_area_unit }}</p>

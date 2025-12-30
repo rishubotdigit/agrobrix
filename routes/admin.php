@@ -19,7 +19,6 @@ use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\EmailLogController;
 use App\Http\Controllers\Admin\StateController;
 use App\Http\Controllers\Admin\DistrictController;
-use App\Http\Controllers\Admin\CityController;
 
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('admin.dashboard');
@@ -134,11 +133,5 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::post('districts', [DistrictController::class, 'store'])->name('admin.districts.store');
     Route::put('districts/{district}', [DistrictController::class, 'update'])->name('admin.districts.update');
     Route::delete('districts/{district}', [DistrictController::class, 'destroy'])->name('admin.districts.destroy');
-
-    // Cities Management
-    Route::get('cities', [CityController::class, 'index'])->name('admin.cities.index');
-    Route::post('cities', [CityController::class, 'store'])->name('admin.cities.store');
-    Route::put('cities/{city}', [CityController::class, 'update'])->name('admin.cities.update');
-    Route::delete('cities/{city}', [CityController::class, 'destroy'])->name('admin.cities.destroy');
 
 });
