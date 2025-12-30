@@ -11,16 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('visits', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('lead_id');
-            $table->datetime('scheduled_at');
-            $table->enum('status', ['scheduled', 'completed', 'cancelled'])->default('scheduled');
-            $table->text('notes')->nullable();
-            $table->timestamps();
-            
-            $table->foreign('lead_id')->references('id')->on('leads')->onDelete('cascade');
-        });
+        if (!Schema::hasTable('visits')) {
+            Schema::create('visits', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('lead_id');
+                $table->datetime('scheduled_at');
+                $table->enum('status', ['scheduled', 'completed', 'cancelled'])->default('scheduled');
+                $table->text('notes')->nullable();
+                $table->timestamps();
+                
+                $table->foreign('lead_id')->references('id')->on('leads')->onDelete('cascade');
+            });
+        }
     }
 
     /**
