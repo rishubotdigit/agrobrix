@@ -65,6 +65,11 @@ class PlanController extends Controller
             return redirect()->back()->with('error', 'Too many purchase attempts. Please wait before trying again.');
         }
 
+        // Enforce role-based restrictions
+        if (auth()->user()->role !== $plan->role) {
+            return redirect()->back()->with('error', 'You can only purchase plans that match your account role (' . ucfirst(auth()->user()->role) . '). This plan is for ' . ucfirst($plan->role) . 's.');
+        }
+
         // Enhanced gateway validation
         $gateway = request('gateway');
         $allowedGateways = ['razorpay', 'phonepe', 'upi_static'];

@@ -54,7 +54,11 @@
                         @endif
                     </div>
                     @if(auth()->check())
-                        <a href="{{ route('plans.purchase', $plan->id) }}" class="block text-center {{ $plan->name === 'Pro' ? 'gradient-bg text-white hover:opacity-90' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} px-6 py-3 rounded-lg font-semibold transition">Get Started</a>
+                        @if(auth()->user()->role === 'buyer')
+                            <a href="{{ route('plans.purchase', $plan->id) }}" class="block text-center {{ $plan->name === 'Pro' ? 'gradient-bg text-white hover:opacity-90' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} px-6 py-3 rounded-lg font-semibold transition">Get Started</a>
+                        @else
+                            <button disabled class="block w-full text-center bg-gray-200 text-gray-500 px-6 py-3 rounded-lg font-semibold cursor-not-allowed">Available for Buyers</button>
+                        @endif
                     @else
                         <a href="{{ route('register', ['plan' => $plan->id]) }}" class="block text-center {{ $plan->name === 'Pro' ? 'gradient-bg text-white hover:opacity-90' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} px-6 py-3 rounded-lg font-semibold transition">Get Started</a>
                     @endif
