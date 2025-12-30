@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('follow_ups', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('lead_id')->constrained('leads');
+            $table->unsignedBigInteger('lead_id');
             $table->datetime('follow_up_date');
             $table->text('notes')->nullable();
             $table->enum('status', ['pending', 'completed'])->default('pending');
             $table->timestamps();
+            
+            $table->foreign('lead_id')->references('id')->on('leads')->onDelete('cascade');
         });
     }
 

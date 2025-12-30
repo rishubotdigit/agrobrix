@@ -13,13 +13,16 @@ return new class extends Migration
     {
         Schema::create('leads', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('property_id')->constrained('properties');
-            $table->foreignId('agent_id')->constrained('users');
+            $table->unsignedBigInteger('property_id');
+            $table->unsignedBigInteger('agent_id');
             $table->string('buyer_name');
             $table->string('buyer_email');
             $table->string('buyer_phone');
             $table->enum('status', ['new', 'contacted', 'interested', 'closed'])->default('new');
             $table->timestamps();
+            
+            $table->foreign('property_id')->references('id')->on('properties')->onDelete('cascade');
+            $table->foreign('agent_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
