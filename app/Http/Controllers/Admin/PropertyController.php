@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Events\PropertyApproved;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StorePropertyRequest;
 use App\Http\Requests\UpdatePropertyRequest;
 use App\Models\Property;
 use App\Models\PropertyVersion;
@@ -14,14 +15,107 @@ class PropertyController extends Controller
 {
     public function index()
     {
+        $myProperties = Property::where('owner_id', auth()->id())->with(['owner', 'city.district.state'])->paginate(9);
         $properties = Property::with(['owner', 'city.district.state'])->paginate(9);
-        return view('admin.properties.index', compact('properties'));
+        return view('admin.properties.index', compact('properties', 'myProperties'));
+    }
+
+    public function create(Request $request)
+    {
+        $step = $request->get('step', 1);
+        $categories = \App\Models\Category::with('subcategories.amenities')->get();
+
+        return view('admin.properties.create', compact('step', 'categories'));
+    }
+
+    public function store(StorePropertyRequest $request)
+    {
+        Log::info('Admin PropertyController store started', ['user_id' => auth()->id(), 'is_ajax' => $request->ajax()]);
+
+        // Validate request
+        $validated = $request->validated();
+        Log::info('Validation passed', ['validated_keys' => array_keys($validated), 'featured_value' => $validated['featured'] ?? null, 'user_role' => 'admin']);
+
+        // Handle file uploads
+        $imagePaths = [];
+        if ($request->hasFile('property_images')) {
+            foreach ($request->file('property_images') as $image) {
+                $path = $image->store('properties/images', 'public');
+                $imagePaths[] = $path;
+            }
+        }
+        Log::info('Image uploads handled', ['image_count' => count($imagePaths)]);
+
+        $videoPath = null;
+        if ($request->hasFile('property_video')) {
+            $videoPath = $request->file('property_video')->store('properties/videos', 'public');
+        }
+        Log::info('Video upload handled', ['video_path' => $videoPath]);
+
+        // Create property
+        $propertyData = [
+            'title' => $validated['title'],
+            'land_type' => $validated['land_type'],
+            'description' => $validated['description'],
+            'city_id' => $validated['city_id'],
+            'area' => $validated['area'],
+            'full_address' => $validated['full_address'],
+            'google_map_lat' => $validated['google_map_lat'] ?? null,
+            'google_map_lng' => $validated['google_map_lng'] ?? null,
+            'plot_area' => $validated['plot_area'],
+            'plot_area_unit' => $validated['plot_area_unit'],
+            'frontage' => $validated['frontage'],
+            'road_width' => $validated['road_width'],
+            'corner_plot' => $validated['corner_plot'] ?? false,
+            'gated_community' => $validated['gated_community'] ?? false,
+            'price' => $validated['price'],
+            'price_negotiable' => $validated['price_negotiable'] ?? false,
+            'contact_name' => $validated['contact_name'],
+            'contact_mobile' => $validated['contact_mobile'],
+            'contact_role' => 'Admin',
+            'property_images' => json_encode($imagePaths),
+            'property_video' => $videoPath,
+            'status' => 'approved',
+            'owner_id' => auth()->id(),
+            'featured' => $validated['featured'] ?? false,
+            'featured_until' => ($validated['featured'] ?? false) ? now()->addDays(30) : null,
+        ];
+        Log::info('Creating property with data', ['property_data' => $propertyData]);
+
+        $property = Property::create($propertyData);
+        Log::info('Property created', ['property_id' => $property->id, 'contact_name' => $property->contact_name, 'contact_mobile' => $property->contact_mobile, 'contact_role' => $property->contact_role]);
+
+        // Attach amenities
+        if (isset($validated['amenities'])) {
+            $property->amenities()->attach($validated['amenities']);
+            Log::info('Amenities attached', ['amenity_count' => count($validated['amenities'])]);
+        }
+
+        // Create initial version
+        $property->createVersion();
+        Log::info('Initial version created');
+
+        Log::info('Firing PropertyApproved event for property ID: ' . $property->id);
+        event(new PropertyApproved($property, auth()->id()));
+
+        Log::info('Admin PropertyController store completed successfully');
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Property created successfully',
+                'redirect' => route('admin.properties.show', $property)
+            ]);
+        }
+
+        return redirect()->route('admin.properties.show', $property)->with('success', 'Property created successfully');
     }
 
     public function show(Property $property)
     {
         $property->load(['owner', 'agent', 'amenities', 'versions', 'city.district.state']);
         $versions = $property->versions()->orderBy('version', 'desc')->get();
+        Log::info('Showing property', ['property_id' => $property->id, 'contact_name' => $property->contact_name, 'contact_mobile' => $property->contact_mobile, 'contact_role' => $property->contact_role]);
         return view('admin.properties.show', compact('property', 'versions'));
     }
 

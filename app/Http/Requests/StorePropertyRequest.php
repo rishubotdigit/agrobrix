@@ -43,6 +43,7 @@ class StorePropertyRequest extends FormRequest
             'property_images' => 'required|array|min:2|max:10',
             'property_images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'property_video' => 'nullable|file|mimes:mp4,mov,avi|max:30720',
+            'featured' => 'nullable|boolean',
             'amenities' => 'nullable|array',
             'amenities.*' => 'exists:amenities,id',
         ];

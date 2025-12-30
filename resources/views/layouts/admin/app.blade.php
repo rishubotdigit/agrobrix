@@ -209,6 +209,22 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    const inquiriesToggle = document.getElementById('inquiries-toggle');
+    const inquiriesSubmenu = document.getElementById('inquiries-submenu');
+    const inquiriesArrow = document.getElementById('inquiries-arrow');
+
+    if (inquiriesToggle) {
+        inquiriesToggle.addEventListener('click', function() {
+            if (inquiriesSubmenu.classList.contains('hidden')) {
+                inquiriesSubmenu.classList.remove('hidden');
+                inquiriesArrow.classList.add('rotate-180');
+            } else {
+                inquiriesSubmenu.classList.add('hidden');
+                inquiriesArrow.classList.remove('rotate-180');
+            }
+        });
+    }
 });
     </script>
     @endpush

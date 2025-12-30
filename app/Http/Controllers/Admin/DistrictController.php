@@ -11,9 +11,8 @@ class DistrictController extends Controller
 {
     public function index()
     {
-        $districts = District::with('state', 'cities')->get();
-        $states = State::all();
-        return view('admin.districts.index', compact('districts', 'states'));
+        $states = State::with(['districts.cities'])->get();
+        return view('admin.districts.index', compact('states'));
     }
 
     public function store(Request $request)

@@ -38,7 +38,7 @@
                         </div>
                         <div class="text-right">
                             <div class="text-5xl font-bold text-green-600 mb-1">₹{{ number_format($plan->price) }}</div>
-                            <p class="text-gray-500">per month</p>
+                            <p class="text-gray-500">for {{ $plan->getValidityDays() }} days</p>
                         </div>
                     </div>
 

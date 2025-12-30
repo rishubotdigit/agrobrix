@@ -18,33 +18,75 @@
     </div>
 
     <div class="space-y-4" id="districts-list">
-        @foreach($districts as $district)
-            <div class="border border-gray-200 rounded-lg p-4">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-800">{{ $district->name }}</h3>
-                        <p class="text-sm text-gray-600">State: {{ $district->state->name }}</p>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button onclick="editDistrict({{ $district->id }}, '{{ $district->name }}', {{ $district->state_id }})" class="text-blue-600 hover:text-blue-800">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+        @foreach($states as $state)
+            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                <!-- State Header -->
+                <div class="bg-blue-50 px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657l4.243 4.243a1 1 0 01-1.414 1.414l-4.243-4.243M9 17a8 8 0 100-16 8 8 0 000 16z"/>
                             </svg>
-                        </button>
-                        <button onclick="deleteDistrict({{ $district->id }})" class="text-red-600 hover:text-red-800">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">{{ $state->name }}</h3>
+                                <p class="text-sm text-gray-600">{{ $state->districts->count() }} districts</p>
+                            </div>
+                        </div>
+                        <button type="button" class="state-toggle text-gray-400 hover:text-gray-600 transition-colors" data-state="{{ $state->id }}">
+                            <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
                     </div>
                 </div>
 
-                <!-- Cities -->
-                <div class="ml-4 space-y-2">
-                    <h4 class="text-md font-medium text-gray-700">Cities ({{ $district->cities->count() }})</h4>
-                    @foreach($district->cities as $city)
-                        <div class="text-sm text-gray-600">- {{ $city->name }}</div>
+                <!-- State Content -->
+                <div class="state-content" data-state="{{ $state->id }}">
+                    @foreach($state->districts as $district)
+                        <div class="border-l-4 border-green-200 ml-6 mr-6 mb-4">
+                            <!-- District Header -->
+                            <div class="bg-green-50 px-4 py-3 border-b border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <svg class="w-4 h-4 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657l4.243 4.243a1 1 0 01-1.414 1.414l-4.243-4.243M9 17a8 8 0 100-16 8 8 0 000 16z"/>
+                                        </svg>
+                                        <div>
+                                            <h4 class="text-md font-medium text-gray-800">{{ $district->name }}</h4>
+                                            <p class="text-sm text-gray-600">{{ $district->cities->count() }} cities</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button onclick="editDistrict({{ $district->id }}, '{{ $district->name }}', {{ $state->id }})" class="text-blue-600 hover:text-blue-800 text-sm">
+                                            Edit
+                                        </button>
+                                        <button onclick="deleteDistrict({{ $district->id }})" class="text-red-600 hover:text-red-800 text-sm">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cities Content -->
+                            <div class="px-4 py-3">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                    @foreach($district->cities as $city)
+                                        <div class="text-sm text-gray-600 bg-gray-50 px-2 py-1 rounded">
+                                            {{ $city->name }}
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <button onclick="openCityModal({{ $state->id }}, {{ $district->id }})" class="mt-3 text-green-600 hover:text-green-700 text-sm font-medium">
+                                    + Add City to {{ $district->name }}
+                                </button>
+                            </div>
+                        </div>
                     @endforeach
+                    <div class="px-6 pb-4">
+                        <button onclick="openDistrictModal({{ $state->id }})" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                            + Add District to {{ $state->name }}
+                        </button>
+                    </div>
                 </div>
             </div>
         @endforeach
@@ -76,6 +118,40 @@
                 </div>
                 <div class="flex justify-end space-x-3">
                     <button type="button" onclick="closeDistrictModal()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-emerald-700">
+                        Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- City Modal -->
+<div id="cityModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <h3 class="text-lg font-medium text-gray-900 mb-4" id="cityModalTitle">Add City</h3>
+            <form id="cityForm" onsubmit="saveCity(event)">
+                @csrf
+                <input type="hidden" id="cityId" name="city_id">
+                <input type="hidden" id="cityStateId" name="state_id">
+                <div class="mb-4">
+                    <label for="cityName" class="block text-sm font-medium text-gray-700 mb-2">City Name</label>
+                    <input type="text" id="cityName" name="name" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                </div>
+                <div class="mb-4">
+                    <label for="cityDistrict" class="block text-sm font-medium text-gray-700 mb-2">District</label>
+                    <select id="cityDistrict" name="district_id" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                        <option value="">Select District</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeCityModal()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
                         Cancel
                     </button>
                     <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-emerald-700">
@@ -180,5 +256,96 @@ function deleteDistrict(id) {
         });
     }
 }
+
+// City modal functions
+function openCityModal(stateId, districtId) {
+    document.getElementById('cityModalTitle').textContent = 'Add City';
+    document.getElementById('cityId').value = '';
+    document.getElementById('cityName').value = '';
+    document.getElementById('cityStateId').value = stateId;
+    document.getElementById('cityDistrict').innerHTML = '<option value="' + districtId + '">Loading...</option>';
+    document.getElementById('cityDistrict').disabled = true;
+    document.getElementById('cityModal').classList.remove('hidden');
+
+    // Load districts for this state
+    fetch(`/api/districts/${stateId}`)
+        .then(response => response.json())
+        .then(data => {
+            let options = '<option value="">Select District</option>';
+            data.forEach(district => {
+                options += `<option value="${district.id}" ${district.id == districtId ? 'selected' : ''}>${district.name}</option>`;
+            });
+            document.getElementById('cityDistrict').innerHTML = options;
+            document.getElementById('cityDistrict').disabled = false;
+        })
+        .catch(error => {
+            console.error('Error loading districts:', error);
+            document.getElementById('cityDistrict').innerHTML = '<option value="" disabled>Error loading districts</option>';
+        });
+}
+
+function closeCityModal() {
+    document.getElementById('cityModal').classList.add('hidden');
+}
+
+function saveCity(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+
+    fetch('/admin/cities', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            showSuccessMessage(data.message);
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function openDistrictModal(stateId) {
+    document.getElementById('districtModalTitle').textContent = 'Add District';
+    document.getElementById('districtId').value = '';
+    document.getElementById('districtName').value = '';
+    document.getElementById('districtState').value = stateId;
+    document.getElementById('districtModal').classList.remove('hidden');
+}
+
+// Tree toggle functions
+document.addEventListener('DOMContentLoaded', function() {
+    // Initially collapse all states except first
+    const stateContents = document.querySelectorAll('.state-content');
+    stateContents.forEach((content, index) => {
+        if (index > 0) {
+            content.classList.add('hidden');
+        }
+    });
+});
+
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.state-toggle')) {
+        const button = e.target.closest('.state-toggle');
+        const stateId = button.getAttribute('data-state');
+        const content = document.querySelector(`.state-content[data-state="${stateId}"]`);
+        const icon = button.querySelector('svg');
+
+        if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            icon.style.transform = 'rotate(180deg)';
+        } else {
+            content.classList.add('hidden');
+            icon.style.transform = 'rotate(0deg)';
+        }
+    }
+});
 </script>
 @endsection

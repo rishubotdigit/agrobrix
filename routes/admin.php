@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\SmsGatewayController;
 use App\Http\Controllers\Admin\SocialLoginController;
 use App\Http\Controllers\Admin\PlanPurchaseController;
 use App\Http\Controllers\Admin\AdminContactController;
+use App\Http\Controllers\Admin\AdminInquiryController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\EmailLogController;
 use App\Http\Controllers\Admin\StateController;
@@ -36,6 +37,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
 
     // Properties
     Route::get('properties', [PropertyController::class, 'index'])->name('admin.properties.index');
+    Route::get('properties/create', [PropertyController::class, 'create'])->name('admin.properties.create');
+    Route::post('properties', [PropertyController::class, 'store'])->name('admin.properties.store');
     Route::get('properties/{property}', [PropertyController::class, 'show'])->name('admin.properties.show');
     Route::get('properties/{property}/edit', [PropertyController::class, 'edit'])->name('admin.properties.edit');
     Route::put('properties/{property}', [PropertyController::class, 'update'])->name('admin.properties.update');
@@ -104,6 +107,11 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('contact-messages', [AdminContactController::class, 'index'])->name('admin.contact-messages.index');
     Route::get('contact-messages/{contactMessage}', [AdminContactController::class, 'show'])->name('admin.contact-messages.show');
     Route::delete('contact-messages/{contactMessage}', [AdminContactController::class, 'destroy'])->name('admin.contact-messages.destroy');
+
+    // Inquiries
+    Route::get('leads', [AdminInquiryController::class, 'leads'])->name('admin.leads.index');
+    Route::get('leads/{lead}', [AdminInquiryController::class, 'showLead'])->name('admin.leads.show');
+    Route::get('viewed-contacts', [AdminInquiryController::class, 'viewedContacts'])->name('admin.viewed-contacts.index');
 
     Route::get('notifications', [NotificationController::class, 'index'])->name('admin.notifications.index');
     Route::get('notifications/count', [NotificationController::class, 'count'])->name('admin.notifications.count');

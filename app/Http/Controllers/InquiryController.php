@@ -348,6 +348,12 @@ class InquiryController extends Controller
                     'admin_id' => $user->id,
                     'property_id' => $property->id
                 ]);
+            } elseif ($user->role === 'owner') {
+                // Owners have full access to view contacts, no restrictions
+                \Log::info('Owner viewing contact - allowed', [
+                    'owner_id' => $user->id,
+                    'property_id' => $property->id
+                ]);
             } else {
                 // Other roles - deny access
                 \Log::info('Unknown role viewing contact - denied', [

@@ -283,8 +283,8 @@
                             <div class="border-t border-gray-200 pt-4">
                                 <h3 class="text-lg font-semibold text-gray-900 mb-2">Interested in this property?</h3>
                                 <p class="text-gray-600 text-sm mb-4">Contact the owner for more details and schedule a visit.</p>
-                                
-                                @if(!auth()->check() || auth()->user()->role !== 'owner')
+
+                                @if(auth()->check())
                                 <button id="viewContactBtn" onclick="handleContactClick({{ $property->id }}, '{{ $property->owner_id }}', '{{ $property->agent_id }}')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
                                     <span class="flex items-center justify-center gap-2">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -206,7 +206,7 @@
                                     View Details
                                 </a>
 
-                                @if(!Auth::check() || Auth::user()->role !== 'owner')
+                                @if(Auth::check())
                                 <button type="button" onclick="handleContactClick({{ $property->id }}, '{{ $property->owner_id }}', '{{ $property->agent_id }}')" class="w-full py-2 px-4 border-2 border-emerald-500 text-emerald-600 rounded-lg font-semibold hover:bg-emerald-50 transition-colors">
                                     Contact
                                 </button>
@@ -344,7 +344,7 @@
                                     View Details
                                 </a>
 
-                                @if(!Auth::check() || Auth::user()->role !== 'owner')
+                                @if(Auth::check())
                                 <button type="button" onclick="handleContactClick({{ $property->id }}, '{{ $property->owner_id }}', '{{ $property->agent_id }}')" class="w-full py-2 px-4 border-2 border-emerald-500 text-emerald-600 rounded-lg font-semibold hover:bg-emerald-50 transition-colors">
                                     Contact
                                 </button>
