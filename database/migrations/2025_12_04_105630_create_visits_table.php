@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('visits', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('lead_id')->constrained('leads');
+            $table->unsignedBigInteger('lead_id');
             $table->datetime('scheduled_at');
             $table->enum('status', ['scheduled', 'completed', 'cancelled'])->default('scheduled');
             $table->text('notes')->nullable();
             $table->timestamps();
+            
+            $table->foreign('lead_id')->references('id')->on('leads')->onDelete('cascade');
         });
     }
 
