@@ -558,6 +558,10 @@ class PropertyController extends Controller
 
             $description = trim($data[2]);
             $price = trim($data[3]);
+            // Sanitize price (non-nullable)
+            $price = str_replace(',', '', $price);
+            $price = (is_numeric($price) && $price !== '') ? $price : 0;
+
             $area = trim($data[4]);
             
             // State
@@ -596,7 +600,11 @@ class PropertyController extends Controller
             }
 
             $fullAddress = trim($data[7]);
+            
             $plotArea = trim($data[8]);
+            // Sanitize plot_area (nullable)
+            $plotArea = str_replace(',', '', $plotArea);
+            $plotArea = (is_numeric($plotArea) && $plotArea !== '') ? $plotArea : null;
             
             // Unit
             $plotAreaUnitInput = trim($data[9]);
@@ -612,9 +620,17 @@ class PropertyController extends Controller
             if (!empty($plotAreaUnitInput) && !$unitMatch) {
                 $rowWarnings[] = "Invalid Unit '$plotAreaUnitInput' skipped";
             }
-
+            
+            // Sanitize frontage (nullable)
             $frontage = trim($data[10]);
+            $frontage = str_replace(',', '', $frontage);
+            $frontage = (is_numeric($frontage) && $frontage !== '') ? $frontage : null;
+
+            // Sanitize road_width (nullable)
             $roadWidth = trim($data[11]);
+            $roadWidth = str_replace(',', '', $roadWidth);
+            $roadWidth = (is_numeric($roadWidth) && $roadWidth !== '') ? $roadWidth : null;
+
             $cornerPlot = strtolower(trim($data[12])) === 'yes';
             $gatedCommunity = strtolower(trim($data[13])) === 'yes';
             $contactName = trim($data[14]);
