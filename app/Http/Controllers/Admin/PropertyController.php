@@ -503,7 +503,24 @@ class PropertyController extends Controller
         
         $count = 0;
         $errors = [];
+        $warnings = [];
         $rowNum = 1;
+
+        // Valid Enum Values
+        $validLandTypes = ['Agriculture', 'Residential Plot', 'Commercial Plot'];
+        $validUnits = ['sq ft', 'sq yd', 'acre'];
+
+        // District Mapping
+        $districtMap = [
+            'Tumkur' => 'Tumakuru',
+            'Sivagangai' => 'Sivaganga',
+            'Kanchipuram' => 'Kancheepuram',
+            'Mysore' => 'Mysuru',
+            'Belgaum' => 'Belagavi',
+            'Chamraja Nagar' => 'Chamarajanagar',
+            'Thiruvallur' => 'Tiruvallur',
+            'Bangalore' => 'Bengaluru Urban',
+        ];
 
         while (($data = fgetcsv($handle)) !== FALSE) {
             $rowNum++;
@@ -512,60 +529,96 @@ class PropertyController extends Controller
                 continue;
             }
 
-            // Map columns
+            $rowWarnings = [];
+
+            // 1. Map Columns
             $title = trim($data[0]);
-            $landType = trim($data[1]);
-            // Map land type
-            if (strtolower($landType) === 'agricultural') {
-                $landType = 'Agriculture';
+            
+            // Land Type
+            $landTypeInput = trim($data[1]);
+            $landType = null;
+            
+            // Normalize common variations
+            if (strtolower($landTypeInput) === 'agricultural') {
+                $landTypeInput = 'Agriculture';
+            }
+            
+            // Match against valid values case-insensitively
+            $matchFound = false;
+            foreach ($validLandTypes as $validType) {
+                if (strcasecmp($validType, $landTypeInput) === 0) {
+                    $landType = $validType;
+                    $matchFound = true;
+                    break;
+                }
+            }
+            if (!empty($landTypeInput) && !$matchFound) {
+                $rowWarnings[] = "Invalid Land Type '$landTypeInput' skipped";
             }
 
             $description = trim($data[2]);
             $price = trim($data[3]);
             $area = trim($data[4]);
-            $stateName = trim($data[5]);
-            $districtName = trim($data[6]);
-
-            // Map district names
-            $districtMap = [
-                'Tumkur' => 'Tumakuru',
-                'Sivagangai' => 'Sivaganga',
-                'Kanchipuram' => 'Kancheepuram',
-                'Mysore' => 'Mysuru',
-                'Belgaum' => 'Belagavi',
-                'Chamraja Nagar' => 'Chamarajanagar',
-                'Thiruvallur' => 'Tiruvallur',
-                'Bangalore' => 'Bengaluru Urban',
-            ];
             
+            // State
+            $stateName = trim($data[5]);
+            $stateObject = null;
+            $state = null;
+            if (!empty($stateName)) {
+                $stateObject = \App\Models\State::where('name', $stateName)->first();
+                if ($stateObject) {
+                    $state = $stateObject->name;
+                } else {
+                    $rowWarnings[] = "State '$stateName' not found";
+                }
+            }
+
+            // District
+            $districtName = trim($data[6]);
+            // Apply mapping
             if (isset($districtMap[$districtName])) {
                 $districtName = $districtMap[$districtName];
             }
+            
+            $districtId = null;
+            if (!empty($districtName) && $stateObject) {
+                $district = \App\Models\District::where('name', $districtName)
+                    ->where('state_id', $stateObject->id)
+                    ->first();
+                
+                if ($district) {
+                    $districtId = $district->id;
+                } else {
+                    $rowWarnings[] = "District '$districtName' not found in '$stateName'";
+                }
+            } elseif (!empty($districtName) && !$stateObject) {
+                 $rowWarnings[] = "District '$districtName' skipped (State invalid)";
+            }
+
             $fullAddress = trim($data[7]);
             $plotArea = trim($data[8]);
-            $plotAreaUnit = trim($data[9]);
+            
+            // Unit
+            $plotAreaUnitInput = trim($data[9]);
+            $plotAreaUnit = null;
+            $unitMatch = false;
+            foreach ($validUnits as $validUnit) {
+                 if (strcasecmp($validUnit, $plotAreaUnitInput) === 0) {
+                    $plotAreaUnit = $validUnit;
+                    $unitMatch = true;
+                    break;
+                }
+            }
+            if (!empty($plotAreaUnitInput) && !$unitMatch) {
+                $rowWarnings[] = "Invalid Unit '$plotAreaUnitInput' skipped";
+            }
+
             $frontage = trim($data[10]);
             $roadWidth = trim($data[11]);
             $cornerPlot = strtolower(trim($data[12])) === 'yes';
             $gatedCommunity = strtolower(trim($data[13])) === 'yes';
             $contactName = trim($data[14]);
             $contactMobile = trim($data[15]);
-
-            // Resolve State and District
-            $state = \App\Models\State::where('name', $stateName)->first();
-            if (!$state) {
-                $errors[] = "Row $rowNum: State '$stateName' not found.";
-                continue;
-            }
-
-            $district = \App\Models\District::where('name', $districtName)
-                ->where('state_id', $state->id)
-                ->first();
-            
-            if (!$district) {
-                $errors[] = "Row $rowNum: District '$districtName' not found in state '$stateName'.";
-                continue;
-            }
 
             try {
                 Property::create([
@@ -574,8 +627,8 @@ class PropertyController extends Controller
                     'description' => $description,
                     'price' => $price,
                     'area' => $area,
-                    'state' => $state->name,
-                    'district_id' => $district->id,
+                    'state' => $state,
+                    'district_id' => $districtId,
                     'full_address' => $fullAddress,
                     'plot_area' => $plotArea,
                     'plot_area_unit' => $plotAreaUnit,
@@ -589,6 +642,10 @@ class PropertyController extends Controller
                     'owner_id' => auth()->id(),
                 ]);
                 $count++;
+                
+                if (!empty($rowWarnings)) {
+                    $warnings[] = "Row $rowNum: " . implode('; ', $rowWarnings);
+                }
             } catch (\Exception $e) {
                 $errors[] = "Row $rowNum: " . $e->getMessage();
             }
@@ -597,13 +654,15 @@ class PropertyController extends Controller
         fclose($handle);
 
         $message = "Successfully imported $count properties.";
-        if (!empty($errors)) {
-            $message .= " Remaining rows had errors: " . implode('; ', array_slice($errors, 0, 5));
-            if (count($errors) > 5) {
-                $message .= " ... and " . (count($errors) - 5) . " more errors.";
-            }
+        $status = 'success';
+
+        if (!empty($warnings) || !empty($errors)) {
+            $status = 'warning';
+            $message .= " Some issues encountered:";
         }
 
-        return redirect()->back()->with(empty($errors) ? 'success' : 'warning', $message);
+        return redirect()->back()->with($status, $message)
+            ->with('import_errors', $errors)
+            ->with('import_warnings', $warnings);
     }
 }
