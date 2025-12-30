@@ -8,6 +8,8 @@ use App\Traits\CapabilityTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Events\PropertySubmittedForApproval;
+use App\Models\State;
+use App\Models\District;
 
 class MyPropertyController extends Controller
 {
@@ -108,6 +110,8 @@ class MyPropertyController extends Controller
             'title' => $validated['title'],
             'land_type' => $validated['land_type'],
             'description' => $validated['description'],
+            'state' => State::find($validated['state'])->name,
+            'district_id' => $validated['district'],
             'area' => $validated['area'],
             'full_address' => $validated['full_address'],
             'google_map_lat' => $validated['google_map_lat'] ?? null,
@@ -246,6 +250,8 @@ class MyPropertyController extends Controller
             'title' => $validated['title'],
             'land_type' => $validated['land_type'],
             'description' => $validated['description'],
+            'state' => State::find($validated['state'])->name,
+            'district_id' => $validated['district'],
             'area' => $validated['area'],
             'full_address' => $validated['full_address'],
             'google_map_lat' => $validated['google_map_lat'] ?? null,
