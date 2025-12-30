@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             DistrictSeeder::class,
             PlanSeeder::class,
             AddonSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }
