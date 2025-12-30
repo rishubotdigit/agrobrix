@@ -167,27 +167,86 @@
         <div id="step2" class="step-content {{ $step == 2 ? '' : 'hidden' }}">
             <h3 class="text-xl font-semibold text-gray-900 mb-6">Step 2: Amenities & Features</h3>
 
-            <div id="amenities-container">
+            <div class="space-y-8" id="amenities-container">
                 @foreach($categories ?? [] as $category)
-                    <div class="mb-6">
-                        <h4 class="text-lg font-medium text-gray-800 mb-3">{{ $category->name }}</h4>
-                        @foreach($category->subcategories as $subcategory)
-                            <div class="ml-4 mb-4">
-                                <h5 class="text-md font-medium text-gray-700 mb-2">{{ $subcategory->name }}</h5>
-                                <div class="ml-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    @foreach($subcategory->amenities as $amenity)
-                                        <label class="flex items-center">
-                                            <input type="checkbox" name="amenities[]" value="{{ $amenity->id }}"
-                                                   {{ in_array($amenity->id, old('amenities', $property->amenities->pluck('id')->toArray())) ? 'checked' : '' }}
-                                                   class="mr-2 text-primary focus:ring-primary">
-                                            {{ $amenity->name }}
-                                        </label>
-                                    @endforeach
+                    <!-- Category Section -->
+                    <div class="border border-gray-200 rounded-lg overflow-hidden">
+                        <!-- Category Header -->
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    @php
+                                        $icons = [
+                                            'Water Source' => 'M19 14V6a2 2 0 00-2-2H7a2 2 0 00-2 2v8m14 0v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4m14 0H9',
+                                            'Irrigation' => 'M17.657 16.657l4.243 4.243a1 1 0 01-1.414 1.414l-4.243-4.243M9 17a8 8 0 100-16 8 8 0 000 16z',
+                                            'Electricity & Power' => 'M13 10V3L4 14h7v7l9-11h-7z',
+                                            'Structures' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+                                            'Security & Fencing' => 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
+                                            'Plantation & Soil' => 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064',
+                                            'Access & Terrain' => 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7',
+                                            'Scenic & Leisure' => 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z'
+                                        ];
+                                        $icon = $icons[$category->name] ?? 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z';
+                                    @endphp
+                                    <svg class="w-5 h-5 text-primary mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icon }}"></path>
+                                    </svg>
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-gray-900">{{ $category->name }}</h4>
+                                        <p class="text-sm text-gray-600">{{ $category->subcategories->count() }} sub-categories</p>
+                                    </div>
                                 </div>
+                                <button type="button" class="category-toggle text-gray-400 hover:text-gray-600 transition-colors" onclick="toggleCategory({{ $category->id }})" data-category="{{ $category->id }}">
+                                    <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
                             </div>
-                        @endforeach
+                        </div>
+
+                        <!-- Category Content -->
+                        <div class="category-content px-6 py-4 {{ $loop->first ? '' : 'hidden' }}" data-category="{{ $category->id }}">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                @foreach($category->subcategories as $subcategory)
+                                    <div class="bg-white border border-gray-200 rounded-lg p-4 h-full">
+                                        <h5 class="text-sm font-semibold text-gray-800 mb-3 border-b border-gray-100 pb-2">{{ $subcategory->name }}</h5>
+                                        <div class="space-y-2">
+                                            @foreach($subcategory->amenities as $amenity)
+                                                <label class="flex items-start cursor-pointer group">
+                                                    <div class="flex items-center h-5">
+                                                        <input type="checkbox"
+                                                               name="amenities[]"
+                                                               value="{{ $amenity->id }}"
+                                                               {{ in_array($amenity->id, old('amenities', $property->amenities->pluck('id')->toArray())) ? 'checked' : '' }}
+                                                               class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
+                                                    </div>
+                                                    <span class="ml-2 text-sm text-gray-600 group-hover:text-gray-900 transition-colors">{{ $amenity->name }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
                 @endforeach
+            </div>
+
+            <!-- Selection Summary -->
+            <div class="mt-8 bg-primary bg-opacity-5 border border-primary border-opacity-20 rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-primary mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900">Selection Summary</h4>
+                            <p class="text-sm text-gray-600">
+                                <span id="selected-count" class="font-semibold text-primary">0</span> amenities selected
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -513,7 +572,42 @@ document.addEventListener('DOMContentLoaded', function() {
         if (step === 3) {
             initializeMap();
         }
+        
+        if (step === 2) {
+            updateAmenitiesCount();
+        }
     }
+
+    function updateAmenitiesCount() {
+        const checkboxes = document.querySelectorAll('input[name="amenities[]"]:checked');
+        const count = checkboxes.length;
+        const countElement = document.getElementById('selected-count');
+        if (countElement) {
+            countElement.textContent = count;
+        }
+    }
+
+    // Add toggleCategory to global scope or ensure function is available
+    window.toggleCategory = function(categoryId) {
+        const content = document.querySelector(`.category-content[data-category="${categoryId}"]`);
+        const button = document.querySelector(`.category-toggle[data-category="${categoryId}"]`);
+        const icon = button.querySelector('svg');
+
+        if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            icon.style.transform = 'rotate(180deg)';
+        } else {
+            content.classList.add('hidden');
+            icon.style.transform = 'rotate(0deg)';
+        }
+    };
+
+    // Add event listeners for amenity checkboxes
+    document.addEventListener('change', function(e) {
+        if (e.target.name === 'amenities[]') {
+            updateAmenitiesCount();
+        }
+    });
 
     const nextBtn = document.getElementById('nextBtn');
     if (nextBtn) {

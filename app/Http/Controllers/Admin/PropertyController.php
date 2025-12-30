@@ -452,6 +452,7 @@ class PropertyController extends Controller
     {
         $step = $request->get('step', 1);
         $categories = \App\Models\Category::with('subcategories.amenities')->get();
+        $property->load(['district.state']);
 
         return view('admin.properties.edit', compact('property', 'step', 'categories'));
     }
@@ -460,6 +461,14 @@ class PropertyController extends Controller
     {
         // Validate request
         $validated = $request->validated();
+        
+        // Handle nullable numeric fields getting empty strings
+        $nullableNumerics = ['frontage', 'google_map_lat', 'google_map_lng'];
+        foreach ($nullableNumerics as $field) {
+            if (isset($validated[$field]) && $validated[$field] === '') {
+                $validated[$field] = null;
+            }
+        }
 
         // Handle file uploads
         $imagePaths = $property->property_images ? json_decode($property->property_images, true) : [];
