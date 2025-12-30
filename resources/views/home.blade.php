@@ -242,7 +242,7 @@
             </div>
 
             <div class="text-center mt-12">
-                <a href="{{ route('properties.index') }}" class="inline-block bg-primary text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-dark transition">
+                <a href="{{ route('search.advanced') }}" class="inline-block bg-primary text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-dark transition">
                     View All Properties
                 </a>
             </div>
@@ -373,7 +373,7 @@
             </div>
 
             <div class="text-center mt-12">
-                <a href="{{ route('properties.index') }}" class="inline-block bg-primary text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-dark transition">
+                <a href="{{ route('search.advanced') }}" class="inline-block bg-primary text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-dark transition">
                     View All Properties
                 </a>
             </div>
