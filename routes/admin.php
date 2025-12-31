@@ -115,6 +115,11 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::post('sms-gateways/templates', [SmsGatewayController::class, 'storeTemplate'])->name('admin.sms-templates.store');
     Route::put('sms-gateways/templates/{template}', [SmsGatewayController::class, 'updateTemplate'])->name('admin.sms-templates.update');
     Route::delete('sms-gateways/templates/{template}', [SmsGatewayController::class, 'deleteTemplate'])->name('admin.sms-templates.delete');
+    Route::post('sms-gateways/templates/{template}/test', [SmsGatewayController::class, 'testTemplate'])->name('admin.sms-templates.test');
+
+    // SMS Logs
+    Route::get('sms-logs', [\App\Http\Controllers\Admin\SmsLogController::class, 'index'])->name('admin.sms-logs.index');
+    Route::get('sms-logs/{log}', [\App\Http\Controllers\Admin\SmsLogController::class, 'show'])->name('admin.sms-logs.show');
 
     // Social Logins
     Route::get('social-logins', [SocialLoginController::class, 'index'])->name('admin.social-logins.index');

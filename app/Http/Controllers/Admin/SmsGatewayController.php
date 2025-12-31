@@ -31,35 +31,18 @@ class SmsGatewayController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'enable_2factor' => 'nullable|boolean',
-            'enable_msg91' => 'nullable|boolean',
-            '2factor_api_key' => 'required_if:enable_2factor,1',
-            'msg91_authkey' => 'required_if:enable_msg91,1',
-            'sender_id' => 'required_if:enable_2factor,1|required_if:enable_msg91,1',
-            'template_id' => 'required_if:enable_2factor,1',
-            'entity_id' => 'required_if:enable_2factor,1',
+            'msg91_authkey' => 'required|string',
             'otp_expiry_time' => 'nullable|integer|min:1',
             'otp_resend_limit' => 'nullable|integer|min:1',
         ]);
 
-        // Determine which gateway is enabled
-        $sms_gateway = '';
-        if ($request->has('enable_2factor')) {
-            $sms_gateway = '2factor';
-        } elseif ($request->has('enable_msg91')) {
-            $sms_gateway = 'msg91';
-        }
-
-        Setting::set('sms_gateway', $sms_gateway);
-        Setting::set('2factor_api_key', $request->input('2factor_api_key'));
+        // Always set gateway to MSG91
+        Setting::set('sms_gateway', 'msg91');
         Setting::set('msg91_authkey', $request->input('msg91_authkey'));
-        Setting::set('sender_id', $request->input('sender_id'));
-        Setting::set('template_id', $request->input('template_id'));
-        Setting::set('entity_id', $request->input('entity_id'));
         Setting::set('otp_expiry_time', $request->input('otp_expiry_time', '5'));
         Setting::set('otp_resend_limit', $request->input('otp_resend_limit', '3'));
 
-        return redirect()->route('admin.sms-gateways.index')->with('success', 'SMS Gateway settings updated successfully.');
+        return redirect()->route('admin.sms-gateways.index')->with('success', 'MSG91 settings updated successfully.');
     }
 
     /**
@@ -116,6 +99,33 @@ class SmsGatewayController extends Controller
         ]);
 
         return redirect()->route('admin.sms-gateways.index')->with('success', 'SMS template updated successfully.');
+    }
+
+    /**
+     * Test an SMS template
+     */
+    public function testTemplate(Request $request, SmsTemplate $template)
+    {
+        $request->validate([
+            'mobile' => 'required|string|regex:/^[0-9]{10,15}$/',
+        ]);
+
+        $otpService = app(\App\OtpService::class);
+        $testOtp = rand(100000, 999999);
+
+        $result = $otpService->sendOtpMsg91($request->mobile, $testOtp, $template->slug);
+
+        if ($result['success']) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Test SMS sent successfully to ' . $request->mobile,
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send test SMS: ' . ($result['error'] ?? 'Unknown error'),
+            ], 400);
+        }
     }
 
     /**

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Http;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Session;
 use App\Models\SmsTemplate;
+use App\Models\SmsLog;
 
 class OtpService
 {
@@ -117,22 +118,37 @@ class OtpService
     /**
      * Send OTP using MSG91 Flow API
      */
-    public function sendOtpMsg91(string $mobile, string $otp, string $templateSlug = 'otp'): array
+    public function sendOtpMsg91(string $mobile, string $otp, string $templateSlug = 'otp', $userId = null): array
     {
+        // Create log entry
+        $log = SmsLog::create([
+            'user_id' => $userId,
+            'mobile' => $mobile,
+            'message' => "OTP: {$otp}",
+            'template_slug' => $templateSlug,
+            'gateway' => 'msg91',
+            'status' => 'pending',
+            'type' => 'otp',
+        ]);
+
         try {
             // Get template from database
             $template = SmsTemplate::getBySlug($templateSlug, 'msg91');
             
             if (!$template) {
+                $error = 'Template not found: ' . $templateSlug;
+                $log->update(['status' => 'failed', 'error' => $error]);
                 Log::error('MSG91 template not found: ' . $templateSlug);
-                return ['success' => false, 'response' => null, 'error' => 'Template not found'];
+                return ['success' => false, 'response' => null, 'error' => $error];
             }
 
             $authkey = Setting::get('msg91_authkey');
             
             if (!$authkey) {
-                Log::error('MSG91 authkey not configured');
-                return ['success' => false, 'response' => null, 'error' => 'MSG91 authkey not configured'];
+                $error = 'MSG91 authkey not configured';
+                $log->update(['status' => 'failed', 'error' => $error]);
+                Log::error($error);
+                return ['success' => false, 'response' => null, 'error' => $error];
             }
 
             // Build payload according to MSG91 flow API
@@ -154,16 +170,21 @@ class OtpService
 
             if ($response->successful()) {
                 $data = $response->json();
+                $log->update(['status' => 'sent', 'response' => $data]);
                 Log::info('MSG91 OTP sent successfully', ['response' => $data]);
                 return ['success' => true, 'response' => $data, 'error' => null];
             } else {
                 $errorData = $response->json() ?? ['message' => 'Unknown error'];
+                $error = 'HTTP error: ' . $response->status();
+                $log->update(['status' => 'failed', 'response' => $errorData, 'error' => $error]);
                 Log::error('MSG91 OTP sending failed', ['response' => $errorData]);
-                return ['success' => false, 'response' => $errorData, 'error' => 'HTTP error: ' . $response->status()];
+                return ['success' => false, 'response' => $errorData, 'error' => $error];
             }
         } catch (\Exception $e) {
-            Log::error('MSG91 OTP sending failed: ' . $e->getMessage());
-            return ['success' => false, 'response' => null, 'error' => $e->getMessage()];
+            $error = $e->getMessage();
+            $log->update(['status' => 'failed', 'error' => $error]);
+            Log::error('MSG91 OTP sending failed: ' . $error);
+            return ['success' => false, 'response' => null, 'error' => $error];
         }
     }
 
@@ -207,7 +228,7 @@ class OtpService
         if ($gateway === '2factor') {
             $result = $this->sendOtp2Factor($user->mobile, $otp);
         } elseif ($gateway === 'msg91') {
-            $result = $this->sendOtpMsg91($user->mobile, $otp, 'otp');
+            $result = $this->sendOtpMsg91($user->mobile, $otp, 'otp', $user->id);
         } else {
             $result = $this->sendOtp($user->mobile, $otp);
         }
