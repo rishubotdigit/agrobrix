@@ -150,7 +150,22 @@ class HomeController extends Controller
     public function forBuyers()
     {
         $plans = Plan::where('role', 'buyer')->where('status', 'active')->get();
-        return view('pages.for-buyers', compact('plans'));
+        
+        $currentPlanId = null;
+        $currentPlanPrice = 0;
+        if (Auth::check()) {
+            $activePurchase = \App\Models\PlanPurchase::where('user_id', Auth::id())
+                ->where('status', 'activated')
+                ->where(function($q) {
+                    $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+                })->first();
+            if ($activePurchase) {
+                $currentPlanId = $activePurchase->plan_id;
+                $currentPlanPrice = $activePurchase->plan->price ?? 0;
+            }
+        }
+
+        return view('pages.for-buyers', compact('plans', 'currentPlanId', 'currentPlanPrice'));
     }
 
     public function forSellers()
@@ -175,8 +190,22 @@ class HomeController extends Controller
             $agentPlans = Plan::where('role', 'agent')->where('status', 'active')->get();
             $plans = $ownerPlans->merge($agentPlans);
         }
+
+        $currentPlanId = null;
+        $currentPlanPrice = 0;
+        if (Auth::check()) {
+            $activePurchase = \App\Models\PlanPurchase::where('user_id', Auth::id())
+                ->where('status', 'activated')
+                ->where(function($q) {
+                    $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+                })->first();
+            if ($activePurchase) {
+                $currentPlanId = $activePurchase->plan_id;
+                $currentPlanPrice = $activePurchase->plan->price ?? 0;
+            }
+        }
         
-        return view('pages.for-sellers', compact('plans'));
+        return view('pages.for-sellers', compact('plans', 'currentPlanId', 'currentPlanPrice'));
     }
 
     public function postProperty()

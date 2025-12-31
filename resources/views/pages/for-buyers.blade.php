@@ -47,12 +47,22 @@
                     @if($plan->name === 'Pro')
                         <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-sm font-semibold">Popular</div>
                     @endif
+                    @if(isset($currentPlanId) && $plan->id == $currentPlanId)
+                        <div class="absolute -top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Current Plan</div>
+                    @endif
+
                     <div class="mb-2">
                         <h3 class="text-2xl font-bold text-gray-900">{{ $plan->name }}</h3>
                     </div>
                     <div class="mb-6">
+                        @if($plan->original_price && $plan->original_price > $plan->price)
+                            <div class="text-lg text-gray-500 line-through">₹{{ number_format($plan->original_price, 0) }}</div>
+                        @endif
                         <span class="text-4xl font-bold text-primary">₹{{ number_format($plan->price) }}</span>
                         <span class="text-gray-600">/ {{ $plan->validity_days }} days</span>
+                        @if($plan->discount > 0)
+                            <div class="text-sm text-green-600 font-semibold">{{ $plan->discount }}% off</div>
+                        @endif
                     </div>
                     <div class="mb-6 space-y-3">
                         <div class="flex items-center text-gray-700">
@@ -74,12 +84,42 @@
                     </div>
                     @if(auth()->check())
                         @if(auth()->user()->role === 'buyer')
-                            <a href="{{ route('plans.purchase', $plan->id) }}" class="block text-center {{ $plan->name === 'Pro' ? 'gradient-bg text-white hover:opacity-90' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} px-6 py-3 rounded-lg font-semibold transition">Get Started</a>
+                            @if(isset($currentPlanId) && $plan->id == $currentPlanId)
+                                <button disabled class="block text-center w-full bg-gray-300 text-gray-500 px-6 py-3 rounded-lg font-semibold cursor-not-allowed">Current Plan</button>
+                            @elseif($plan->price == 0)
+                                <button disabled class="block text-center w-full bg-gray-300 text-gray-500 px-6 py-3 rounded-lg font-semibold cursor-not-allowed">Default Plan</button>
+                            @else
+                                @php
+                                    $buttonText = isset($currentPlanPrice) && $plan->price > $currentPlanPrice ? 'Upgrade Plan' : 'Purchase Plan';
+                                @endphp
+                                <a href="{{ route('plans.purchase', $plan->id) }}" class="block text-center {{ $plan->name === 'Pro' ? 'gradient-bg text-white hover:opacity-90' : 'bg-primary text-white hover:bg-emerald-700' }} px-6 py-3 rounded-lg font-semibold transition">
+                                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13l-1.1-5m1.1 5l1.1 5M9 21a1 1 0 11-2 0 1 1 0 012 0zm10 0a1 1 0 11-2 0 1 1 0 012 0z"/>
+                                    </svg>
+                                    {{ $buttonText }}
+                                </a>
+                            @endif
                         @else
                             <button disabled class="block w-full text-center bg-gray-200 text-gray-500 px-6 py-3 rounded-lg font-semibold cursor-not-allowed">Available for Buyers</button>
                         @endif
                     @else
-                        <a href="{{ route('register', ['plan' => $plan->id]) }}" class="block text-center {{ $plan->name === 'Pro' ? 'gradient-bg text-white hover:opacity-90' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} px-6 py-3 rounded-lg font-semibold transition">Get Started</a>
+                        @if($plan->price == 0)
+                            <button disabled class="block text-center w-full bg-gray-300 text-gray-500 px-6 py-3 rounded-lg font-semibold cursor-not-allowed">Default Plan</button>
+                        @else
+                            <div class="space-y-2">
+                                <button onclick="openAuthModal({{ $plan->id }}, '{{ $plan->name }}')"
+                                        class="block w-full text-center {{ $plan->name === 'Pro' ? 'gradient-bg text-white hover:opacity-90' : 'bg-primary text-white hover:bg-emerald-700' }} px-6 py-3 rounded-lg font-semibold transition">
+                                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                    </svg>
+                                    Sign Up & Purchase
+                                </button>
+                                <button onclick="openLoginModal({{ $plan->id }})"
+                                        class="block w-full text-center border-2 border-primary text-primary bg-white px-6 py-2 rounded-lg font-semibold hover:bg-primary hover:text-white transition text-sm">
+                                    Already have an account? Login
+                                </button>
+                            </div>
+                        @endif
                     @endif
                 </div>
             @empty
@@ -150,5 +190,104 @@
         </div>
     </div>
 </section>
+</section>
+
+<!-- Auth Modal -->
+<div id="authModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Sign Up to Purchase</h3>
+                <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="mb-4">
+                <p class="text-sm text-gray-600 mb-2">Create an account to purchase:</p>
+                <div class="bg-gray-50 p-3 rounded-lg">
+                    <p class="font-medium text-gray-900" id="authPlanName"></p>
+                </div>
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="closeAuthModal()" class="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition">
+                    Cancel
+                </button>
+                <a href="{{ route('register') }}?plan=" id="signupLink" class="flex-1 bg-primary text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition text-center">
+                    Sign Up Now
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Login Modal -->
+<div id="loginModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Login to Purchase</h3>
+                <button onclick="closeLoginModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="mb-4">
+                <p class="text-sm text-gray-600">Login to your account to complete the purchase.</p>
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="closeLoginModal()" class="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition">
+                    Cancel
+                </button>
+                <a href="{{ route('login') }}" id="modalLoginLink" class="flex-1 bg-primary text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition text-center">
+                    Login Now
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedPlanId = null;
+
+function openAuthModal(planId, planName) {
+    document.getElementById('authPlanName').textContent = planName;
+    document.getElementById('signupLink').href = `{{ route('register') }}?plan=${planId}`;
+    document.getElementById('authModal').classList.remove('hidden');
+}
+
+function closeAuthModal() {
+    document.getElementById('authModal').classList.add('hidden');
+}
+
+function openLoginModal(planId) {
+    selectedPlanId = planId;
+    const loginLink = document.getElementById('modalLoginLink');
+    if (loginLink) {
+        loginLink.href = `/login?redirect=/plans/${planId}/purchase`;
+    }
+    document.getElementById('loginModal').classList.remove('hidden');
+}
+
+function closeLoginModal() {
+    document.getElementById('loginModal').classList.add('hidden');
+    selectedPlanId = null;
+}
+
+// Close modals when clicking outside
+document.addEventListener('click', function(event) {
+    const authModal = document.getElementById('authModal');
+    const loginModal = document.getElementById('loginModal');
+
+    if (event.target === authModal) {
+        closeAuthModal();
+    }
+    if (event.target === loginModal) {
+        closeLoginModal();
+    }
+});
+</script>
 @endif
 @endsection
