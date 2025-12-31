@@ -60,6 +60,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::post('versions/bulk-approve', [PropertyController::class, 'bulkApprove'])->name('admin.versions.bulk-approve');
     Route::post('versions/bulk-reject', [PropertyController::class, 'bulkReject'])->name('admin.versions.bulk-reject');
     Route::get('versions/{version}/diff', [PropertyController::class, 'diff'])->name('admin.versions.diff');
+    Route::post('properties/{property}/toggle-featured', [PropertyController::class, 'toggleFeatured'])->name('admin.properties.toggle-featured');
 
     // Categories Management
     Route::get('categories', [CategoryController::class, 'index'])->name('admin.categories.index');

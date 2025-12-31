@@ -448,6 +448,23 @@ class PropertyController extends Controller
         return redirect()->back()->with('success', 'Property rejected.');
     }
 
+    public function toggleFeatured(Property $property)
+    {
+        // Admins can only feature their own properties (or where they are set as owner)
+        if ($property->owner_id !== auth()->id()) {
+            return redirect()->back()->with('error', 'You can only feature properties created by you.');
+        }
+
+        $newFeaturedStatus = !$property->featured;
+        $property->update([
+            'featured' => $newFeaturedStatus,
+            'featured_until' => $newFeaturedStatus ? now()->addDays(30) : null
+        ]);
+
+        $message = $newFeaturedStatus ? 'Property featured successfully.' : 'Property un-featured.';
+        return redirect()->back()->with('success', $message);
+    }
+
     public function edit(Request $request, Property $property)
     {
         $step = $request->get('step', 1);

@@ -280,6 +280,18 @@
                     </div>
                 @endif
 
+                <!-- Featured Badge -->
+                @if($property->featured)
+                    <div class="absolute top-2 left-8 z-10">
+                        <span class="inline-flex px-2 py-0.5 text-[10px] uppercase tracking-wide font-bold rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200 shadow-sm">
+                            <svg class="w-3 h-3 mr-1 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            Featured
+                        </span>
+                    </div>
+                @endif
+                
                 <!-- Status Badge -->
                 <div class="absolute top-2 right-2">
                     <span class="inline-flex px-2 py-0.5 text-[10px] uppercase tracking-wide font-bold rounded-full
@@ -380,6 +392,18 @@
                                 Delete
                            </button>
                         @endif
+                        
+                        @if($property->owner_id == auth()->id())
+                             <form method="POST" action="{{ route('admin.properties.toggle-featured', $property) }}" class="flex-1">
+                                @csrf
+                                <button type="submit" class="w-full py-1.5 rounded transition-colors border text-center flex items-center justify-center {{ $property->featured ? 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100' : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100' }}">
+                                    <svg class="w-3 h-3 mr-1 {{ $property->featured ? 'fill-current' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                    </svg>
+                                    {{ $property->featured ? 'Unfeature' : 'Feature' }}
+                                </button>
+                            </form>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -428,7 +452,14 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900 truncate max-w-xs">{{ $property->title }}</div>
+                            <div class="text-sm font-medium text-gray-900 truncate max-w-xs">
+                                {{ $property->title }}
+                                @if($property->featured)
+                                    <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        <svg class="w-3 h-3 mr-0.5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    </span>
+                                @endif
+                            </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-600">{{ $property->area }}</div>
@@ -491,6 +522,17 @@
                                     </form>
                                 @endif
                                 <button onclick="deleteProperty({{ $property->id }})" class="text-red-600 hover:text-red-900">Delete</button>
+                                
+                                @if($property->owner_id == auth()->id())
+                                    <form method="POST" action="{{ route('admin.properties.toggle-featured', $property) }}" class="inline ml-2">
+                                        @csrf
+                                        <button type="submit" class="text-yellow-600 hover:text-yellow-900" title="{{ $property->featured ? 'Unfeature' : 'Feature' }}">
+                                            <svg class="w-4 h-4 inline {{ $property->featured ? 'fill-current' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
                         </td>
                     </tr>
