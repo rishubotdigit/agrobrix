@@ -86,10 +86,6 @@
                         <a href="{{ route('properties.show', $property) }}" class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-2.5 px-4 rounded-lg font-semibold hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200 text-center block shadow-md hover:shadow-lg">
                             View Details
                         </a>
-
-                        <button onclick="handleContactClick({{ $property->id }}, '{{ $property->owner_id }}', '{{ $property->agent_id }}')" class="w-full py-2 px-4 border-2 border-emerald-500 text-emerald-600 rounded-lg font-semibold hover:bg-emerald-50 transition-colors">
-                            Contact
-                        </button>
                     </div>
                 </div>
             </div>

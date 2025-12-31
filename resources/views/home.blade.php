@@ -276,4 +276,45 @@
 
 @include('components.contact-inquiry-modal')
 
+<script>
+    function toggleWishlist(propertyId, buttonElement) {
+        const heartIcon = buttonElement.querySelector('svg');
+        const isInWishlist = heartIcon.classList.contains('fill-current');
+
+        const url = isInWishlist ? `/buyer/wishlist/remove/${propertyId}` : '/buyer/wishlist/add';
+        const method = isInWishlist ? 'DELETE' : 'POST';
+        const body = isInWishlist ? null : JSON.stringify({ property_id: propertyId });
+
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                'Accept': 'application/json',
+            },
+            body: body
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (isInWishlist) {
+                    heartIcon.classList.remove('text-red-500', 'fill-current');
+                    heartIcon.classList.add('text-gray-600');
+                    heartIcon.setAttribute('fill', 'none');
+                } else {
+                    heartIcon.classList.remove('text-gray-600');
+                    heartIcon.classList.add('text-red-500', 'fill-current');
+                    heartIcon.setAttribute('fill', 'currentColor');
+                }
+            } else {
+                alert(data.error || 'An error occurred');
+            }
+        })
+        .catch(error => {
+            console.error('Error toggling wishlist:', error);
+            alert('An error occurred while updating wishlist');
+        });
+    }
+</script>
+
 @endsection
