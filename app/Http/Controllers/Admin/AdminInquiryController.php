@@ -10,7 +10,18 @@ class AdminInquiryController extends Controller
 {
     public function leads()
     {
+        \Log::info('AdminInquiryController leads query executed', [
+            'total_leads' => Lead::count()
+        ]);
+
         $leads = Lead::with(['property.owner', 'agent'])->orderBy('created_at', 'desc')->paginate(20);
+
+        \Log::info('Leads query results', [
+            'leads_count' => $leads->count(),
+            'total_pages' => $leads->lastPage(),
+            'current_page' => $leads->currentPage(),
+            'leads_ids' => $leads->pluck('id')->toArray()
+        ]);
 
         return view('admin.inquiries.leads.index', compact('leads'));
     }

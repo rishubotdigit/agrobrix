@@ -17,7 +17,7 @@
                 <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
                     <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
                         <div class="flex-1">
-                            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">{{ $property->title }}</h1>
+                            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">{{ $property->title }}</h1>
                             <p class="text-gray-600 flex items-center gap-2">
                                 <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
@@ -27,7 +27,7 @@
                             </p>
                         </div>
                         <div class="text-left sm:text-right">
-                            <p class="text-3xl sm:text-4xl font-bold text-emerald-600">₹{{ number_format($property->price) }}</p>
+                            <p class="text-2xl sm:text-3xl font-bold text-emerald-600">₹{{ number_format($property->price) }}</p>
                             @if($property->price_negotiable)
                                 <span class="inline-block mt-2 px-3 py-1 bg-emerald-100 text-emerald-700 text-sm font-medium rounded-full">
                                     Negotiable
@@ -240,7 +240,7 @@
                             <!-- Owner Profile Image -->
                             <div class="flex justify-center">
                                 <div class="w-24 h-24 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-full flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
-                                    @if($property->owner->profile_photo)
+                                    @if($property->owner->profile_photo && $property->owner->role !== 'admin')
                                         <img src="{{ asset('storage/' . $property->owner->profile_photo) }}" alt="Owner Profile" class="w-full h-full object-cover">
                                     @else
                                         <svg class="w-12 h-12 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -253,9 +253,11 @@
                             <!-- Owner Name -->
                             <div>
                                 <p class="text-gray-900 text-xl font-bold">
-                                    {{ $property->owner->name ?? 'Property Owner' }}
+                                    {{ $property->owner->role === 'admin' ? 'Agrobrix Team' : ($property->owner->name ?? 'Property Owner') }}
                                 </p>
-                                <p class="text-gray-500 text-sm mt-1">Property Owner</p>
+                                @if($property->owner->role !== 'admin')
+                                    <p class="text-gray-500 text-sm mt-1">Property Owner</p>
+                                @endif
                             </div>
 
                             <!-- Divider -->
