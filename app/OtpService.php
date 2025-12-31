@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Session;
+use App\Models\SmsTemplate;
 
 class OtpService
 {
@@ -113,6 +114,59 @@ class OtpService
         }
     }
 
+    /**
+     * Send OTP using MSG91 Flow API
+     */
+    public function sendOtpMsg91(string $mobile, string $otp, string $templateSlug = 'otp'): array
+    {
+        try {
+            // Get template from database
+            $template = SmsTemplate::getBySlug($templateSlug, 'msg91');
+            
+            if (!$template) {
+                Log::error('MSG91 template not found: ' . $templateSlug);
+                return ['success' => false, 'response' => null, 'error' => 'Template not found'];
+            }
+
+            $authkey = Setting::get('msg91_authkey');
+            
+            if (!$authkey) {
+                Log::error('MSG91 authkey not configured');
+                return ['success' => false, 'response' => null, 'error' => 'MSG91 authkey not configured'];
+            }
+
+            // Build payload according to MSG91 flow API
+            $payload = [
+                'template_id' => $template->template_id,
+                'recipients' => [
+                    [
+                        'mobiles' => $mobile,
+                        'var1' => $otp, // Default OTP variable
+                    ]
+                ]
+            ];
+
+            $response = Http::withHeaders([
+                'authkey' => $authkey,
+                'accept' => 'application/json',
+                'content-type' => 'application/json',
+            ])->post('https://control.msg91.com/api/v5/flow', $payload);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                Log::info('MSG91 OTP sent successfully', ['response' => $data]);
+                return ['success' => true, 'response' => $data, 'error' => null];
+            } else {
+                $errorData = $response->json() ?? ['message' => 'Unknown error'];
+                Log::error('MSG91 OTP sending failed', ['response' => $errorData]);
+                return ['success' => false, 'response' => $errorData, 'error' => 'HTTP error: ' . $response->status()];
+            }
+        } catch (\Exception $e) {
+            Log::error('MSG91 OTP sending failed: ' . $e->getMessage());
+            return ['success' => false, 'response' => null, 'error' => $e->getMessage()];
+        }
+    }
+
     public function verifyOtp2Factor(string $session_id, string $otp): bool
     {
         try {
@@ -152,15 +206,21 @@ class OtpService
         $result = null;
         if ($gateway === '2factor') {
             $result = $this->sendOtp2Factor($user->mobile, $otp);
+        } elseif ($gateway === 'msg91') {
+            $result = $this->sendOtpMsg91($user->mobile, $otp, 'otp');
         } else {
             $result = $this->sendOtp($user->mobile, $otp);
         }
 
         if ($result['success']) {
+            // Handle session ID for 2Factor
             if ($gateway === '2factor') {
                 $user->otp_session_id = $result['response']['Details'] ?? null;
                 $user->save();
             }
+            // Note: MSG91 flow API doesn't return a session ID for verification
+            // OTP verification will be done locally by comparing the OTP codes
+            
             if (!$isResend) {
                 $user->update([
                     'otp_code' => $otp,
@@ -190,6 +250,12 @@ class OtpService
             $result = $this->sendOtp2Factor($mobile, $otp);
             if ($result['success']) {
                 Session::put('otp_session_id', $result['response']['Details'] ?? null);
+            }
+        } elseif ($gateway === 'msg91') {
+            $result = $this->sendOtpMsg91($mobile, $otp, 'otp');
+            if ($result['success']) {
+                Session::put('otp_code', $otp);
+                Session::put('otp_expiry', now()->addMinutes(Setting::get('otp_expiry_time', 5)));
             }
         } else {
             $result = $this->sendOtp($mobile, $otp);
@@ -265,6 +331,9 @@ class OtpService
                 Session::put('otp_session_id', $result['response']['Details'] ?? null);
                 $sent = true;
             }
+        } elseif ($gateway === 'msg91') {
+            $result = $this->sendOtpMsg91($mobile, $otp, 'otp');
+            $sent = $result['success'];
         } else {
             $result = $this->sendOtp($mobile, $otp);
             $sent = $result['success'];

@@ -110,6 +110,11 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     // SMS Gateways
     Route::get('sms-gateways', [SmsGatewayController::class, 'index'])->name('admin.sms-gateways.index');
     Route::post('sms-gateways', [SmsGatewayController::class, 'update'])->name('admin.sms-gateways.update');
+    
+    // SMS Templates
+    Route::post('sms-gateways/templates', [SmsGatewayController::class, 'storeTemplate'])->name('admin.sms-templates.store');
+    Route::put('sms-gateways/templates/{template}', [SmsGatewayController::class, 'updateTemplate'])->name('admin.sms-templates.update');
+    Route::delete('sms-gateways/templates/{template}', [SmsGatewayController::class, 'deleteTemplate'])->name('admin.sms-templates.delete');
 
     // Social Logins
     Route::get('social-logins', [SocialLoginController::class, 'index'])->name('admin.social-logins.index');
