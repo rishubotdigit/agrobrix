@@ -299,58 +299,27 @@ class InquiryController extends Controller
         ]);
 
         if (!$isOwnerOrAgent) {
-            // User is not owner/agent, apply plan limits
-            if ($user->role === 'agent') {
-                // Agents check their own plan limits
-                $agentActivePurchases = $user->activePlanPurchases();
-
-                \Log::info('Agent viewing contact - checking own plan', [
-                    'agent_id' => $user->id,
-                    'agent_active_purchases_count' => $agentActivePurchases->count(),
-                    'property_owner_id' => $property->owner_id,
+            // Admin, Agent, and Owner allow freely without deduction
+            if (in_array($user->role, ['admin', 'agent', 'owner'])) {
+                Log::info(ucfirst($user->role) . ' viewing contact - allowed (no deduction)', [
+                    'user_id' => $user->id,
                     'property_id' => $property->id
                 ]);
-
-                if ($agentActivePurchases->isEmpty()) {
-                    \Log::info('Agent has no active plan', ['agent_id' => $user->id]);
-                    return response()->json([
-                        'error' => 'No active plan. Please purchase a plan to view contacts.',
-                        'redirect' => route('plans.index')
-                    ], 403);
-                }
-
-                // Check max_contacts capability
-                $maxContacts = $this->getCapabilityValue($user, 'max_contacts');
-                $totalUsedContacts = $agentActivePurchases->sum('used_contacts');
-
-                \Log::info('Agent contact credits check', [
-                    'agent_id' => $user->id,
-                    'max_contacts' => $maxContacts,
-                    'total_used_contacts' => $totalUsedContacts
-                ]);
-
-                if ($totalUsedContacts >= $maxContacts) {
-                    \Log::info('Agent contact credits exhausted', ['agent_id' => $user->id]);
-                    return response()->json([
-                        'error' => 'Contact credits exhausted. Please upgrade your plan.',
-                        'redirect' => route('plans.index')
-                    ], 403);
-                }
             } elseif ($user->role === 'buyer') {
                 // Buyers check their own plan limits
                 $buyerActivePurchases = $user->activePlanPurchases();
 
-                \Log::info('Buyer viewing contact - checking own plan', [
+                Log::info('Buyer viewing contact - checking own plan', [
                     'buyer_id' => $user->id,
                     'buyer_active_purchases_count' => $buyerActivePurchases->count(),
                     'property_id' => $property->id
                 ]);
 
                 if ($buyerActivePurchases->isEmpty()) {
-                    \Log::info('Buyer has no active plan', ['buyer_id' => $user->id]);
+                    Log::info('Buyer has no active plan', ['buyer_id' => $user->id]);
                     return response()->json([
                         'error' => 'No active plan. Please purchase a plan to view contacts.',
-                        'redirect' => route('plans.index')
+                        'redirect' => route('for-buyers')
                     ], 403);
                 }
 
@@ -358,34 +327,22 @@ class InquiryController extends Controller
                 $maxContacts = $this->getCapabilityValue($user, 'max_contacts');
                 $totalUsedContacts = $buyerActivePurchases->sum('used_contacts');
 
-                \Log::info('Buyer contact credits check', [
+                Log::info('Buyer contact credits check', [
                     'buyer_id' => $user->id,
                     'max_contacts' => $maxContacts,
                     'total_used_contacts' => $totalUsedContacts
                 ]);
 
                 if ($totalUsedContacts >= $maxContacts) {
-                    \Log::info('Buyer contact credits exhausted', ['buyer_id' => $user->id]);
+                    Log::info('Buyer contact credits exhausted', ['buyer_id' => $user->id]);
                     return response()->json([
                         'error' => 'Contact credits exhausted. Please upgrade your plan.',
-                        'redirect' => route('plans.index')
+                        'redirect' => route('for-buyers')
                     ], 403);
                 }
-            } elseif ($user->role === 'admin') {
-                // Admin has full access, no restrictions
-                \Log::info('Admin viewing contact - allowed', [
-                    'admin_id' => $user->id,
-                    'property_id' => $property->id
-                ]);
-            } elseif ($user->role === 'owner') {
-                // Owners have full access to view contacts, no restrictions
-                \Log::info('Owner viewing contact - allowed', [
-                    'owner_id' => $user->id,
-                    'property_id' => $property->id
-                ]);
             } else {
                 // Other roles - deny access
-                \Log::info('Unknown role viewing contact - denied', [
+                Log::info('Unknown role viewing contact - denied', [
                     'user_id' => $user->id,
                     'role' => $user->role,
                     'property_id' => $property->id
@@ -397,6 +354,7 @@ class InquiryController extends Controller
         }
 
         // Handle lead/viewed contact creation and credit deduction based on role
+        // Handle lead/viewed contact creation and credit deduction based on role
         if ($user->role === 'buyer' && !$isOwnerOrAgent) {
             $existingViewed = ViewedContact::where('buyer_id', $user->id)
                 ->where('property_id', $property->id)
@@ -405,33 +363,56 @@ class InquiryController extends Controller
             if (!$existingViewed) {
                 // Wrap deduction and creation in transaction
                 DB::transaction(function () use ($user, $property) {
+                    // Deduct credit
                     $buyerActivePurchases = $user->activePlanPurchases();
                     $buyerActivePurchases->first()->increment('used_contacts');
+                    
+                    // Create ViewedContact
                     ViewedContact::create([
                         'buyer_id' => $user->id,
                         'property_id' => $property->id,
                     ]);
+                    
+                    // Create Lead Automatically
+                    $agentId = $property->agent_id ?: $property->owner_id;
+                    $lead = Lead::firstOrCreate(
+                        [
+                            'property_id' => $property->id,
+                            'buyer_email' => $user->email,
+                        ],
+                        [
+                            'agent_id' => $agentId,
+                            'buyer_name' => $user->name,
+                            'buyer_phone' => $user->mobile ?? '',
+                            'buyer_type' => 'buyer',
+                            'status' => 'new'
+                        ]
+                    );
+
+                    if ($lead->wasRecentlyCreated) {
+                        event(new InquiryCreated($lead));
+                    }
                 });
 
-                Log::info('Deducted contact credit from buyer in viewContact', [
+                Log::info('Deducted contact credit and created lead for buyer in viewContact', [
                     'buyer_id' => $user->id,
                     'property_id' => $property->id
                 ]);
             } else {
-                Log::info('Buyer already viewed contact, no deduction', [
+                Log::info('Buyer already viewed contact, no deduction, assuming lead exists or not recreating', [
                     'buyer_id' => $user->id,
                     'property_id' => $property->id
                 ]);
             }
-        } elseif ($user->role === 'agent' && !$isOwnerOrAgent) {
+        } elseif (in_array($user->role, ['agent', 'owner']) && !$isOwnerOrAgent) {
+            // Agent / Owner - Create Lead, No Deduction
             $existingLead = Lead::where('property_id', $property->id)
-                ->where('buyer_name', $user->name)
                 ->where('buyer_email', $user->email)
                 ->exists();
 
             if (!$existingLead) {
                 // Create lead for assigned agent or owner
-                $agentId = $property->owner_id;
+                $agentId = $property->agent_id ?: $property->owner_id;
 
                 $lead = Lead::create([
                     'property_id' => $property->id,
@@ -439,25 +420,16 @@ class InquiryController extends Controller
                     'buyer_name' => $user->name,
                     'buyer_email' => $user->email,
                     'buyer_phone' => $user->mobile ?? '',
+                    'buyer_type' => $user->role
                 ]);
+                
+                 event(new InquiryCreated($lead));
 
-                Log::info('Lead created from view contact for agent', [
+                Log::info('Lead created from view contact for agent/owner (No Deduction)', [
                     'lead_id' => $lead->id,
                     'property_id' => $property->id,
-                    'property_agent_id' => $property->agent_id,
-                    'assigned_agent_id' => $agentId,
-                    'property_owner_id' => $property->owner_id,
-                    'property_owner_role' => $property->owner ? $property->owner->role : null,
-                    'buyer_email' => $user->email,
-                    'is_admin_property' => $property->owner && $property->owner->role === 'admin'
-                ]);
-
-                // Deduct credit
-                $agentActivePurchases = $user->activePlanPurchases();
-                $agentActivePurchases->first()->increment('used_contacts');
-                Log::info('Deducted contact credit from agent', [
-                    'agent_id' => $user->id,
-                    'property_id' => $property->id
+                    'user_role' => $user->role,
+                    'buyer_email' => $user->email
                 ]);
             }
         }

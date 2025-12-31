@@ -18,55 +18,49 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submission Date</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Buying Purpose</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timeline</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Site Visit</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Buyer Type</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Additional Message</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Details</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Viewed</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach($inquiries as $inquiry)
                         <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ $inquiry->property->title ?? 'N/A' }}</div>
-                                <div class="text-sm text-gray-500">{{ $inquiry->property->state->name ?? 'N/A' }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ $inquiry->updated_at->format('M d, Y') }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ $inquiry->buying_purpose ?? 'N/A' }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ $inquiry->buying_timeline ?? 'N/A' }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ $inquiry->interested_in_site_visit ? 'Yes' : 'No' }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ $inquiry->buyer_type ?? 'N/A' }}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-900">
-                                {{ $inquiry->additional_message ?? 'N/A' }}
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    @if(isset($inquiry->property->property_images) && is_array(json_decode($inquiry->property->property_images, true)))
+                                        <div class="flex-shrink-0 h-10 w-10 mr-3">
+                                            <img class="h-10 w-10 rounded-lg object-cover" src="{{ asset('storage/' . json_decode($inquiry->property->property_images, true)[0]) }}" alt="">
+                                        </div>
+                                    @endif
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">{{ $inquiry->property->title ?? 'N/A' }}</div>
+                                        <div class="text-xs text-gray-500">{{ $inquiry->property->land_type ?? 'Property' }} • {{ $inquiry->property->plot_area ?? '' }} {{ $inquiry->property->plot_area_unit ?? '' }}</div>
+                                    </div>
+                                </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
-                                    @if($inquiry->status == 'pending')
-                                        bg-yellow-100 text-yellow-800
-                                    @elseif($inquiry->status == 'contacted')
-                                        bg-blue-100 text-blue-800
-                                    @elseif($inquiry->status == 'qualified')
-                                        bg-purple-100 text-purple-800
-                                    @elseif($inquiry->status == 'closed')
-                                        bg-red-100 text-red-800
-                                    @else
-                                        bg-gray-100 text-gray-800
-                                    @endif">
-                                    {{ ucfirst($inquiry->status) }}
-                                </span>
+                                <div class="text-sm text-gray-900">{{ $inquiry->property->district->name ?? 'N/A' }}</div>
+                                <div class="text-xs text-gray-500">{{ $inquiry->property->state ?? 'N/A' }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-semibold text-emerald-600">₹{{ number_format($inquiry->property->price ?? 0) }}</div>
+                                @if($inquiry->property->price_negotiable)
+                                    <div class="text-xs text-gray-500">Negotiable</div>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ $inquiry->property->contact_name ?? 'Owner' }}</div>
+                                <div class="text-xs text-gray-500">{{ $inquiry->property->contact_mobile ?? 'N/A' }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ $inquiry->viewed_at ? $inquiry->viewed_at->format('M d, Y') : $inquiry->created_at->format('M d, Y') }}
+                                <div class="text-xs">{{ $inquiry->viewed_at ? $inquiry->viewed_at->format('h:i A') : $inquiry->created_at->format('h:i A') }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <a href="{{ route('properties.show', $inquiry->property->slug) }}" class="text-emerald-600 hover:text-emerald-900 hover:underline">View Property</a>
                             </td>
                         </tr>
                     @endforeach

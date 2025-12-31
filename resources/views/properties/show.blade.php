@@ -282,7 +282,7 @@
                                 <h3 class="text-lg font-semibold text-gray-900 mb-2">Interested in this property?</h3>
                                 <p class="text-gray-600 text-sm mb-4">Contact the owner for more details and schedule a visit.</p>
 
-                                <button id="viewContactBtn" onclick="handleContactClick({{ $property->id }}, '{{ $property->owner_id }}', '{{ $property->agent_id }}')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                                <button id="viewContactBtn" onclick="handleContactClick('{{ $property->slug }}', '{{ $property->owner_id }}', '{{ $property->agent_id }}')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
                                     <span class="flex items-center justify-center gap-2">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
@@ -338,5 +338,5 @@
     </div>
 </div>
 
-@include('components.contact-inquiry-modal', ['propertyId' => $property->id])
+@include('components.contact-inquiry-modal', ['propertyId' => $property->slug])
 @endsection
