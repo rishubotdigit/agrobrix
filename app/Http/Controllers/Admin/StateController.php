@@ -18,10 +18,22 @@ class StateController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255|unique:states',
-            'code' => 'required|string|max:10|unique:states'
+            'code' => 'required|string|max:10|unique:states',
+            'image' => 'nullable|image|max:2048',
+            'icon' => 'nullable|image|max:1024',
         ]);
 
-        State::create($request->only(['name', 'code']));
+        $data = $request->only(['name', 'code']);
+
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('states/images', 'public');
+        }
+
+        if ($request->hasFile('icon')) {
+            $data['icon'] = $request->file('icon')->store('states/icons', 'public');
+        }
+
+        State::create($data);
 
         return response()->json(['message' => 'State created successfully']);
     }
@@ -30,16 +42,43 @@ class StateController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255|unique:states,name,' . $state->id,
-            'code' => 'required|string|max:10|unique:states,code,' . $state->id
+            'code' => 'required|string|max:10|unique:states,code,' . $state->id,
+            'image' => 'nullable|image|max:2048',
+            'icon' => 'nullable|image|max:1024',
         ]);
 
-        $state->update($request->only(['name', 'code']));
+        $data = $request->only(['name', 'code']);
+
+        if ($request->hasFile('image')) {
+            // Delete old image
+            if ($state->image && \Storage::disk('public')->exists($state->image)) {
+                \Storage::disk('public')->delete($state->image);
+            }
+            $data['image'] = $request->file('image')->store('states/images', 'public');
+        }
+
+        if ($request->hasFile('icon')) {
+            // Delete old icon
+            if ($state->icon && \Storage::disk('public')->exists($state->icon)) {
+                \Storage::disk('public')->delete($state->icon);
+            }
+            $data['icon'] = $request->file('icon')->store('states/icons', 'public');
+        }
+
+        $state->update($data);
 
         return response()->json(['message' => 'State updated successfully']);
     }
 
     public function destroy(State $state)
     {
+        if ($state->image && \Storage::disk('public')->exists($state->image)) {
+            \Storage::disk('public')->delete($state->image);
+        }
+        if ($state->icon && \Storage::disk('public')->exists($state->icon)) {
+            \Storage::disk('public')->delete($state->icon);
+        }
+        
         $state->delete();
 
         return response()->json(['message' => 'State deleted successfully']);

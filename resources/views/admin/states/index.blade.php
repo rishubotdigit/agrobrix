@@ -84,6 +84,16 @@
                     <input type="text" id="stateCode" name="code" required maxlength="10"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
                 </div>
+                <div class="mb-4">
+                    <label for="stateImage" class="block text-sm font-medium text-gray-700 mb-2">State Image</label>
+                    <input type="file" id="stateImage" name="image" accept="image/*"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                </div>
+                <div class="mb-4">
+                    <label for="stateIcon" class="block text-sm font-medium text-gray-700 mb-2">State Icon</label>
+                    <input type="file" id="stateIcon" name="icon" accept="image/*"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                </div>
                 <div class="flex justify-end space-x-3">
                     <button type="button" onclick="closeStateModal()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
                         Cancel
@@ -126,14 +136,14 @@ function showSuccessMessage(message) {
 
 function openStateModal() {
     document.getElementById('stateModalTitle').textContent = 'Add State';
+    document.getElementById('stateForm').reset();
     document.getElementById('stateId').value = '';
-    document.getElementById('stateName').value = '';
-    document.getElementById('stateCode').value = '';
     document.getElementById('stateModal').classList.remove('hidden');
 }
 
 function editState(id, name, code) {
     document.getElementById('stateModalTitle').textContent = 'Edit State';
+    document.getElementById('stateForm').reset();
     document.getElementById('stateId').value = id;
     document.getElementById('stateName').value = name;
     document.getElementById('stateCode').value = code;
@@ -150,17 +160,26 @@ function saveState(event) {
     const formData = new FormData(form);
     const stateId = formData.get('state_id');
 
-    const url = stateId ? `/admin/states/${stateId}` : '/admin/states';
-    const method = stateId ? 'PUT' : 'POST';
+    let url = '/admin/states';
+    
+    if (stateId) {
+        url = `/admin/states/${stateId}`;
+        formData.append('_method', 'PUT');
+    }
 
     fetch(url, {
-        method: method,
+        method: 'POST',
         body: formData,
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => Promise.reject(data));
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.message) {
             showSuccessMessage(data.message);
@@ -169,7 +188,10 @@ function saveState(event) {
             }, 1000);
         }
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        console.error('Error:', error);
+        alert(error.message || 'An error occurred while saving the state.');
+    });
 }
 
 function deleteState(id) {

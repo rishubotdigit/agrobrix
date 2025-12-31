@@ -131,14 +131,12 @@
 
                                     <div>
                                         <label for="google_redirect_uri" class="block text-sm font-medium text-gray-700 mb-2">
-                                            Redirect URI<span class="text-red-500">*</span>
-
+                                            Redirect URI <span class="text-gray-400 font-normal">(Auto-generated)</span>
                                         </label>
-                                        <input type="url" id="google_redirect_uri" name="google_redirect_uri" value="{{ $settings['google_redirect_uri'] }}" class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm @error('google_redirect_uri') border-red-300 @enderror" placeholder="https://yourdomain.com/auth/google/callback">
-                                        <p class="mt-1 text-xs text-gray-500">The redirect URI configured in your Google OAuth app</p>
-                                        @error('google_redirect_uri')
-                                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                                        @enderror
+                                        <div class="flex rounded-md shadow-sm">
+                                            <input type="url" id="google_redirect_uri" name="google_redirect_uri" value="{{ route('auth.google.callback') }}" class="flex-1 block w-full px-3 py-2 bg-gray-100 text-gray-500 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-300 sm:text-sm cursor-not-allowed" readonly>
+                                        </div>
+                                        <p class="mt-1 text-xs text-gray-500">Copy this URL and paste it into your Google OAuth Client configuration.</p>
                                     </div>
                                 </div>
                             </div>
@@ -219,14 +217,12 @@
 
                                     <div>
                                         <label for="facebook_redirect_uri" class="block text-sm font-medium text-gray-700 mb-2">
-                                            Redirect URI<span class="text-red-500">*</span>
-
+                                            Redirect URI <span class="text-gray-400 font-normal">(Auto-generated)</span>
                                         </label>
-                                        <input type="url" id="facebook_redirect_uri" name="facebook_redirect_uri" value="{{ $settings['facebook_redirect_uri'] }}" class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm @error('facebook_redirect_uri') border-red-300 @enderror" placeholder="https://yourdomain.com/auth/facebook/callback">
-                                        <p class="mt-1 text-xs text-gray-500">The redirect URI configured in your Facebook app</p>
-                                        @error('facebook_redirect_uri')
-                                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                                        @enderror
+                                        <div class="flex rounded-md shadow-sm">
+                                            <input type="url" id="facebook_redirect_uri" name="facebook_redirect_uri" value="{{ route('auth.facebook.callback') }}" class="flex-1 block w-full px-3 py-2 bg-gray-100 text-gray-500 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-300 sm:text-sm cursor-not-allowed" readonly>
+                                        </div>
+                                        <p class="mt-1 text-xs text-gray-500">Copy this URL and paste it into your Facebook App settings.</p>
                                     </div>
                                 </div>
                             </div>
