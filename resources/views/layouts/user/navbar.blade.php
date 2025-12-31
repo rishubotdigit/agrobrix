@@ -18,13 +18,11 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
                         </div>
-                        <h1 class="text-xl font-bold text-gray-900">
                         @if(App\Models\Setting::get('logo'))
-                        <img src="{{ asset(App\Models\Setting::get('logo')) }}" alt="Logo" class="h-8">
+                            <img src="{{ asset(App\Models\Setting::get('logo')) }}" alt="Logo" class="h-8">
                         @else
-                        Agrobrix
+                            <h1 class="text-xl font-bold tracking-tight" style="color: #10b981; font-family: system-ui, -apple-system, sans-serif;">Agrobrix</h1>
                         @endif
-                        </h1>
                     </a>
                 </div>
             </div>
