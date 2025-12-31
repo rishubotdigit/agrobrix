@@ -155,9 +155,27 @@ class HomeController extends Controller
 
     public function forSellers()
     {
-        $ownerPlans = Plan::where('role', 'owner')->where('status', 'active')->get();
-        $agentPlans = Plan::where('role', 'agent')->where('status', 'active')->get();
-        $plans = $ownerPlans->merge($agentPlans);
+        if (Auth::check()) {
+            $user = Auth::user();
+            if ($user->role === 'owner') {
+                $plans = Plan::where('role', 'owner')->where('status', 'active')->get();
+            } elseif ($user->role === 'agent') {
+                $plans = Plan::where('role', 'agent')->where('status', 'active')->get();
+            } elseif ($user->role === 'admin') {
+                $ownerPlans = Plan::where('role', 'owner')->where('status', 'active')->get();
+                $agentPlans = Plan::where('role', 'agent')->where('status', 'active')->get();
+                $plans = $ownerPlans->merge($agentPlans);
+            } else {
+                // Buyer or other roles
+                $plans = collect();
+            }
+        } else {
+            // Guest users see all plans
+            $ownerPlans = Plan::where('role', 'owner')->where('status', 'active')->get();
+            $agentPlans = Plan::where('role', 'agent')->where('status', 'active')->get();
+            $plans = $ownerPlans->merge($agentPlans);
+        }
+        
         return view('pages.for-sellers', compact('plans'));
     }
 

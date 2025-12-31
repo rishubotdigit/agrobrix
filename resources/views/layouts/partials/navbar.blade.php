@@ -20,9 +20,14 @@
 
             <!-- Desktop Menu -->
             <div class="hidden md:flex items-center space-x-10">
-                <a href="{{ route('for-buyers') }}" class="text-gray-700 hover:text-primary font-medium transition text-base">For Buyers</a>
-                <a href="{{ route('for-sellers') }}" class="text-gray-700 hover:text-primary font-medium transition text-base">For Sellers</a>
-                <a href="{{ route('post-property') }}" class="text-gray-700 hover:text-primary font-medium transition text-base">Post Your Property (Free)</a>
+                @if(!auth()->check() || auth()->user()->role === 'buyer' || auth()->user()->role === 'admin')
+                    <a href="{{ route('for-buyers') }}" class="text-gray-700 hover:text-primary font-medium transition text-base">For Buyers</a>
+                @endif
+                
+                @if(!auth()->check() || in_array(auth()->user()->role, ['owner', 'agent', 'admin']))
+                    <a href="{{ route('for-sellers') }}" class="text-gray-700 hover:text-primary font-medium transition text-base">For Sellers</a>
+                    <a href="{{ route('post-property') }}" class="text-gray-700 hover:text-primary font-medium transition text-base">Post Your Property (Free)</a>
+                @endif
             </div>
 
             <!-- Auth Links -->
@@ -49,12 +54,16 @@
             </div>
         </div>
 
-        <!-- Mobile Menu -->
         <div class="md:hidden hidden" id="mobile-menu">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="{{ route('for-buyers') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary">For Buyers</a>
-                <a href="{{ route('for-sellers') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary">For Sellers</a>
-                <a href="{{ route('post-property') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary">Post Your Property (Free)</a>
+                @if(!auth()->check() || auth()->user()->role === 'buyer' || auth()->user()->role === 'admin')
+                    <a href="{{ route('for-buyers') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary">For Buyers</a>
+                @endif
+
+                @if(!auth()->check() || in_array(auth()->user()->role, ['owner', 'agent', 'admin']))
+                    <a href="{{ route('for-sellers') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary">For Sellers</a>
+                    <a href="{{ route('post-property') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary">Post Your Property (Free)</a>
+                @endif
                 @auth
                     <a href="{{ route(auth()->user()->role . '.dashboard') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary">Dashboard</a>
                     <form method="POST" action="{{ route('logout') }}" class="px-3 py-2">

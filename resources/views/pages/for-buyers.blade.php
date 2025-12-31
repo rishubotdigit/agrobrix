@@ -1,6 +1,25 @@
 @extends('layouts.app')
 
 @section('content')
+@if(auth()->check() && !in_array(auth()->user()->role, ['buyer', 'admin']))
+    <div class="min-h-[60vh] flex items-center justify-center bg-gray-50">
+        <div class="text-center px-4">
+            <div class="bg-white p-8 rounded-xl shadow-lg max-w-lg mx-auto border border-gray-100">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-3">Buyer Exclusive Content</h2>
+                <p class="text-gray-600 mb-8">This page contains information tailored specificially for buyers. Since you are logged in as a <strong>{{ ucfirst(auth()->user()->role) }}</strong>, this content is not relevant to your account.</p>
+                <div class="space-y-3">
+                    <a href="{{ route('home') }}" class="block w-full bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition">Return Home</a>
+                    <a href="{{ route('for-sellers') }}" class="block w-full bg-white border border-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition">Go to Seller's Page</a>
+                </div>
+            </div>
+        </div>
+    </div>
+@else
 <style>
     .card-hover {
         transition: all 0.3s ease;
@@ -131,4 +150,5 @@
         </div>
     </div>
 </section>
+@endif
 @endsection
