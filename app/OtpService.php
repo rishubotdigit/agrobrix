@@ -245,7 +245,7 @@ class OtpService
             if (!$isResend) {
                 $user->update([
                     'otp_code' => $otp,
-                    'otp_expiry' => now()->addMinutes(Setting::get('otp_expiry_time', 5)),
+                    'otp_expiry' => now()->addMinutes((int) Setting::get('otp_expiry_time', 5)),
                     'otp_resend_count' => 1,
                     'last_otp_resend_at' => now(),
                 ]);
@@ -276,13 +276,13 @@ class OtpService
             $result = $this->sendOtpMsg91($mobile, $otp, $templateSlug);
             if ($result['success']) {
                 Session::put('otp_code', $otp);
-                Session::put('otp_expiry', now()->addMinutes(Setting::get('otp_expiry_time', 5)));
+                Session::put('otp_expiry', now()->addMinutes((int) Setting::get('otp_expiry_time', 5)));
             }
         } else {
             $result = $this->sendOtp($mobile, $otp);
             if ($result['success']) {
                 Session::put('otp_code', $otp);
-                Session::put('otp_expiry', now()->addMinutes(Setting::get('otp_expiry_time', 5)));
+                Session::put('otp_expiry', now()->addMinutes((int) Setting::get('otp_expiry_time', 5)));
             }
         }
         return $result;
@@ -342,7 +342,7 @@ class OtpService
         if (!$otp) {
             $otp = $this->generateOtp();
             Session::put('otp_code', $otp);
-            Session::put('otp_expiry', now()->addMinutes(Setting::get('otp_expiry_time', 5)));
+            Session::put('otp_expiry', now()->addMinutes((int) Setting::get('otp_expiry_time', 5)));
         }
 
         $sent = false;
