@@ -134,7 +134,9 @@ class DashboardController extends Controller
         $user = auth()->user();
         $activePlanPurchases = $user->activePlanPurchases();
         $planPurchaseHistory = $user->planPurchases()->with('plan', 'payment')->orderBy('created_at', 'desc')->get();
+        // Fetch available plans for buyers
+        $plans = \App\Models\Plan::where('role', 'buyer')->where('status', 'active')->get();
 
-        return view('buyer.plans.index', compact('activePlanPurchases', 'planPurchaseHistory'));
+        return view('buyer.plans.index', compact('activePlanPurchases', 'planPurchaseHistory', 'plans'));
     }
 }

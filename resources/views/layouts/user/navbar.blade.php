@@ -13,11 +13,6 @@
                 </button>
                 <div class="flex-shrink-0">
                     <a href="{{ route('home') }}" class="flex items-center space-x-3">
-                        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                            </svg>
-                        </div>
                         @if(App\Models\Setting::get('logo'))
                             <img src="{{ asset(App\Models\Setting::get('logo')) }}" alt="Logo" class="h-8">
                         @else
@@ -81,7 +76,8 @@
                     </div>
                 </div>
 
-                <div class="flex items-center space-x-2">
+                <!-- User Profile -->
+                <div class="flex items-center space-x-3">
                     @if(auth()->user()->profile_photo)
                         <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="Profile" class="w-8 h-8 rounded-full object-cover">
                     @else
@@ -89,17 +85,17 @@
                             <span class="text-white text-sm font-semibold">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
                         </div>
                     @endif
-                    <span class="text-sm font-medium text-gray-700">Welcome, {{ auth()->user()->name }}</span>
+                    <span class="text-sm font-medium text-gray-700">{{ auth()->user()->name }}</span>
                 </div>
-                <a href="{{ route('home') }}" target="_blank" class="bg-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-emerald-700 transition-colors flex items-center space-x-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                    </svg>
-                    <span>Visit Site</span>
-                </a>
+
+                <!-- Logout -->
                 <form method="POST" action="{{ route('logout') }}" class="inline">
                     @csrf
-                    <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors">Logout</button>
+                    <button type="submit" class="text-gray-500 hover:text-red-600 transition-colors" title="Logout">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                    </button>
                 </form>
             </div>
         </div>

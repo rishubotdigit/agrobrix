@@ -64,13 +64,73 @@
             </svg>
             <h3 class="mt-2 text-sm font-medium text-gray-900">No active plans</h3>
             <p class="mt-1 text-sm text-gray-500">You don't have any active subscription plans.</p>
-            <div class="mt-6">
-                <a href="{{ route('pricing') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                    View Plans
-                </a>
-            </div>
         </div>
     @endif
+</div>
+
+<!-- Available Plans Section -->
+<div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
+    <h3 class="text-lg font-semibold text-gray-900 mb-6">Available Plans</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        @php
+            $activePlanId = $activePlanPurchases->first() ? $activePlanPurchases->first()->plan_id : null;
+        @endphp
+        @forelse($plans as $plan)
+            <div class="bg-white p-6 rounded-xl {{ ($activePlanId == $plan->id) ? 'border-2 border-green-500' : ($plan->name === 'Pro' ? 'border-2 border-primary' : 'border border-gray-200') }} relative hover:shadow-lg transition-shadow">
+                @if($activePlanId == $plan->id)
+                    <div class="absolute -top-3 right-4 bg-green-500 text-white px-4 py-1 rounded-full text-xs font-semibold">Current Plan</div>
+                @endif
+
+                @if($plan->name === 'Pro' && $activePlanId != $plan->id)
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-xs font-semibold">Popular</div>
+                @endif
+                
+                <div class="mb-4">
+                    <h4 class="text-xl font-bold text-gray-900">{{ $plan->name }}</h4>
+                    <div class="mt-2 text-primary">
+                        <span class="text-3xl font-bold">₹{{ number_format($plan->price) }}</span>
+                        @if($plan->price > 0 && $plan->original_price > $plan->price)
+                            <span class="text-sm text-gray-500 line-through ml-2">₹{{ number_format($plan->original_price) }}</span>
+                        @endif
+                        <span class="text-sm text-gray-600">/ {{ $plan->validity_days }} days</span>
+                    </div>
+                </div>
+
+                <div class="space-y-3 mb-6">
+                    <div class="flex items-center text-sm text-gray-600">
+                        <svg class="w-4 h-4 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        View up to {{ $plan->contacts }} contacts
+                    </div>
+                    @if(isset($plan->features) && is_array($plan->features))
+                        @foreach($plan->features as $feature)
+                            <div class="flex items-center text-sm text-gray-600">
+                                <svg class="w-4 h-4 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                {{ $feature }}
+                            </div>
+                        @endforeach
+                    @endif
+                </div>
+
+                @if($activePlanId == $plan->id)
+                    <button disabled class="block w-full text-center bg-gray-100 text-gray-500 px-4 py-2 rounded-lg font-medium cursor-not-allowed">
+                        Current Active Plan
+                    </button>
+                @else
+                    <a href="{{ route('plans.purchase', $plan->id) }}" class="block w-full text-center {{ $plan->name === 'Pro' ? 'bg-primary text-white hover:bg-emerald-700' : 'bg-white border border-primary text-primary hover:bg-primary hover:text-white' }} px-4 py-2 rounded-lg font-medium transition-colors">
+                        {{ $activePlanId ? 'Upgrade Plan' : 'Purchase Plan' }}
+                    </a>
+                @endif
+            </div>
+        @empty
+            <div class="col-span-3 text-center py-8">
+                <p class="text-gray-500">No plans available at the moment.</p>
+            </div>
+        @endforelse
+    </div>
 </div>
 
 <!-- Plan Purchase History -->
