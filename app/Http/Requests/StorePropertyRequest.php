@@ -45,6 +45,10 @@ class StorePropertyRequest extends FormRequest
             'featured' => 'nullable|boolean',
             'amenities' => 'nullable|array',
             'amenities.*' => 'exists:amenities,id',
+            'slug' => 'nullable|string|max:255|unique:properties,slug',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string',
+            'meta_keywords' => 'nullable|string',
         ];
 
         $mapEnabled = \App\Models\Setting::get('map_enabled', '1') == '1';

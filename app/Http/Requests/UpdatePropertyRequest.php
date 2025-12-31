@@ -44,6 +44,10 @@ class UpdatePropertyRequest extends FormRequest
             'property_video' => 'nullable|file|mimes:mp4,mov,avi|max:30720',
             'amenities' => 'nullable|array',
             'amenities.*' => 'exists:amenities,id',
+            'slug' => 'nullable|string|max:255|unique:properties,slug,' . $this->route('property')->id,
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string',
+            'meta_keywords' => 'nullable|string',
         ];
 
         $mapEnabled = \App\Models\Setting::get('map_enabled', '1') == '1';

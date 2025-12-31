@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Agrobrix - Smart Property Management Platform')</title>
+    <title>@yield('title', \App\Models\Setting::get('site_title', 'Agrobrix - Smart Property Management Platform'))</title>
+    <meta name="description" content="@yield('meta_description', \App\Models\Setting::get('meta_description', 'Find the best agricultural properties.'))">
+    <meta name="keywords" content="@yield('meta_keywords', \App\Models\Setting::get('meta_keywords', 'agriculture, land, property, farm, sale, buy'))">
+    @stack('seo')
     <link rel="icon" href="{{ asset(App\Models\Setting::get('favicon')) }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">

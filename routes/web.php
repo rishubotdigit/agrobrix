@@ -9,9 +9,19 @@ use App\Http\Controllers\PlanController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\InquiryController;
 
+Route::get('/sitemap.xml', [App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
 Route::get('/states', [HomeController::class, 'allStates'])->name('states.all');
+Route::get('/properties/{id}', function ($id) {
+    if (is_numeric($id)) {
+        $property = \App\Models\Property::find($id);
+        if ($property) {
+            return redirect()->route('properties.show', $property, 301);
+        }
+    }
+    abort(404);
+})->where('id', '[0-9]+');
 Route::get('/properties/{property}', [PropertyController::class, 'show'])->name('properties.show');
 Route::get('/search', [SearchController::class, 'advanced'])->name('search.advanced');
 Route::get('/plans', [PlanController::class, 'index'])->name('plans.index');

@@ -1,6 +1,23 @@
 @extends('layouts.app')
 
-@section('title', $property->title . ' - Property Details')
+@section('title', $property->meta_title ?: $property->title . ' - Agrobrix')
+
+@section('meta_description', $property->meta_description ?: \Illuminate\Support\Str::limit($property->description, 155))
+
+@if($property->meta_keywords)
+    @section('meta_keywords', $property->meta_keywords)
+@endif
+
+@push('seo')
+    <link rel="canonical" href="{{ route('properties.show', $property) }}" />
+    <meta property="og:title" content="{{ $property->meta_title ?: $property->title }}" />
+    <meta property="og:description" content="{{ $property->meta_description ?: \Illuminate\Support\Str::limit($property->description, 155) }}" />
+    @if($property->property_images && is_array(json_decode($property->property_images, true)) && count(json_decode($property->property_images, true)) > 0)
+        <meta property="og:image" content="{{ asset('storage/' . json_decode($property->property_images, true)[0]) }}" />
+    @endif
+    <meta property="og:url" content="{{ route('properties.show', $property) }}" />
+    <meta property="og:type" content="product" />
+@endpush
 
 @section('content')
 

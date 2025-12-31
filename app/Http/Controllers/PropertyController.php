@@ -20,7 +20,8 @@ class PropertyController extends Controller
             $query->where(function($q) use ($searchTerm) {
                 $q->where('title', 'LIKE', $searchTerm)
                   ->orWhere('description', 'LIKE', $searchTerm)
-                  ->orWhere('full_address', 'LIKE', $searchTerm);
+                  ->orWhere('full_address', 'LIKE', $searchTerm)
+                  ->orWhere('meta_keywords', 'LIKE', $searchTerm);
             });
         }
 

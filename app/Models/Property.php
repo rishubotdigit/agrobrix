@@ -6,23 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Property extends Model
 {
-    protected static function booted()
-    {
-        static::deleting(function ($property) {
-            // Delete related records before deleting the property
-            $property->amenities()->detach();
-            $property->viewedContacts()->delete();
-            $property->versions()->delete();
-            $property->payments()->delete();
-            $property->leads()->delete();
-        });
-    }
     protected $fillable = [
-        'title', 'land_type', 'description', 'state', 'district_id', 'area', 'full_address',
+        'title', 'slug', 'land_type', 'description', 'state', 'district_id', 'area', 'full_address',
         'google_map_lat', 'google_map_lng', 'plot_area', 'plot_area_unit', 'frontage',
         'road_width', 'corner_plot', 'gated_community',
         'price', 'price_negotiable', 'contact_name', 'contact_mobile',
-        'property_images', 'property_video', 'status', 'owner_id', 'agent_id', 'featured', 'featured_until'
+        'property_images', 'property_video', 'status', 'owner_id', 'agent_id', 'featured', 'featured_until',
+        'meta_title', 'meta_description', 'meta_keywords'
     ];
 
     protected $casts = [
@@ -40,6 +30,49 @@ class Property extends Model
         'featured_until' => 'datetime',
         'district_id' => 'integer',
     ];
+
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($property) {
+            if (empty($property->slug)) {
+                $property->slug = static::generateUniqueSlug($property->title);
+            }
+        });
+
+        static::updating(function ($property) {
+            if ($property->isDirty('title') && empty($property->slug)) {
+                 $property->slug = static::generateUniqueSlug($property->title);
+            }
+        });
+
+        static::deleting(function ($property) {
+            // Delete related records before deleting the property
+            $property->amenities()->detach();
+            $property->viewedContacts()->delete();
+            $property->versions()->delete();
+            $property->payments()->delete();
+            $property->leads()->delete();
+        });
+    }
+
+    public static function generateUniqueSlug($title)
+    {
+        $slug = \Illuminate\Support\Str::slug($title);
+        $originalSlug = $slug;
+        $count = 2;
+
+        while (static::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+
+        return $slug;
+    }
 
     public function getLatitudeAttribute()
     {

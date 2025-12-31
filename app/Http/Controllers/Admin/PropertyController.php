@@ -172,6 +172,10 @@ class PropertyController extends Controller
             'owner_id' => auth()->id(),
             'featured' => $validated['featured'] ?? false,
             'featured_until' => ($validated['featured'] ?? false) ? now()->addDays(30) : null,
+            'slug' => $validated['slug'] ?? null,
+            'meta_title' => $validated['meta_title'] ?? null,
+            'meta_description' => $validated['meta_description'] ?? null,
+            'meta_keywords' => $validated['meta_keywords'] ?? null,
         ];
         Log::info('Creating property with data', ['property_data' => $propertyData]);
 
@@ -546,6 +550,10 @@ class PropertyController extends Controller
             'contact_role' => $validated['contact_role'] ?? 'Admin',
             'property_images' => json_encode($imagePaths),
             'property_video' => $videoPath,
+            'slug' => $validated['slug'] ?? $property->slug,
+            'meta_title' => $validated['meta_title'] ?? null,
+            'meta_description' => $validated['meta_description'] ?? null,
+            'meta_keywords' => $validated['meta_keywords'] ?? null,
         ]);
 
         // Update amenities
