@@ -30,6 +30,15 @@ class NotifyOwnerOfNewInquiry
         $notifyUserId = $lead->agent_id ?? $property->owner_id;
 
         if ($notifyUserId) {
+            $notifyUser = \App\Models\User::find($notifyUserId);
+            Log::info('NotifyOwnerOfNewInquiry: notifying user', [
+                'notify_user_id' => $notifyUserId,
+                'notify_user_role' => $notifyUser ? $notifyUser->role : 'unknown',
+                'property_owner_id' => $property->owner_id,
+                'property_owner_role' => $property->owner ? $property->owner->role : 'unknown',
+                'lead_id' => $lead->id
+            ]);
+
             Notification::create([
                 'user_id' => $notifyUserId,
                 'type' => 'new_inquiry',

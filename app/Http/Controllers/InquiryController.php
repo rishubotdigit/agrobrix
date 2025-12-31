@@ -198,7 +198,7 @@ class InquiryController extends Controller
             if ($existingLead) {
                 // Update existing lead
                 $existingLead->update(array_merge($inquiryData, [
-                    'agent_id' => $property->owner && $property->owner->role === 'agent' ? $property->owner_id : null,
+                    'agent_id' => $property->owner_id,
                 ]));
                 Log::info('Existing lead updated from inquiry', [
                     'lead_id' => $existingLead->id,
@@ -208,7 +208,7 @@ class InquiryController extends Controller
                 ]);
             } else {
                 // Create new lead
-                $agentId = $property->owner && $property->owner->role === 'agent' ? $property->owner_id : null;
+                $agentId = $property->owner_id;
                 $lead = Lead::create(array_merge($inquiryData, [
                     'agent_id' => $agentId,
                 ]));
@@ -219,7 +219,8 @@ class InquiryController extends Controller
                     'assigned_agent_id' => $agentId,
                     'property_owner_id' => $property->owner_id,
                     'property_owner_role' => $property->owner ? $property->owner->role : null,
-                    'buyer_email' => $inquiryData['buyer_email']
+                    'buyer_email' => $inquiryData['buyer_email'],
+                    'is_admin_property' => $property->owner && $property->owner->role === 'admin'
                 ]);
 
                 // Fire the InquiryCreated event
@@ -402,7 +403,7 @@ class InquiryController extends Controller
 
             if (!$existingLead) {
                 // Create lead for assigned agent or owner
-                $agentId = $property->owner && $property->owner->role === 'agent' ? $property->owner_id : null;
+                $agentId = $property->owner_id;
 
                 $lead = Lead::create([
                     'property_id' => $property->id,
@@ -419,7 +420,8 @@ class InquiryController extends Controller
                     'assigned_agent_id' => $agentId,
                     'property_owner_id' => $property->owner_id,
                     'property_owner_role' => $property->owner ? $property->owner->role : null,
-                    'buyer_email' => $user->email
+                    'buyer_email' => $user->email,
+                    'is_admin_property' => $property->owner && $property->owner->role === 'admin'
                 ]);
 
                 // Deduct credit
