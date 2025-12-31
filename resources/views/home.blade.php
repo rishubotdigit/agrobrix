@@ -198,18 +198,51 @@
     @if(isset($stateSummary) && $stateSummary->isNotEmpty())
     <section class="py-16 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold text-gray-900 mb-8">Browse by State</h2>
+            <div class="flex justify-between items-end mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">Browse by State</h2>
+                <a href="{{ route('states.all') }}" class="text-primary hover:text-primary-dark font-semibold flex items-center group">
+                    View All
+                    <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                    </svg>
+                </a>
+            </div>
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 @foreach($stateSummary as $stat)
-                    <a href="{{ route('properties.index', ['state' => $stat->state]) }}" class="stat-card flex flex-col items-center text-center group bg-gray-50 hover:bg-white cursor-pointer">
-                        <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-emerald-500 transition-colors">
-                            <svg class="w-6 h-6 text-emerald-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            </svg>
-                        </div>
-                        <h3 class="font-bold text-gray-900 mb-1">{{ $stat->state }}</h3>
-                        <p class="text-sm text-gray-500">{{ $stat->total }} Properties</p>
+                    <a href="{{ route('properties.index', ['state' => $stat->state]) }}" class="stat-card flex flex-col items-center text-center group bg-gray-50 hover:bg-white cursor-pointer relative overflow-hidden">
+                        @if($stat->image && \Storage::disk('public')->exists($stat->image))
+                             <div class="absolute inset-0 z-0">
+                                 <img src="{{ asset('storage/' . $stat->image) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="{{ $stat->state }}">
+                                 <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors"></div>
+                             </div>
+                             <div class="relative z-10 w-full h-full flex flex-col items-center justify-center py-4">
+                                <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-3 group-hover:bg-white/30 transition-colors border border-white/30">
+                                    @if($stat->icon && \Storage::disk('public')->exists($stat->icon))
+                                        <img src="{{ asset('storage/' . $stat->icon) }}" class="w-6 h-6 object-contain filter brightness-0 invert" alt="icon">
+                                    @else
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                    @endif
+                                </div>
+                                <h3 class="font-bold text-white text-lg mb-1 shadow-sm">{{ $stat->state }}</h3>
+                                <p class="text-xs text-white/90 font-medium bg-black/30 px-2 py-0.5 rounded-full backdrop-blur-md">{{ $stat->total }} Properties</p>
+                             </div>
+                        @else
+                            <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-emerald-500 transition-colors">
+                                @if($stat->icon && \Storage::disk('public')->exists($stat->icon))
+                                    <img src="{{ asset('storage/' . $stat->icon) }}" class="w-6 h-6 object-contain text-emerald-600 group-hover:text-white transition-all" alt="icon">
+                                @else
+                                    <svg class="w-6 h-6 text-emerald-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                @endif
+                            </div>
+                            <h3 class="font-bold text-gray-900 mb-1">{{ $stat->state }}</h3>
+                            <p class="text-sm text-gray-500">{{ $stat->total }} Properties</p>
+                        @endif
                     </a>
                 @endforeach
             </div>

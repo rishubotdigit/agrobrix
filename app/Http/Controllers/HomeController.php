@@ -70,9 +70,11 @@ class HomeController extends Controller
             ->get();
             
         // State Summary
-        $stateSummary = Property::where('status', 'approved')
-            ->select('state', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
-            ->groupBy('state')
+        $stateSummary = Property::join('states', 'properties.state', '=', 'states.name')
+            ->where('properties.status', 'approved')
+            ->where('states.is_active', true)
+            ->select('properties.state', 'states.image', 'states.icon', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+            ->groupBy('properties.state', 'states.image', 'states.icon')
             ->orderByDesc('total')
             ->limit(8)
             ->get();
@@ -162,5 +164,18 @@ class HomeController extends Controller
     public function postProperty()
     {
         return view('pages.post-property');
+    }
+
+    public function allStates()
+    {
+        $states = Property::join('states', 'properties.state', '=', 'states.name')
+            ->where('properties.status', 'approved')
+            ->where('states.is_active', true)
+            ->select('properties.state', 'states.image', 'states.icon', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+            ->groupBy('properties.state', 'states.image', 'states.icon')
+            ->orderByDesc('total')
+            ->get();
+
+        return view('pages.all-states', compact('states'));
     }
 }

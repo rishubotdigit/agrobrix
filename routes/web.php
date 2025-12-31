@@ -11,6 +11,7 @@ use App\Http\Controllers\InquiryController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
+Route::get('/states', [HomeController::class, 'allStates'])->name('states.all');
 Route::get('/properties/{property}', [PropertyController::class, 'show'])->name('properties.show');
 Route::get('/search', [SearchController::class, 'advanced'])->name('search.advanced');
 Route::get('/plans', [PlanController::class, 'index'])->name('plans.index');

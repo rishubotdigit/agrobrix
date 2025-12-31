@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class State extends Model
 {
-    protected $fillable = ['name', 'code', 'image', 'icon'];
+    protected $fillable = ['name', 'code', 'image', 'icon', 'is_active'];
 
     public function districts()
     {

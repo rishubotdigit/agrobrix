@@ -24,6 +24,7 @@ class StateController extends Controller
         ]);
 
         $data = $request->only(['name', 'code']);
+        $data['is_active'] = $request->has('is_active') ? 1 : 0;
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('states/images', 'public');
@@ -48,6 +49,7 @@ class StateController extends Controller
         ]);
 
         $data = $request->only(['name', 'code']);
+        $data['is_active'] = $request->has('is_active') ? 1 : 0;
 
         if ($request->hasFile('image')) {
             // Delete old image
