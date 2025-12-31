@@ -270,6 +270,11 @@ class PaymentService
         // Handle successful payment processing
         $this->handleSuccessfulPayment($payment);
 
+        // Deactivate other active plans for the user after plan activation
+        if ($payment->planPurchase) {
+            \App\Models\PlanPurchase::deactivateActivePlansForUser($payment->planPurchase->user_id, $payment->planPurchase->id);
+        }
+
         Log::info('Payment approval handling completed', ['payment_id' => $payment->id]);
     }
 }
