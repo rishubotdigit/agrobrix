@@ -26,6 +26,11 @@ class ForgotPasswordController extends Controller
 
     public function sendForgotPasswordOtp(Request $request): RedirectResponse
     {
+        // Auto-prefix 91 to mobile number if 10 digits
+        if ($request->mobile && preg_match('/^\d{10}$/', $request->mobile)) {
+            $request->merge(['mobile' => '91' . $request->mobile]);
+        }
+
         $request->validate([
             'mobile' => 'required|string|regex:/^\+?[1-9]\d{1,14}$/',
         ]);

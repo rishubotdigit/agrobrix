@@ -32,6 +32,11 @@ class RegisterController extends Controller
     {
         ini_set('max_execution_time', 120);
 
+        // Auto-prefix 91 to mobile number if 10 digits
+        if ($request->mobile && preg_match('/^\d{10}$/', $request->mobile)) {
+            $request->merge(['mobile' => '91' . $request->mobile]);
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
