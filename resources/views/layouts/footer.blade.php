@@ -1,41 +1,30 @@
-<footer class="py-8 shadow-2xl border-t border-emerald-200/50" style="background: linear-gradient(to right, #a7f3d0, #ffffff);">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+<footer class="py-10 shadow-inner border-t border-emerald-100" style="background: linear-gradient(to right, #ecfdf5, #ffffff);">
+    <div class="w-full px-4 sm:px-6 lg:px-12">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6">
             <!-- Left Section - Brand & Copyright -->
-            <div class="flex items-center gap-3">
-                @php
-                    $logo = App\Models\Setting::get('logo');
-                @endphp
-                
-                @if($logo)
-                    <img src="{{ asset($logo) }}" alt="Agrobrix" class="h-10">
-                @else
-                    <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center shadow-md">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-gray-800 text-lg font-bold" style="color: #10b981;">Agrobrix</h3>
-                        <p class="text-xs text-gray-600">&copy; 2026 Agrobrix. All rights reserved.</p>
-                    </div>
-                @endif
-                
-                @if($logo)
-                    <div>
-                        <p class="text-xs text-gray-600">&copy; 2026 Agrobrix. All rights reserved.</p>
-                    </div>
-                @endif
+            <div class="flex flex-col items-center md:items-start gap-2">
+                <a href="{{ route('home') }}" class="flex items-center gap-2">
+                    @php
+                        $logo = App\Models\Setting::get('logo');
+                    @endphp
+                    
+                    @if($logo)
+                        <img src="{{ asset($logo) }}" alt="Agrobrix" class="h-10">
+                    @else
+                        <h3 class="text-2xl font-bold tracking-tight" style="color: #10b981; font-family: system-ui, -apple-system, sans-serif;">Agrobrix</h3>
+                    @endif
+                </a>
+                <p class="text-sm text-gray-500">&copy; {{ date('Y') }} Agrobrix. All rights reserved.</p>
             </div>
 
             <!-- Right Section - Navigation Links -->
-            <div class="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6 text-sm">
-                <a href="/about" class="text-gray-700 hover:text-emerald-600 transition-colors font-medium">About Us</a>
-                <a href="{{ route('contact') }}" class="text-gray-700 hover:text-emerald-600 transition-colors font-medium">Contact Us</a>
-                <a href="/privacy" class="text-gray-700 hover:text-emerald-600 transition-colors font-medium">Privacy Policy</a>
-                <a href="/terms" class="text-gray-700 hover:text-emerald-600 transition-colors font-medium">Terms and Conditions</a>
-                <a href="{{ route('refund') }}" class="text-gray-700 hover:text-emerald-600 transition-colors font-medium">Refund/Cancellation Policy</a>
-                <a href="/faq" class="text-gray-700 hover:text-emerald-600 transition-colors font-medium">FAQ</a>
+            <div class="flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm">
+                <a href="/about" class="text-gray-600 hover:text-primary transition-colors font-medium">About Us</a>
+                <a href="{{ route('contact') }}" class="text-gray-600 hover:text-primary transition-colors font-medium">Contact Us</a>
+                <a href="/privacy" class="text-gray-600 hover:text-primary transition-colors font-medium">Privacy Policy</a>
+                <a href="/terms" class="text-gray-600 hover:text-primary transition-colors font-medium">Terms</a>
+                <a href="{{ route('refund') }}" class="text-gray-600 hover:text-primary transition-colors font-medium">Refund Policy</a>
+                <a href="/faq" class="text-gray-600 hover:text-primary transition-colors font-medium">FAQ</a>
             </div>
         </div>
     </div>

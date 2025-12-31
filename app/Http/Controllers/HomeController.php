@@ -53,28 +53,39 @@ class HomeController extends Controller
             });
         }
 
-        // Fetch state-wise properties for admin-selected states
-        $homepageStatesJson = \App\Models\Setting::get('homepage_states', json_encode(['Punjab', 'Haryana', 'Chandigarh', 'Himachal Pradesh']));
-        $stateNames = json_decode($homepageStatesJson, true) ?? [];
-        $stateWiseProperties = [];
-        
-        foreach ($stateNames as $stateName) {
-            $properties = Property::with(['owner', 'amenities', 'district'])
-                ->where('status', 'approved')
-                ->where('state', $stateName)
-                ->orderBy('created_at', 'desc')
-                ->limit(4)
-                ->get();
-                
-            if ($properties->isNotEmpty()) {
-                $stateWiseProperties[$stateName] = [
-                    'state' => (object)['name' => $stateName],
-                    'properties' => $properties
-                ];
-            }
+        // Properties in Selected State
+        $selectedState = request('state');
+        if (!$selectedState && Auth::check() && Auth::user()->address) {
+            // Attempt to extract state from user address if possible, or just default
+            // For now, let's default to Karnataka if not provided, as per request example
+            $selectedState = 'Karnataka'; 
         }
+        $selectedState = $selectedState ?: 'Karnataka';
 
-        return view('home', compact('plans', 'featuredProperties', 'latestProperties', 'currentPlanId', 'currentPlanPrice', 'stateWiseProperties'));
+        $selectedStateProperties = Property::with(['owner', 'amenities', 'district'])
+            ->where('status', 'approved')
+            ->where('state', $selectedState)
+            ->orderBy('created_at', 'desc')
+            ->limit(4)
+            ->get();
+            
+        // State Summary
+        $stateSummary = Property::where('status', 'approved')
+            ->select('state', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+            ->groupBy('state')
+            ->orderByDesc('total')
+            ->limit(8)
+            ->get();
+
+        // Category Summary
+        $categorySummary = Property::where('status', 'approved')
+            ->select('land_type', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+            ->groupBy('land_type')
+            ->orderByDesc('total')
+            ->limit(8)
+            ->get();
+
+        return view('home', compact('plans', 'featuredProperties', 'latestProperties', 'currentPlanId', 'currentPlanPrice', 'selectedState', 'selectedStateProperties', 'stateSummary', 'categorySummary'));
     }
 
     public function about()

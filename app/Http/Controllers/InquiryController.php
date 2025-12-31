@@ -191,40 +191,69 @@ class InquiryController extends Controller
             }
         } else {
             // Non-buyer logic: create or update Lead
-            $existingLead = Lead::where('property_id', $property->id)
-                ->where('buyer_email', $inquiryData['buyer_email'])
-                ->first();
+            $isAdminProperty = $property->owner && $property->owner->role === 'admin';
+            Log::info('Checking lead creation for non-buyer inquiry', [
+                'property_id' => $property->id,
+                'property_owner_id' => $property->owner_id,
+                'property_owner_role' => $property->owner ? $property->owner->role : null,
+                'is_admin_property' => $isAdminProperty,
+                'buyer_email' => $inquiryData['buyer_email']
+            ]);
 
-            if ($existingLead) {
-                // Update existing lead
-                $existingLead->update(array_merge($inquiryData, [
-                    'agent_id' => $property->owner_id,
-                ]));
-                Log::info('Existing lead updated from inquiry', [
-                    'lead_id' => $existingLead->id,
+            if ($isAdminProperty) {
+                Log::info('Skipping lead creation for admin-owned property', [
                     'property_id' => $property->id,
-                    'agent_id' => $property->agent_id,
-                    'buyer_email' => $inquiryData['buyer_email']
+                    'property_owner_id' => $property->owner_id
                 ]);
+                // Skip lead creation for admin properties
             } else {
-                // Create new lead
-                $agentId = $property->owner_id;
-                $lead = Lead::create(array_merge($inquiryData, [
-                    'agent_id' => $agentId,
-                ]));
-                Log::info('New lead created from inquiry', [
-                    'lead_id' => $lead->id,
-                    'property_id' => $property->id,
-                    'property_agent_id' => $property->agent_id,
-                    'assigned_agent_id' => $agentId,
-                    'property_owner_id' => $property->owner_id,
-                    'property_owner_role' => $property->owner ? $property->owner->role : null,
-                    'buyer_email' => $inquiryData['buyer_email'],
-                    'is_admin_property' => $property->owner && $property->owner->role === 'admin'
-                ]);
+                $existingLead = Lead::where('property_id', $property->id)
+                    ->where('buyer_email', $inquiryData['buyer_email'])
+                    ->first();
 
-                // Fire the InquiryCreated event
-                event(new InquiryCreated($lead));
+                if ($existingLead) {
+                    // Update existing lead
+                    $agentId = $property->agent_id ?: $property->owner_id;
+                    $existingLead->update(array_merge($inquiryData, [
+                        'agent_id' => $agentId,
+                    ]));
+                    Log::info('Existing lead updated from inquiry', [
+                        'lead_id' => $existingLead->id,
+                        'property_id' => $property->id,
+                        'property_agent_id' => $property->agent_id,
+                        'assigned_agent_id' => $agentId,
+                        'property_owner_id' => $property->owner_id,
+                        'buyer_email' => $inquiryData['buyer_email']
+                    ]);
+                } else {
+                    // Create new lead
+                    $agentId = $property->agent_id ?: $property->owner_id;
+                    try {
+                        $lead = Lead::create(array_merge($inquiryData, [
+                            'agent_id' => $agentId,
+                        ]));
+                        Log::info('New lead created from inquiry', [
+                            'lead_id' => $lead->id,
+                            'property_id' => $property->id,
+                            'property_agent_id' => $property->agent_id,
+                            'assigned_agent_id' => $agentId,
+                            'property_owner_id' => $property->owner_id,
+                            'property_owner_role' => $property->owner ? $property->owner->role : null,
+                            'buyer_email' => $inquiryData['buyer_email'],
+                            'is_admin_property' => $isAdminProperty
+                        ]);
+    
+                        // Fire the InquiryCreated event
+                        event(new InquiryCreated($lead));
+                    } catch (\Exception $e) {
+                        Log::error('Failed to create lead from inquiry', [
+                            'property_id' => $property->id,
+                            'agent_id' => $agentId,
+                            'buyer_email' => $inquiryData['buyer_email'],
+                            'error' => $e->getMessage()
+                        ]);
+                    }
+                }
             }
         }
 

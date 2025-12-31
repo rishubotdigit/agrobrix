@@ -1,34 +1,32 @@
 <nav class="bg-white shadow-sm fixed w-full top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-            <div class="flex items-center">
-        <!-- Logo -->
-        <div class="flex items-center">
-            <a href="{{ route('home') }}" class="flex items-center">
-                @php
-                    $logo = App\Models\Setting::get('logo');
-                @endphp
-                
-                @if($logo)
-                    <img src="{{ asset($logo) }}" alt="Agrobrix" class="h-10">
-                @else
-                    <span class="font-bold text-2xl tracking-tight" style="color: #10b981; font-family: system-ui, -apple-system, sans-serif;">
-                        Agrobrix
-                    </span>
-                @endif
-            </a>
-        </div>
+    <div class="w-full px-4 sm:px-6 lg:px-12">
+        <div class="flex justify-between items-center h-20">
+            <!-- Logo -->
+            <div class="flex-shrink-0 flex items-center">
+                <a href="{{ route('home') }}" class="flex items-center gap-2">
+                    @php
+                        $logo = App\Models\Setting::get('logo');
+                    @endphp
+                    
+                    @if($logo)
+                        <img src="{{ asset($logo) }}" alt="Agrobrix" class="h-12 w-auto">
+                    @else
+                        <span class="font-bold text-2xl tracking-tight" style="color: #10b981; font-family: system-ui, -apple-system, sans-serif;">
+                            Agrobrix
+                        </span>
+                    @endif
+                </a>
             </div>
 
             <!-- Desktop Menu -->
-            <div class="hidden md:flex items-center space-x-8">
-                <a href="{{ route('for-buyers') }}" class="text-gray-700 hover:text-primary transition">For Buyers</a>
-                <a href="{{ route('for-sellers') }}" class="text-gray-700 hover:text-primary transition">For Sellers</a>
-                <a href="{{ route('post-property') }}" class="text-gray-700 hover:text-primary transition">Post Your Property (Free)</a>
+            <div class="hidden md:flex items-center space-x-10">
+                <a href="{{ route('for-buyers') }}" class="text-gray-700 hover:text-primary font-medium transition text-base">For Buyers</a>
+                <a href="{{ route('for-sellers') }}" class="text-gray-700 hover:text-primary font-medium transition text-base">For Sellers</a>
+                <a href="{{ route('post-property') }}" class="text-gray-700 hover:text-primary font-medium transition text-base">Post Your Property (Free)</a>
             </div>
 
             <!-- Auth Links -->
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-5">
                 @auth
                     <a href="{{ route(auth()->user()->role . '.dashboard') }}" class="text-gray-700 hover:text-primary font-medium transition">Dashboard</a>
                     <form method="POST" action="{{ route('logout') }}" class="inline">
@@ -36,8 +34,8 @@
                         <button type="submit" class="text-gray-700 hover:text-primary font-medium transition">Logout</button>
                     </form>
                 @else
-                    <a href="{{ route('login') }}" class="text-gray-700 hover:text-primary font-medium transition">Login</a>
-                    <a href="{{ route('register') }}" class="gradient-bg text-white px-6 py-2 rounded-lg hover:opacity-90 transition">Register</a>
+                    <a href="{{ route('login') }}" class="text-gray-700 hover:text-primary font-medium transition text-base px-3">Login</a>
+                    <a href="{{ route('register') }}" class="gradient-bg text-white px-8 py-2.5 rounded-lg hover:opacity-90 transition font-medium shadow-md">Register</a>
                 @endauth
             </div>
 

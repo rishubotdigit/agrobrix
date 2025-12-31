@@ -26,10 +26,11 @@ class NotifyOwnerOfNewInquiry
         $lead = $event->lead;
         $property = $lead->property;
 
-        // Determine who to notify: agent if assigned, otherwise owner
-        $notifyUserId = $lead->agent_id ?? $property->owner_id;
+        // Notify the property owner for every inquiry
+        $notifyUserId = $property->owner_id;
 
         if ($notifyUserId) {
+
             $notifyUser = \App\Models\User::find($notifyUserId);
             Log::info('NotifyOwnerOfNewInquiry: notifying user', [
                 'notify_user_id' => $notifyUserId,
