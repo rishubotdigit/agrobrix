@@ -75,7 +75,7 @@ class SearchController extends Controller
                 }
             })
             ->where('status', 'approved')
-            ->paginate(5);
+            ->paginate(10);
 
         // Add wishlist and contact viewed status for authenticated buyers
         if (Auth::check() && Auth::user()->role === 'buyer') {

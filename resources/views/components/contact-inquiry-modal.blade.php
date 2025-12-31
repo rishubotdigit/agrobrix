@@ -152,12 +152,10 @@
 
             if (isOwnerOrAgent) {
                 // User is owner or agent - directly fetch contact
-                console.log('User is owner/agent, fetching contact directly');
                 fetchContactDirectly(propertyId);
             } else {
                 @if(Auth::user()->role === 'buyer')
                     // User is logged in and is a buyer - check if inquiry exists
-                    console.log('Checking inquiry status for buyer');
                     fetch(`/properties/${propertyId}/inquiry/status`, {
                         method: 'POST',
                         headers: {
@@ -168,29 +166,31 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.exists) {
-                            console.log('Inquiry exists, fetching contact directly');
                             fetchContactDirectly(propertyId);
                         } else {
-                            console.log('No inquiry, opening modal');
-                            openInquiryModal(propertyId);
+                            // Prompt for confirmation before using credit
+                            if(confirm('Do you want to view contact details? This will use 1 contact credit.')) {
+                                fetchContactDirectly(propertyId);
+                            }
                         }
                     })
                     .catch(error => {
                         console.error('Error checking inquiry status:', error);
-                        // Fallback to opening modal
-                        openInquiryModal(propertyId);
+                        // Fallback: prompt anyway
+                        if(confirm('Do you want to view contact details?')) {
+                            fetchContactDirectly(propertyId);
+                        }
                     });
                 @else
                     // User is logged in as agent - fetch contact directly
-                    console.log('Fetching contact for agent');
                     fetchContactDirectly(propertyId);
                 @endif
             }
         @else
-            // User is not logged in - redirect to login
-            console.log('User not logged in, redirecting to login');
-            alert('Please log in to view contact details.');
-            window.location.href = "{{ route('login') }}";
+            // User is not logged in - redirect to register
+            if(confirm('Please register or login to view contact details.')) {
+                window.location.href = "{{ route('register') }}";
+            }
         @endauth
     }
 

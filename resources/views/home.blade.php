@@ -177,7 +177,7 @@
                     <h2 class="text-3xl font-bold text-gray-900 mb-2">Properties in {{ $selectedState }}</h2>
                     <p class="text-gray-600">Local opportunities in your region</p>
                 </div>
-                <a href="{{ route('properties.index', ['state' => $selectedState]) }}" class="text-primary hover:text-primary-dark font-semibold flex items-center group">
+                <a href="{{ route('search.advanced', ['state' => $selectedState]) }}" class="text-primary hover:text-primary-dark font-semibold flex items-center group">
                     View All
                     <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
@@ -209,7 +209,7 @@
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 @foreach($stateSummary as $stat)
-                    <a href="{{ route('properties.index', ['state' => $stat->state]) }}" class="stat-card flex flex-col items-center text-center group bg-gray-50 hover:bg-white cursor-pointer relative overflow-hidden">
+                    <a href="{{ route('search.advanced', ['state' => $stat->state]) }}" class="stat-card flex flex-col items-center text-center group bg-gray-50 hover:bg-white cursor-pointer relative overflow-hidden">
                         @if($stat->image && \Storage::disk('public')->exists($stat->image))
                              <div class="absolute inset-0 z-0">
                                  <img src="{{ asset('storage/' . $stat->image) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="{{ $stat->state }}">
