@@ -21,6 +21,11 @@
                 </svg>
             </div>
         @endif
+        @if($property->featured)
+            <div class="absolute top-2 left-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-md z-10">
+                ⭐ Featured
+            </div>
+        @endif
     </div>
 
     <!-- Property Details -->
