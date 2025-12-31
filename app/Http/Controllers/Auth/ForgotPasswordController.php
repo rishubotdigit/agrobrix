@@ -36,7 +36,7 @@ class ForgotPasswordController extends Controller
         }
 
         $otp = $this->otpService->generateOtp();
-        $result = $this->otpService->sendOtpToMobile($request->mobile, $otp);
+        $result = $this->otpService->sendOtpToMobile($request->mobile, $otp, 'forgot_password');
 
         if ($result['success']) {
             session(['forgot_password_mobile' => $request->mobile]);

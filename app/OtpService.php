@@ -258,7 +258,7 @@ class OtpService
         return $result;
     }
 
-    public function sendOtpToMobile(string $mobile, string $otp): array
+    public function sendOtpToMobile(string $mobile, string $otp, string $templateSlug = 'otp'): array
     {
         if (Setting::get('otp_verification_enabled') != '1') {
             return ['success' => false, 'response' => null, 'error' => 'OTP verification not enabled'];
@@ -273,7 +273,7 @@ class OtpService
                 Session::put('otp_session_id', $result['response']['Details'] ?? null);
             }
         } elseif ($gateway === 'msg91') {
-            $result = $this->sendOtpMsg91($mobile, $otp, 'otp');
+            $result = $this->sendOtpMsg91($mobile, $otp, $templateSlug);
             if ($result['success']) {
                 Session::put('otp_code', $otp);
                 Session::put('otp_expiry', now()->addMinutes(Setting::get('otp_expiry_time', 5)));

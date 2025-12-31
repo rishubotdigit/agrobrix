@@ -40,7 +40,37 @@ class RegisterController extends Controller
             'role' => 'required|in:admin,owner,agent,buyer',
         ]);
 
-        // Create user directly
+        // Check if OTP verification is enabled
+        $otpEnabled = Setting::get('otp_verification_enabled') == '1';
+
+        if ($otpEnabled) {
+            // Store registration data in session
+            session(['registration_data' => $request->all()]);
+            
+            // Generate OTP
+            $otp = $this->otpService->generateOtp();
+            
+            // Send OTP
+            $result = $this->otpService->sendOtpToMobile($request->mobile, $otp);
+            
+            if ($result['success']) {
+                if ($request->ajax()) {
+                    // Return success but NO redirect to trigger OTP modal on frontend
+                    return response()->json([
+                        'success' => true, 
+                        'message' => 'OTP sent successfully. Please verify your mobile number.'
+                    ]);
+                }
+                return redirect()->route('register.verify.otp.form');
+            } else {
+                if ($request->ajax()) {
+                    return response()->json(['success' => false, 'message' => 'Failed to send OTP: ' . ($result['error'] ?? 'Unknown error')], 500);
+                }
+                return back()->withErrors(['mobile' => 'Failed to send OTP. Please try again.']);
+            }
+        }
+
+        // Create user directly (OTP Disabled)
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
