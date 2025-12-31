@@ -284,6 +284,39 @@
                     </div>
                 </div>
             </div>
+            
+            <div class="mt-8 bg-gray-50 p-6 rounded-lg border-2 border-gray-200">
+                <h4 class="text-lg font-medium text-gray-900 mb-4">Homepage Properties</h4>
+                <p class="text-sm text-gray-600 mb-4">Select properties to display on the homepage. Only selected properties will be visible in featured, latest, and state sections.</p>
+                
+                <div class="bg-white border border-gray-300 rounded-md p-4 max-h-96 overflow-y-auto">
+                    <div class="grid grid-cols-1 gap-2">
+                        @php
+                            $selectedProperties = json_decode($settings['homepage_properties'], true) ?? [];
+                        @endphp
+                        @foreach($allProperties as $property)
+                            <div class="flex items-center p-2 hover:bg-gray-50 rounded">
+                                <input 
+                                    type="checkbox" 
+                                    id="property_{{ $property->id }}" 
+                                    name="homepage_properties[]" 
+                                    value="{{ $property->id }}"
+                                    {{ in_array($property->id, $selectedProperties) ? 'checked' : '' }}
+                                    class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                                >
+                                <label for="property_{{ $property->id }}" class="ml-3 block text-sm text-gray-900 cursor-pointer flex-1">
+                                    <span class="font-medium">{{ $property->title }}</span>
+                                    <span class="text-gray-500 text-xs ml-2">({{ $property->state }}) - ID: {{ $property->id }}</span>
+                                </label>
+                            </div>
+                        @endforeach
+                        
+                        @if($allProperties->isEmpty())
+                            <p class="text-gray-500 text-center py-4">No approved properties found.</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Branding Tab -->

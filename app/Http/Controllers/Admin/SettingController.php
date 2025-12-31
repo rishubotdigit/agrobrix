@@ -48,11 +48,17 @@ class SettingController extends Controller
             'logo' => Setting::get('logo', ''),
             'favicon' => Setting::get('favicon', ''),
             'homepage_states' => Setting::get('homepage_states', json_encode(['Punjab', 'Haryana', 'Chandigarh', 'Himachal Pradesh'])),
+            'homepage_properties' => Setting::get('homepage_properties', '[]'),
         ];
+
+        $allProperties = \App\Models\Property::where('status', 'approved')
+            ->select('id', 'title', 'state', 'created_at')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         Log::info('Settings index: queue_mode retrieved as ' . $settings['queue_mode']);
 
-        return view('admin.settings.index', compact('settings'));
+        return view('admin.settings.index', compact('settings', 'allProperties'));
     }
 
     public function update(Request $request)
@@ -93,7 +99,10 @@ class SettingController extends Controller
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'favicon' => 'nullable|image|mimes:jpeg,png,jpg,gif,ico|max:1024',
             'homepage_states' => 'nullable|array',
+
             'homepage_states.*' => 'string|max:100',
+            'homepage_properties' => 'nullable|array',
+            'homepage_properties.*' => 'integer',
         ]);
 
         Setting::set('login_enabled', $request->has('login_enabled') ? '1' : '0');
@@ -131,6 +140,8 @@ class SettingController extends Controller
         if ($request->has('homepage_states')) {
             Setting::set('homepage_states', json_encode($request->input('homepage_states')));
         }
+        
+        Setting::set('homepage_properties', json_encode($request->input('homepage_properties', [])));
 
         if ($request->hasFile('logo')) {
             $logoPath = $request->file('logo')->store('images', 'public');

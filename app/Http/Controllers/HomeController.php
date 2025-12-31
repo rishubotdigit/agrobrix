@@ -34,8 +34,19 @@ class HomeController extends Controller
             }
         }
 
-        $featuredProperties = Property::with(['owner', 'amenities', 'district.state'])->where('status', 'approved')->where('featured', true)->limit(4)->get();
-        $latestProperties = Property::with(['owner', 'amenities', 'district.state'])->where('status', 'approved')->orderBy('created_at', 'desc')->limit(4)->get();
+        // Filter properties based on Admin Settings
+        $homepageProperties = json_decode(\App\Models\Setting::get('homepage_properties', '[]'), true);
+
+        $featuredProperties = Property::with(['owner', 'amenities', 'district.state'])
+            ->where('status', 'approved')
+            ->where('featured', true)
+            ->whereIn('id', $homepageProperties)
+            ->limit(4)->get();
+
+        $latestProperties = Property::with(['owner', 'amenities', 'district.state'])
+            ->where('status', 'approved')
+            ->whereIn('id', $homepageProperties)
+            ->orderBy('created_at', 'desc')->limit(4)->get();
 
         // Add wishlist status for authenticated buyers
         if (Auth::check() && Auth::user()->role === 'buyer') {
@@ -65,6 +76,7 @@ class HomeController extends Controller
         $selectedStateProperties = Property::with(['owner', 'amenities', 'district'])
             ->where('status', 'approved')
             ->where('state', $selectedState)
+            ->whereIn('id', $homepageProperties)
             ->orderBy('created_at', 'desc')
             ->limit(4)
             ->get();

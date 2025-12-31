@@ -22,7 +22,7 @@
                         @if(App\Models\Setting::get('logo'))
                         <img src="{{ asset(App\Models\Setting::get('logo')) }}" alt="Logo" class="h-8">
                         @else
-                        Agrobrix Buyer
+                        Agrobrix
                         @endif
                         </h1>
                     </a>

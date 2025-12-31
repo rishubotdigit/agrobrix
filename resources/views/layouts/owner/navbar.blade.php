@@ -21,7 +21,7 @@
                         @if(App\Models\Setting::get('logo'))
                             <img src="{{ asset(App\Models\Setting::get('logo')) }}" alt="Logo" class="h-8">
                         @else
-                            <h1 class="text-xl font-bold text-gray-900">Agrobrix Owner</h1>
+                            <h1 class="text-xl font-bold text-gray-900">Agrobrix</h1>
                         @endif
                     </a>
                 </div>
