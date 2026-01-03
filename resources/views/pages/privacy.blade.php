@@ -27,7 +27,7 @@
             <p class="text-xl mb-8 text-gray-700 max-w-3xl mx-auto">
                 Your privacy is important to us. This policy explains how we collect, use, and protect your personal information.
             </p>
-            <p class="text-sm text-gray-600">Last updated: December 22, 2025</p>
+            <p class="text-sm text-gray-600">Last Updated: January 01, 2026</p>
         </div>
     </div>
 </section>
@@ -38,10 +38,6 @@
         <div class="prose prose-lg max-w-none">
 
             <div class="mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-6">Privacy Policy</h2>
-                <p class="text-gray-600 leading-relaxed mb-4">
-                    Last Updated: December 22, 2025
-                </p>
                 <p class="text-gray-600 leading-relaxed mb-4">
                     Welcome to Agrobrix. We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, and share your data when you visit our website and use our services.
                 </p>
@@ -105,13 +101,26 @@
             </div>
 
             <div class="mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-6">8. Grievance Redressal</h2>
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">8. Data Deletion & Account Termination</h2>
+                <p class="text-gray-600 leading-relaxed mb-4">
+                    We respect your right to control your personal data. You may request the permanent deletion of your account and associated data at any time through your Profile Page. To prevent accidental or unauthorized data loss, our deletion process includes a 24-hour cooling-off period:
+                </p>
+                <ul class="list-disc pl-6 text-gray-600 space-y-2">
+                    <li><strong>Initiating Deletion:</strong> Once you submit a deletion request via your profile, your account will be queued for permanent removal.</li>
+                    <li><strong>24-Hour Grace Period:</strong> Your data will be permanently deleted from our active databases exactly 24 hours after the request is made, provided you do not access your account during this time.</li>
+                    <li><strong>Cancellation of Request:</strong> If you log in to your account at any point within this 24-hour window, the system will interpret this as an intent to continue using our services, and your deletion request will be automatically cancelled.</li>
+                    <li><strong>Finality:</strong> Once the 24-hour period has elapsed and the data is deleted, it cannot be recovered. Please note that some information may be retained for a longer period where we are legally required to do so (e.g., for financial records or regulatory compliance).</li>
+                </ul>
+            </div>
+
+            <div class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">9. Grievance Redressal</h2>
                 <p class="text-gray-600 leading-relaxed mb-4">
                     In accordance with the Information Technology Act and the DPDP Act 2023, if you have any questions or complaints regarding your privacy, please contact our Grievance Officer:
                 </p>
                 <div class="bg-gray-50 p-6 rounded-lg">
                     <p class="text-gray-600"><strong>Email:</strong> helpdesk@agrobrix.com</p>
-                    <p class="text-gray-600"><strong><a href="/contact">Contact Us</a></strong></p>
+                    <p class="text-gray-600"><strong><a href="/contact" class="text-primary hover:underline">Contact Us</a></strong></p>
                 </div>
             </div>
 
