@@ -61,6 +61,8 @@ class NotificationController extends Controller
                 $messageHtml = "<a href=\"/admin/payments/{$notification->data['payment_id']}\" class=\"text-sm text-blue-600 hover:text-blue-800\">{$notification->message}</a>";
             } elseif ($notification->type === 'property_approved_admin' && isset($notification->data['property_id'])) {
                 $messageHtml = "<a href=\"/admin/properties/{$notification->data['property_id']}\" class=\"text-sm text-blue-600 hover:text-blue-800\">{$notification->message}</a>";
+            } elseif ($notification->type === 'property_report' && isset($notification->data['report_id'])) {
+                $messageHtml = "<a href=\"/admin/reports/{$notification->data['report_id']}\" class=\"text-sm text-blue-600 hover:text-blue-800\">{$notification->message}</a>";
             } else {
                 $messageHtml = "<p class=\"text-sm text-gray-900\">{$notification->message}</p>";
             }

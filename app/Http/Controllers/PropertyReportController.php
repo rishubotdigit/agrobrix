@@ -26,6 +26,7 @@ class PropertyReportController extends Controller
             return back()->with('error', 'You have already reported this property.');
         }
 
+        // Create property report
         $report = PropertyReport::create([
             'property_id' => $property->id,
             'user_id' => Auth::id(),
@@ -33,9 +34,19 @@ class PropertyReportController extends Controller
             'details' => $request->details,
         ]);
 
-        // Notify Admins
-        $admins = \App\Models\User::where('role', 'admin')->get();
-        \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\PropertyReportedNotification($report));
+        // Notify Admins (Custom Notification System)
+        // user_id null implies admin notification based on existing system
+        \App\Models\Notification::create([
+            'user_id' => null, 
+            'type' => 'property_report',
+            'message' => 'New Report: ' . \Illuminate\Support\Str::limit($property->title, 20) . ' (' . $request->reason . ')',
+            'data' => [
+                'report_id' => $report->id,
+                'property_id' => $property->id,
+                'reason' => $request->reason
+            ],
+            'seen' => false
+        ]);
 
         return back()->with('success', 'Property reported successfully. We will investigate the issue.');
     }
