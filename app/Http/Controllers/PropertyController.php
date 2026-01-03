@@ -83,6 +83,13 @@ class PropertyController extends Controller
     {
         // Public property details
         $property->load(['owner', 'amenities', 'district.state']);
+        
+        if (Auth::check() && Auth::user()->role === 'buyer') {
+            $property->is_in_wishlist = Wishlist::where('user_id', Auth::id())
+                ->where('property_id', $property->id)
+                ->exists();
+        }
+
         return view('properties.show', compact('property'));
     }
 }

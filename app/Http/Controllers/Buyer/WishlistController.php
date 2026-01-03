@@ -30,19 +30,19 @@ class WishlistController extends Controller
         // Check if property exists
         $property = \App\Models\Property::find($propertyId);
         if (!$property) {
-            return response()->json(['error' => 'Property not found.'], 404);
+            return back()->with('error', 'Property not found.');
         }
 
         // Check if already in wishlist
         $existing = Wishlist::where('user_id', $user->id)->where('property_id', $propertyId)->first();
         if ($existing) {
-            return response()->json(['error' => 'Property already in wishlist.'], 400);
+            return back()->with('info', 'Property is already in your wishlist.');
         }
 
         // Add to wishlist
         Wishlist::create(['user_id' => $user->id, 'property_id' => $propertyId]);
 
-        return response()->json(['success' => 'Added to wishlist']);
+        return back()->with('success', 'Property added to your wishlist.');
     }
 
     public function remove(Request $request, $propertyId)

@@ -38,7 +38,7 @@
                     <div class="relative flex flex-col sm:flex-row justify-between items-start gap-6">
                         <div class="flex-1 space-y-4">
                             <div>
-                                <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight leading-tight">{{ $property->title }}</h1>
+                                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight leading-snug">{{ $property->title }}</h1>
                                 <p class="text-gray-500 mt-2 flex items-center gap-2 text-base sm:text-lg font-medium">
                                     <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
@@ -49,22 +49,22 @@
                             </div>
                             
                             <!-- Quick Info Tags -->
-                            <div class="flex flex-wrap gap-2.5">
-                                <span class="px-3.5 py-1.5 bg-gray-50 text-gray-600 border border-gray-200 rounded-full font-medium text-sm">
+                            <div class="flex flex-wrap gap-3 mt-4">
+                                <span class="px-4 py-2 bg-gray-50 text-gray-700 border border-gray-200 rounded-full font-medium text-base">
                                     {{ $property->land_type }}
                                 </span>
-                                <span class="px-3.5 py-1.5 bg-gray-50 text-gray-600 border border-gray-200 rounded-full font-medium text-sm">
+                                <span class="px-4 py-2 bg-gray-50 text-gray-700 border border-gray-200 rounded-full font-medium text-base">
                                     {{ $property->plot_area }} {{ $property->plot_area_unit }}
                                 </span>
                                 @if($property->corner_plot)
-                                    <span class="px-3.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full font-medium text-sm flex items-center gap-1.5">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    <span class="px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full font-medium text-base flex items-center gap-1.5">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                         Corner Plot
                                     </span>
                                 @endif
                                 @if($property->gated_community)
-                                    <span class="px-3.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full font-medium text-sm flex items-center gap-1.5">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                    <span class="px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full font-medium text-base flex items-center gap-1.5">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                                         Gated Community
                                     </span>
                                 @endif
@@ -72,10 +72,10 @@
                         </div>
                         
                         <div class="text-left sm:text-right pt-2">
-                            <p class="text-3xl sm:text-4xl font-bold text-emerald-600 tracking-tight">₹{{ number_format($property->price) }}</p>
+                            <p class="text-2xl sm:text-3xl font-bold text-emerald-600 tracking-tight">₹{{ number_format($property->price) }}</p>
                             @if($property->price_negotiable)
                                 <div class="flex sm:justify-end mt-2">
-                                    <span class="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 text-emerald-700 text-sm font-semibold rounded-full border border-emerald-100">
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 text-emerald-700 text-sm font-medium rounded-full border border-emerald-100">
                                         Negotiable
                                     </span>
                                 </div>
@@ -259,7 +259,39 @@
 
             <!-- RIGHT COLUMN: Sticky Sidebar (1/3 width on desktop) -->
             <div class="lg:col-span-1">
-                <div class="sticky top-24 space-y-6">
+                <div class="sticky top-28 space-y-6">
+
+                    <!-- PROPERTY OVERVIEW (Relocated Up) -->
+                    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-5 flex items-center gap-2 border-b border-gray-100 pb-3">
+                            <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Property Overview
+                        </h3>
+                        <div class="space-y-4 text-base">
+                            <div class="flex justify-between items-center group">
+                                <span class="text-gray-500 font-medium">Property Type</span>
+                                <span class="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">{{ $property->land_type }}</span>
+                            </div>
+                            <div class="flex justify-between items-center group">
+                                <span class="text-gray-500 font-medium">Plot Size</span>
+                                <span class="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">{{ $property->plot_area }} {{ $property->plot_area_unit }}</span>
+                            </div>
+                            <div class="flex justify-between items-center group">
+                                <span class="text-gray-500 font-medium">State</span>
+                                <span class="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">{{ $property->state }}</span>
+                            </div>
+                            <div class="flex justify-between items-center group">
+                                <span class="text-gray-500 font-medium">District</span>
+                                <span class="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">{{ $property->district->name ?? '-' }}</span>
+                            </div>
+                            <div class="flex justify-between items-center group pt-3 border-t border-dashed border-gray-200">
+                                <span class="text-gray-500 font-medium">Price</span>
+                                <span class="font-bold text-emerald-600 text-lg">₹{{ number_format($property->price) }}</span>
+                            </div>
+                        </div>
+                    </div>
                     
                     <!-- CONTACT OWNER SECTION -->
                     @if($property->owner)
@@ -293,10 +325,9 @@
                             </div>
 
                             <!-- Divider -->
-                            <div class="border-t border-gray-100 pt-5 mt-2">
+                            <div class="border-t border-gray-100 pt-5 mt-2 space-y-3">
                                 <h3 class="text-base font-semibold text-gray-900 mb-2">Interested in this property?</h3>
-                                <p class="text-gray-500 text-sm mb-5 leading-relaxed">Connect with the seller directly to discuss details or schedule a site visit.</p>
-
+                                
                                 <button id="viewContactBtn" onclick="handleContactClick('{{ $property->slug }}', '{{ $property->owner_id }}', '{{ $property->agent_id }}')" class="w-full group bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 px-6 rounded-xl transition-all duration-300 shadow-lg shadow-emerald-600/20 hover:shadow-xl hover:shadow-emerald-600/30 transform hover:-translate-y-0.5">
                                     <span class="flex items-center justify-center gap-2.5">
                                         <svg class="w-5 h-5 transition-transform group-hover:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -305,45 +336,34 @@
                                         View Contact Details
                                     </span>
                                 </button>
+
+                                <!-- Wishlist Button -->
+                                @auth
+                                    @if(auth()->user()->role === 'buyer')
+                                        <form action="{{ route('wishlist.add') }}" method="POST" id="wishlistForm-{{ $property->id }}">
+                                            @csrf
+                                            <input type="hidden" name="property_id" value="{{ $property->id }}">
+                                            <button type="submit" class="w-full group bg-white hover:bg-gray-50 text-gray-700 hover:text-rose-600 font-semibold py-3 px-6 rounded-xl border border-gray-200 hover:border-rose-200 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                                                <svg class="w-5 h-5 transition-transform group-hover:scale-110 {{ $property->is_in_wishlist ? 'text-rose-500 fill-current' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                                </svg>
+                                                {{ $property->is_in_wishlist ? 'Saved to Wishlist' : 'Save Property' }}
+                                            </button>
+                                        </form>
+                                    @endif
+                                @else
+                                    <a href="{{ route('login') }}" class="w-full group bg-white hover:bg-gray-50 text-gray-700 hover:text-rose-600 font-semibold py-3 px-6 rounded-xl border border-gray-200 hover:border-rose-200 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                                        <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                        </svg>
+                                        Save Property
+                                    </a>
+                                @endauth
                             </div>
 
                         </div>
                     </div>
                     @endif
-
-                    <!-- Quick Summary Card -->
-                    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-                        <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                            <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            Quick Summary
-                        </h3>
-                        <div class="space-y-3 text-sm">
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600">Property Type</span>
-                                <span class="font-semibold text-gray-900">{{ $property->land_type }}</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600">Plot Size</span>
-                                <span class="font-semibold text-gray-900">{{ $property->plot_area }} {{ $property->plot_area_unit }}</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600">Price</span>
-                                <span class="font-semibold text-emerald-600">₹{{ number_format($property->price) }}</span>
-                            </div>
-                            @if($property->price_negotiable)
-                            <div class="pt-2 border-t border-emerald-200">
-                                <span class="inline-flex items-center gap-1 text-emerald-700 font-medium">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                    </svg>
-                                    Price Negotiable
-                                </span>
-                            </div>
-                            @endif
-                        </div>
-                    </div>
 
                 </div>
             </div>
@@ -354,4 +374,6 @@
 </div>
 
 @include('components.contact-inquiry-modal', ['propertyId' => $property->slug])
+
+
 @endsection
