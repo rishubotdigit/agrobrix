@@ -58,8 +58,8 @@ class HomeController extends Controller
             }
         }
 
-        // Add wishlist status for authenticated buyers
-        if (Auth::check() && Auth::user()->role === 'buyer') {
+        // Add wishlist status for authenticated users
+        if (Auth::check()) {
             $user = Auth::user();
             $wishlistPropertyIds = Wishlist::where('user_id', $user->id)->pluck('property_id')->toArray();
 

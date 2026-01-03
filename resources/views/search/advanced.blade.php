@@ -581,7 +581,7 @@ function toggleWishlist(propertyId, buttonElement) {
     const heartIcon = buttonElement.querySelector('svg');
     const isInWishlist = heartIcon.classList.contains('fill-current');
 
-    const url = isInWishlist ? `/buyer/wishlist/remove/${propertyId}` : '/buyer/wishlist/add';
+    const url = isInWishlist ? `/wishlist/remove/${propertyId}` : '/wishlist/add';
     const method = isInWishlist ? 'DELETE' : 'POST';
     const body = isInWishlist ? null : JSON.stringify({ property_id: propertyId });
 
