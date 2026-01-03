@@ -183,26 +183,8 @@ class HomeController extends Controller
 
     public function forSellers()
     {
-        if (Auth::check()) {
-            $user = Auth::user();
-            if ($user->role === 'owner') {
-                $plans = Plan::where('role', 'owner')->where('status', 'active')->get();
-            } elseif ($user->role === 'agent') {
-                $plans = Plan::where('role', 'agent')->where('status', 'active')->get();
-            } elseif ($user->role === 'admin') {
-                $ownerPlans = Plan::where('role', 'owner')->where('status', 'active')->get();
-                $agentPlans = Plan::where('role', 'agent')->where('status', 'active')->get();
-                $plans = $ownerPlans->merge($agentPlans);
-            } else {
-                // Buyer or other roles
-                $plans = collect();
-            }
-        } else {
-            // Guest users see all plans
-            $ownerPlans = Plan::where('role', 'owner')->where('status', 'active')->get();
-            $agentPlans = Plan::where('role', 'agent')->where('status', 'active')->get();
-            $plans = $ownerPlans->merge($agentPlans);
-        }
+        $ownerPlans = Plan::where('role', 'owner')->where('status', 'active')->get();
+        $agentPlans = Plan::where('role', 'agent')->where('status', 'active')->get();
 
         $currentPlanId = null;
         $currentPlanPrice = 0;
@@ -218,7 +200,7 @@ class HomeController extends Controller
             }
         }
         
-        return view('pages.for-sellers', compact('plans', 'currentPlanId', 'currentPlanPrice'));
+        return view('pages.for-sellers', compact('ownerPlans', 'agentPlans', 'currentPlanId', 'currentPlanPrice'));
     }
 
     public function postProperty()
