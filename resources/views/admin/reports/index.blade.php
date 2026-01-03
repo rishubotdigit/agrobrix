@@ -8,6 +8,46 @@
 </div>
 
 <div class="p-6">
+    <!-- Filter Section -->
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6">
+        <form action="{{ route('admin.reports.index') }}" method="GET" class="flex flex-col md:flex-row gap-4 items-end">
+            <div class="flex-1 w-full">
+                <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search Property</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    <input type="text" name="search" id="search" value="{{ request('search') }}" 
+                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm" 
+                        placeholder="Search by title or ID...">
+                </div>
+            </div>
+            
+            <div class="w-full md:w-64">
+                <label for="reason" class="block text-sm font-medium text-gray-700 mb-1">Filter by Reason</label>
+                <select name="reason" id="reason" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm rounded-lg">
+                    <option value="">All Reasons</option>
+                    <option value="Sold Out" {{ request('reason') == 'Sold Out' ? 'selected' : '' }}>Sold Out</option>
+                    <option value="Incorrect Information" {{ request('reason') == 'Incorrect Information' ? 'selected' : '' }}>Incorrect Information</option>
+                    <option value="Owner Contact Incorrect" {{ request('reason') == 'Owner Contact Incorrect' ? 'selected' : '' }}>Owner Contact Incorrect</option>
+                </select>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                    Filter
+                </button>
+                @if(request()->hasAny(['search', 'reason']))
+                    <a href="{{ route('admin.reports.index') }}" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                        Clear
+                    </a>
+                @endif
+            </div>
+        </form>
+    </div>
+
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
