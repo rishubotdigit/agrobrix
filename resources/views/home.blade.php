@@ -168,30 +168,32 @@
         </div>
     </section>
 
-    <!-- 3. Properties in Selected State -->
-    @if(isset($selectedStateProperties) && $selectedStateProperties->isNotEmpty())
-    <section class="py-16 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-end mb-10">
-                <div>
-                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Properties in {{ $selectedState }}</h2>
-                    <p class="text-gray-600">Local opportunities in your region</p>
-                </div>
-                <a href="{{ route('search.advanced', ['state' => $selectedState]) }}" class="text-primary hover:text-primary-dark font-semibold flex items-center group">
-                    View All
-                    <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                    </svg>
-                </a>
-            </div>
+    <!-- 3. Properties by Selected States (Dynamic Sections) -->
+    @if(isset($statePropertiesCollection) && count($statePropertiesCollection) > 0)
+        @foreach($statePropertiesCollection as $index => $stateData)
+            <section class="py-16 {{ $index % 2 == 0 ? 'bg-gray-50' : 'bg-white' }}">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between items-end mb-10">
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-900 mb-2">Properties in {{ $stateData['state'] }}</h2>
+                            <p class="text-gray-600">Local opportunities in {{ $stateData['state'] }}</p>
+                        </div>
+                        <a href="{{ route('search.advanced', ['state' => $stateData['state']]) }}" class="text-primary hover:text-primary-dark font-semibold flex items-center group">
+                            View All
+                            <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </a>
+                    </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                @foreach($selectedStateProperties as $property)
-                    <x-property-card-simple :property="$property" />
-                @endforeach
-            </div>
-        </div>
-    </section>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        @foreach($stateData['properties'] as $property)
+                            <x-property-card-simple :property="$property" />
+                        @endforeach
+                    </div>
+                </div>
+            </section>
+        @endforeach
     @endif
 
     <!-- 4. Properties by State (Summary) -->

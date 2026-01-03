@@ -37,21 +37,26 @@ class HomeController extends Controller
         $featuredProperties = Property::with(['owner', 'amenities', 'district.state'])->where('status', 'approved')->where('featured', true)->limit(4)->get();
         $latestProperties = Property::with(['owner', 'amenities', 'district.state'])->where('status', 'approved')->orderBy('created_at', 'desc')->limit(4)->get();
 
-        // Properties in Selected State
-        $selectedState = request('state');
-        if (!$selectedState && Auth::check() && Auth::user()->address) {
-            // Attempt to extract state from user address if possible, or just default
-            // For now, let's default to Karnataka if not provided, as per request example
-            $selectedState = 'Karnataka';
+        // Properties by Selected States from Settings
+        $selectedStates = json_decode(\App\Models\Setting::get('homepage_states', '[]'), true) ?? [];
+        $statePropertiesCollection = [];
+        
+        foreach ($selectedStates as $state) {
+            $properties = Property::with(['owner', 'amenities', 'district'])
+                ->where('status', 'approved')
+                ->where('state', $state)
+                ->orderBy('created_at', 'desc')
+                ->limit(4)
+                ->get();
+            
+            // Only add states that have properties
+            if ($properties->isNotEmpty()) {
+                $statePropertiesCollection[] = [
+                    'state' => $state,
+                    'properties' => $properties
+                ];
+            }
         }
-        $selectedState = $selectedState ?: 'Karnataka';
-
-        $selectedStateProperties = Property::with(['owner', 'amenities', 'district'])
-            ->where('status', 'approved')
-            ->where('state', $selectedState)
-            ->orderBy('created_at', 'desc')
-            ->limit(4)
-            ->get();
 
         // Add wishlist status for authenticated buyers
         if (Auth::check() && Auth::user()->role === 'buyer') {
@@ -68,10 +73,13 @@ class HomeController extends Controller
                 return $property;
             });
 
-            $selectedStateProperties->transform(function ($property) use ($wishlistPropertyIds) {
-                $property->is_in_wishlist = in_array($property->id, $wishlistPropertyIds);
-                return $property;
-            });
+            // Add wishlist status to state properties
+            foreach ($statePropertiesCollection as &$stateData) {
+                $stateData['properties']->transform(function ($property) use ($wishlistPropertyIds) {
+                    $property->is_in_wishlist = in_array($property->id, $wishlistPropertyIds);
+                    return $property;
+                });
+            }
         }
             
         // State Summary
@@ -92,7 +100,7 @@ class HomeController extends Controller
             ->limit(8)
             ->get();
 
-        return view('home', compact('plans', 'featuredProperties', 'latestProperties', 'currentPlanId', 'currentPlanPrice', 'selectedState', 'selectedStateProperties', 'stateSummary', 'categorySummary'));
+        return view('home', compact('plans', 'featuredProperties', 'latestProperties', 'currentPlanId', 'currentPlanPrice', 'statePropertiesCollection', 'stateSummary', 'categorySummary'));
     }
 
     public function about()

@@ -47,7 +47,7 @@ class SettingController extends Controller
             'smtp_from_name' => Setting::get('smtp_from_name', ''),
             'logo' => Setting::get('logo', ''),
             'favicon' => Setting::get('favicon', ''),
-            'homepage_states' => Setting::get('homepage_states', json_encode(['Punjab', 'Haryana', 'Chandigarh', 'Himachal Pradesh'])),
+            'homepage_states' => Setting::get('homepage_states', '[]'),
         ];
 
         Log::info('Settings index: queue_mode retrieved as ' . $settings['queue_mode']);
@@ -129,9 +129,7 @@ class SettingController extends Controller
         Setting::set('smtp_from_name', $request->input('smtp_from_name', ''));
         
         // Save homepage states
-        if ($request->has('homepage_states')) {
-            Setting::set('homepage_states', json_encode($request->input('homepage_states')));
-        }
+        Setting::set('homepage_states', json_encode($request->input('homepage_states', [])));
 
         if ($request->hasFile('logo')) {
             $logoPath = $request->file('logo')->store('images', 'public');

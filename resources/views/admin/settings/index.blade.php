@@ -241,12 +241,7 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     @php
-                        $allStates = [
-                            'Punjab', 'Haryana', 'Chandigarh', 'Himachal Pradesh', 'Uttarakhand',
-                            'Delhi', 'Rajasthan', 'Uttar Pradesh', 'Madhya Pradesh', 'Gujarat',
-                            'Maharashtra', 'Karnataka', 'Tamil Nadu', 'Kerala', 'Andhra Pradesh',
-                            'Telangana', 'West Bengal', 'Bihar', 'Jharkhand', 'Odisha'
-                        ];
+                        $allStates = \App\Models\State::where('is_active', true)->orderBy('name')->pluck('name')->toArray();
                         $selectedStates = json_decode($settings['homepage_states'], true) ?? [];
                     @endphp
                     
