@@ -43,6 +43,10 @@ Route::prefix('owner')->middleware(['auth', 'role:owner'])->group(function () {
     Route::get('/leads', [DashboardController::class, 'leads'])->name('owner.leads');
     Route::get('/leads/{lead}', [DashboardController::class, 'showLead'])->name('owner.leads.show');
 
+    // Wishlist (Saved Properties)
+    Route::get('/wishlist', [\App\Http\Controllers\WishlistController::class, 'index'])->name('owner.wishlist.index');
+    Route::delete('/wishlist/remove/{propertyId}', [\App\Http\Controllers\WishlistController::class, 'remove'])->name('owner.wishlist.remove');
+
     // Viewed Contacts
     Route::get('/viewed-contacts', [DashboardController::class, 'viewedContacts'])->name('owner.viewed-contacts');
 

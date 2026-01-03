@@ -57,6 +57,7 @@ class Property extends Model
             $property->versions()->delete();
             $property->payments()->delete();
             $property->leads()->delete();
+            $property->wishlists()->delete();
         });
     }
 
@@ -122,6 +123,11 @@ class Property extends Model
     public function leads()
     {
         return $this->hasMany(Lead::class);
+    }
+
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
     }
 
     public function scopeFeatured($query)

@@ -337,20 +337,18 @@
                                     </span>
                                 </button>
 
-                                <!-- Wishlist Button -->
+                                <!-- Save Property Button -->
                                 @auth
-                                    @if(auth()->user()->role === 'buyer')
-                                        <form action="{{ route('wishlist.add') }}" method="POST" id="wishlistForm-{{ $property->id }}">
-                                            @csrf
-                                            <input type="hidden" name="property_id" value="{{ $property->id }}">
-                                            <button type="submit" class="w-full group bg-white hover:bg-gray-50 text-gray-700 hover:text-rose-600 font-semibold py-3 px-6 rounded-xl border border-gray-200 hover:border-rose-200 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
-                                                <svg class="w-5 h-5 transition-transform group-hover:scale-110 {{ $property->is_in_wishlist ? 'text-rose-500 fill-current' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                                                </svg>
-                                                {{ $property->is_in_wishlist ? 'Saved to Wishlist' : 'Save Property' }}
-                                            </button>
-                                        </form>
-                                    @endif
+                                    <form action="{{ route('wishlist.add') }}" method="POST" id="wishlistForm-{{ $property->id }}">
+                                        @csrf
+                                        <input type="hidden" name="property_id" value="{{ $property->id }}">
+                                        <button type="submit" class="w-full group bg-white hover:bg-gray-50 text-gray-700 hover:text-rose-600 font-semibold py-3 px-6 rounded-xl border border-gray-200 hover:border-rose-200 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                                            <svg class="w-5 h-5 transition-transform group-hover:scale-110 {{ $property->is_in_wishlist ? 'text-rose-500 fill-current' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                            </svg>
+                                            {{ $property->is_in_wishlist ? 'Saved to Wishlist' : 'Save Property' }}
+                                        </button>
+                                    </form>
                                 @else
                                     <a href="{{ route('login') }}" class="w-full group bg-white hover:bg-gray-50 text-gray-700 hover:text-rose-600 font-semibold py-3 px-6 rounded-xl border border-gray-200 hover:border-rose-200 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
                                         <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

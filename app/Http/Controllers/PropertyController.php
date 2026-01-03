@@ -60,8 +60,8 @@ class PropertyController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        // Add wishlist status for authenticated buyers
-        if (Auth::check() && Auth::user()->role === 'buyer') {
+        // Add wishlist status for all authenticated users
+        if (Auth::check()) {
             $user = Auth::user();
             $wishlistPropertyIds = Wishlist::where('user_id', $user->id)->pluck('property_id')->toArray();
 
@@ -84,7 +84,7 @@ class PropertyController extends Controller
         // Public property details
         $property->load(['owner', 'amenities', 'district.state']);
         
-        if (Auth::check() && Auth::user()->role === 'buyer') {
+        if (Auth::check()) {
             $property->is_in_wishlist = Wishlist::where('user_id', Auth::id())
                 ->where('property_id', $property->id)
                 ->exists();

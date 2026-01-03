@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Buyer\DashboardController;
 use App\Http\Controllers\Buyer\ProfileController;
 use App\Http\Controllers\Buyer\SearchController;
-use App\Http\Controllers\Buyer\WishlistController;
+use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\Buyer\NotificationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PlanPurchaseController;
@@ -28,7 +28,7 @@ Route::prefix('buyer')->middleware(['auth', 'role:buyer'])->group(function () {
 
     Route::get('/properties/{property}/contact', [InquiryController::class, 'viewContact'])->name('buyer.properties.contact');
 
-    // Wishlist
+    // Wishlist (Saved Properties)
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('buyer.wishlist.index');
     Route::post('/wishlist/add', [WishlistController::class, 'add'])->name('buyer.wishlist.add');
     Route::delete('/wishlist/remove/{propertyId}', [WishlistController::class, 'remove'])->name('buyer.wishlist.remove');

@@ -64,8 +64,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/properties/{property}/inquiry/verify-otp', [InquiryController::class, 'verifyOtp'])->name('inquiry.verifyOtp');
     Route::post('/properties/{property}/inquiry/status', [InquiryController::class, 'checkInquiryStatus'])->name('inquiry.status');
     Route::post('/properties/{property}/contact', [\App\Http\Controllers\InquiryController::class, 'viewContact'])->name('properties.contact');
-    Route::post('/wishlist/add', [\App\Http\Controllers\Buyer\WishlistController::class, 'add'])->middleware('role:buyer')->name('wishlist.add');
-    Route::delete('/wishlist/remove/{propertyId}', [\App\Http\Controllers\Buyer\WishlistController::class, 'remove'])->middleware('role:buyer')->name('wishlist.remove');
+    Route::post('/wishlist/add', [\App\Http\Controllers\WishlistController::class, 'add'])->name('wishlist.add');
+    Route::delete('/wishlist/remove/{propertyId}', [\App\Http\Controllers\WishlistController::class, 'remove'])->name('wishlist.remove');
 });
 
 require __DIR__.'/auth.php';

@@ -137,6 +137,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('leads/{lead}', [AdminInquiryController::class, 'showLead'])->name('admin.leads.show');
     Route::get('viewed-contacts', [AdminInquiryController::class, 'viewedContacts'])->name('admin.viewed-contacts.index');
 
+    // Wishlist (Saved Properties)
+    Route::get('wishlist', [\App\Http\Controllers\WishlistController::class, 'index'])->name('admin.wishlist.index');
+    Route::delete('wishlist/remove/{propertyId}', [\App\Http\Controllers\WishlistController::class, 'remove'])->name('admin.wishlist.remove');
+
     Route::get('notifications', [NotificationController::class, 'index'])->name('admin.notifications.index');
     Route::get('notifications/count', [NotificationController::class, 'count'])->name('admin.notifications.count');
     Route::get('notifications/dropdown', [NotificationController::class, 'dropdown'])->name('admin.notifications.dropdown');

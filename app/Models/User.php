@@ -116,6 +116,11 @@ class User extends Authenticatable
         return $this->hasMany(ViewedContact::class, 'buyer_id');
     }
 
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
     public function planPurchases()
     {
         return $this->hasMany(PlanPurchase::class);

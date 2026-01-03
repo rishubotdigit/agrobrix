@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Buyer;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Wishlist;
@@ -19,7 +19,16 @@ class WishlistController extends Controller
             ->pluck('property')
             ->filter(); // Remove nulls if any
 
-        return view('buyer.wishlist.index', ['properties' => $properties]);
+        // Determine view based on user role
+        $viewPath = match($user->role) {
+            'buyer' => 'buyer.wishlist.index',
+            'owner' => 'owner.wishlist.index',
+            'agent' => 'agent.wishlist.index',
+            'admin' => 'admin.wishlist.index',
+            default => 'buyer.wishlist.index',
+        };
+
+        return view($viewPath, ['properties' => $properties]);
     }
 
     public function add(Request $request)
@@ -33,16 +42,26 @@ class WishlistController extends Controller
             return back()->with('error', 'Property not found.');
         }
 
+        // Role-based validation: Owners cannot save their own properties
+        if ($user->role === 'owner' && $property->owner_id === $user->id) {
+            return back()->with('error', 'You cannot save your own property.');
+        }
+
+        // Role-based validation: Agents cannot save properties they manage
+        if ($user->role === 'agent' && $property->agent_id === $user->id) {
+            return back()->with('error', 'You cannot save properties you manage.');
+        }
+
         // Check if already in wishlist
         $existing = Wishlist::where('user_id', $user->id)->where('property_id', $propertyId)->first();
         if ($existing) {
-            return back()->with('info', 'Property is already in your wishlist.');
+            return back()->with('info', 'Property is already in your saved properties.');
         }
 
         // Add to wishlist
         Wishlist::create(['user_id' => $user->id, 'property_id' => $propertyId]);
 
-        return back()->with('success', 'Property added to your wishlist.');
+        return back()->with('success', 'Property saved successfully.');
     }
 
     public function remove(Request $request, $propertyId)

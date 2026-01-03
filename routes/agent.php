@@ -66,6 +66,10 @@ Route::prefix('agent')->middleware(['auth', 'role:agent'])->group(function () {
     // Payments
     Route::get('/payments', [DashboardController::class, 'payments'])->name('agent.payments');
 
+    // Wishlist (Saved Properties)
+    Route::get('/wishlist', [\App\Http\Controllers\WishlistController::class, 'index'])->name('agent.wishlist.index');
+    Route::delete('/wishlist/remove/{propertyId}', [\App\Http\Controllers\WishlistController::class, 'remove'])->name('agent.wishlist.remove');
+
     // Notifications
     Route::get('notifications', [NotificationController::class, 'index'])->name('agent.notifications.index');
     Route::get('notifications/count', [NotificationController::class, 'count'])->name('agent.notifications.count');
