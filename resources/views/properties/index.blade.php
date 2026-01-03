@@ -202,7 +202,7 @@
                                 <h3 class="text-md font-semibold text-gray-900 mb-2 line-clamp-2 h-12">{{ $property->title }}</h3>
 
                                 <div class="flex items-center justify-between mb-3">
-                                    <span class="text-xl font-bold text-green-600">₹{{ number_format($property->price) }}</span>
+                                    <span class="text-xl font-bold text-green-600">{!! format_indian_currency($property->price) !!}</span>
                                     @if($property->price_negotiable)
                                         <span class="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded italic">Negotiable</span>
                                     @endif

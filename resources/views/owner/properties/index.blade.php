@@ -107,7 +107,7 @@
             </div>
 
             <div class="flex items-center justify-between mb-4">
-                <div class="text-2xl font-bold text-primary">₹{{ number_format($property->price) }}</div>
+                <div class="text-2xl font-bold text-primary">{!! format_indian_currency($property->price) !!}</div>
                 @if($property->plot_area)
                     <div class="text-sm text-gray-600">{{ $property->plot_area }} {{ $property->plot_area_unit }}</div>
                 @endif

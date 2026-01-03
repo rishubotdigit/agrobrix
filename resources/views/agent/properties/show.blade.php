@@ -34,7 +34,7 @@
         </div>
 
         <!-- Price -->
-        <div class="text-3xl font-bold text-primary mb-4">₹{{ number_format($property->price) }}</div>
+        <div class="text-3xl font-bold text-primary mb-4">{!! format_indian_currency($property->price) !!}</div>
 
         <!-- Location -->
         <div class="flex items-center text-gray-600 mb-4">

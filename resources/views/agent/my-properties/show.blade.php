@@ -163,7 +163,7 @@
         <!-- Price Card -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div class="text-center">
-                <div class="text-3xl font-bold text-primary mb-2">₹{{ number_format($property->price) }}</div>
+                <div class="text-3xl font-bold text-primary mb-2">{!! format_indian_currency($property->price) !!}</div>
                 @if($property->price_negotiable)
                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                         Price Negotiable

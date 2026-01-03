@@ -48,7 +48,7 @@
         <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-1" title="{{ $property->title }}">{{ $property->title }}</h3>
         
         <div class="mb-3">
-            <span class="text-xl font-bold text-green-600">₹{{ number_format($property->price) }}</span>
+            <span class="text-xl font-bold text-green-600">{!! format_indian_currency($property->price) !!}</span>
         </div>
 
         <div class="flex items-center text-sm text-gray-600 mb-2">

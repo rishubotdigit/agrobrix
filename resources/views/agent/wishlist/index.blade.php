@@ -70,7 +70,7 @@
                         <span class="truncate">{{ $property->state }}</span>
                     </div>
 
-                    <p class="text-2xl font-bold text-emerald-600 mb-3">₹{{ number_format($property->price) }} @if($property->price_negotiable) <span class="text-sm text-orange-600 font-normal">(Negotiable)</span> @endif</p>
+                    <p class="text-2xl font-bold text-emerald-600 mb-3">{!! format_indian_currency($property->price) !!} @if($property->price_negotiable) <span class="text-sm text-orange-600 font-normal">(Negotiable)</span> @endif</p>
 
                     <div class="flex items-center text-gray-600 text-sm mb-4">
                         <svg class="w-4 h-4 mr-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

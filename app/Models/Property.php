@@ -130,6 +130,58 @@ class Property extends Model
         return $this->hasMany(Wishlist::class);
     }
 
+    public function analytics()
+    {
+        return $this->hasOne(PropertyAnalytics::class);
+    }
+
+    /**
+     * Get or create analytics for this property.
+     */
+    public function getOrCreateAnalytics()
+    {
+        if (!$this->analytics) {
+            return $this->analytics()->create([
+                'total_clicks' => 0,
+                'total_contact_views' => 0,
+                'total_saves' => 0,
+            ]);
+        }
+        return $this->analytics;
+    }
+
+    /**
+     * Increment property clicks.
+     */
+    public function incrementClicks()
+    {
+        $this->getOrCreateAnalytics()->incrementClicks();
+    }
+
+    /**
+     * Increment contact views.
+     */
+    public function incrementContactViews()
+    {
+        $this->getOrCreateAnalytics()->incrementContactViews();
+    }
+
+    /**
+     * Increment saves.
+     */
+    public function incrementSaves()
+    {
+        $this->getOrCreateAnalytics()->incrementSaves();
+    }
+
+    /**
+     * Decrement saves.
+     */
+    public function decrementSaves()
+    {
+        $this->getOrCreateAnalytics()->decrementSaves();
+    }
+
     public function scopeFeatured($query)
     {
         return $query->where('featured', true)->where('featured_until', '>', now());

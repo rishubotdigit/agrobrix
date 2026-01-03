@@ -17,7 +17,8 @@
     .filter-section {
         background: white;
         border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        border: 1px solid #f3f4f6;
     }
     .filter-group {
         border-bottom: 1px solid #f3f4f6;
@@ -67,7 +68,7 @@
         transition: all 0.2s ease-in-out;
     }
     .view-toggle-btn.active {
-        background-color: #2563eb;
+        background-color: #10b981;
         color: white;
     }
     .view-toggle-btn:not(.active) {
@@ -95,11 +96,12 @@
         transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
     .filter-input:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        outline: none;
     }
     .hero-gradient {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     }
     .card-shadow {
         box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
@@ -307,7 +309,7 @@
 
                                     <!-- Price -->
                                     <div class="mb-3">
-                                        <span class="text-xl font-bold text-emerald-600">₹{{ number_format($property->price) }}</span>
+                                        <span class="text-xl font-bold text-emerald-600">{!! format_indian_currency($property->price) !!}</span>
                                         @if($property->price_negotiable)
                                             <span class="text-xs text-gray-500 ml-1">(Negotiable)</span>
                                         @endif
@@ -410,7 +412,7 @@
                                                 <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3">
                                                     <h3 class="text-xl font-semibold text-gray-900 mb-2 sm:mb-0 line-clamp-2">{{ $property->title }}</h3>
                                                     <div class="text-right">
-                                                        <span class="text-2xl font-bold text-green-600">₹{{ number_format($property->price) }}</span>
+                                                        <span class="text-2xl font-bold text-green-600">{!! format_indian_currency($property->price) !!}</span>
                                                         @if($property->price_negotiable)
                                                             <span class="text-sm text-gray-500 block">(Negotiable)</span>
                                                         @endif

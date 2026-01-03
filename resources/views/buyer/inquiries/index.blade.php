@@ -46,7 +46,7 @@
                                 <div class="text-xs text-gray-500">{{ $inquiry->property->state ?? 'N/A' }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-semibold text-emerald-600">₹{{ number_format($inquiry->property->price ?? 0) }}</div>
+                                <div class="text-sm font-semibold text-emerald-600">{!! format_indian_currency($inquiry->property->price ?? 0) !!}</div>
                                 @if($inquiry->property->price_negotiable)
                                     <div class="text-xs text-gray-500">Negotiable</div>
                                 @endif

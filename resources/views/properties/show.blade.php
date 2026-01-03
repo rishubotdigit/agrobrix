@@ -72,7 +72,7 @@
                         </div>
                         
                         <div class="text-left sm:text-right pt-2">
-                            <p class="text-2xl sm:text-3xl font-bold text-emerald-600 tracking-tight">₹{{ number_format($property->price) }}</p>
+                            <p class="text-2xl sm:text-3xl font-bold text-emerald-600 tracking-tight">{!! format_indian_currency($property->price) !!}</p>
                             @if($property->price_negotiable)
                                 <div class="flex sm:justify-end mt-2">
                                     <span class="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 text-emerald-700 text-sm font-medium rounded-full border border-emerald-100">
@@ -288,7 +288,7 @@
                             </div>
                             <div class="flex justify-between items-center group pt-3 border-t border-dashed border-gray-200">
                                 <span class="text-gray-500 font-medium">Price</span>
-                                <span class="font-bold text-emerald-600 text-lg">₹{{ number_format($property->price) }}</span>
+                                <span class="font-bold text-emerald-600 text-lg">{!! format_indian_currency($property->price) !!}</span>
                             </div>
                         </div>
                     </div>
