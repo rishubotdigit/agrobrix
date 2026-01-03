@@ -101,7 +101,7 @@
         </div>
         <h3 class="text-xl font-semibold text-gray-900 mb-2">No saved properties yet</h3>
         <p class="text-gray-600 mb-6">Start browsing properties and save your favorites to your wishlist.</p>
-        <a href="{{ route('buyer.properties') }}" class="inline-flex items-center bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors">
+        <a href="{{ route('search.advanced') }}" class="inline-flex items-center bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
