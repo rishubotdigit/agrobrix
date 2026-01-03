@@ -420,7 +420,7 @@ class InquiryController extends Controller
                     'buyer_name' => $user->name,
                     'buyer_email' => $user->email,
                     'buyer_phone' => $user->mobile ?? '',
-                    'buyer_type' => $user->role
+                    'buyer_type' => $user->role === 'agent' ? 'agent' : 'buyer'
                 ]);
                 
                  event(new InquiryCreated($lead));
@@ -429,6 +429,7 @@ class InquiryController extends Controller
                     'lead_id' => $lead->id,
                     'property_id' => $property->id,
                     'user_role' => $user->role,
+                    'buyer_type' => $user->role === 'agent' ? 'agent' : 'buyer',
                     'buyer_email' => $user->email
                 ]);
             }

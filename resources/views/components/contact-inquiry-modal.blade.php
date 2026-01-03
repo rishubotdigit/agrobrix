@@ -182,7 +182,8 @@
                         }
                     });
                 @else
-                    // User is logged in as agent - fetch contact directly
+                    // User is logged in as agent/owner/admin (but not the owner/agent of this property) - fetch contact directly
+                    // This handles the case where an owner views another owner's property
                     fetchContactDirectly(propertyId);
                 @endif
             }
