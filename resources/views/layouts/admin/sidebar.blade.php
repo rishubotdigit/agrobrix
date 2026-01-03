@@ -1,7 +1,7 @@
 <div id="sidebar" class="w-64 gradient-bg text-white fixed top-0 left-0 z-50 transform -translate-x-full transition-transform duration-300 ease-in-out md:static md:translate-x-0 md:block shadow-lg">
     <div class="p-6">
         <h2 class="text-2xl font-bold">Admin Panel</h2>
-        <p class="text-emerald-100 text-sm mt-1">Management Dashboard</p>
+
     </div>
     <nav class="mt-6">
         <a href="{{ route('admin.dashboard') }}" class="flex items-center px-6 py-3 hover:bg-emerald-700 transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-emerald-700 border-r-4 border-white' : '' }}">

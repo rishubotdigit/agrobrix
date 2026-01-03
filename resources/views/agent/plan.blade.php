@@ -5,7 +5,7 @@
 @section('content')
 <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-900 mb-2">My Plan</h1>
-    <p class="text-gray-600">View your current plan details and usage.</p>
+
 </div>
 
 @if($activePlanPurchases->count() > 0)

@@ -5,7 +5,7 @@
 @section('content')
 <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-900 mb-2">My Plans & Billing</h1>
-    <p class="text-gray-600">Manage your subscription plans and view payment history.</p>
+
 </div>
 
 <!-- Active Plans Section -->
