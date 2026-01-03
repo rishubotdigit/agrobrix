@@ -1,4 +1,4 @@
-<nav class="bg-white shadow-sm fixed w-full top-0 z-50">
+<nav class="bg-white/95 backdrop-blur-md shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border-b border-gray-100 fixed w-full top-0 z-50 transition-all duration-300">
     <div class="w-full px-4 sm:px-6 lg:px-12">
         <div class="flex justify-between items-center h-20">
             <!-- Logo -->
