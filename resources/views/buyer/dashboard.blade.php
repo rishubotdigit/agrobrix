@@ -52,6 +52,56 @@
             </div>
         </div>
     </div>
+
+    <!-- Current Plan Card -->
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <p class="text-sm font-medium text-gray-600">Current Plan</p>
+                <h3 class="text-lg font-bold text-primary truncate" title="{{ $planInfo['name'] ?? 'Free Plan' }}">
+                    {{ $planInfo['name'] ?? 'Free Plan' }}
+                </h3>
+            </div>
+            <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2">
+                <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                </svg>
+            </div>
+        </div>
+
+        @if($planInfo)
+            <div class="space-y-3">
+                <div class="w-full bg-gray-100 rounded-full h-2.5">
+                    @php
+                        $percentage = $planInfo['max_contacts'] > 0 ? ($planInfo['used_contacts'] / $planInfo['max_contacts']) * 100 : 0;
+                    @endphp
+                    <div class="bg-primary h-2.5 rounded-full transition-all duration-500" style="width: {{ $percentage }}%"></div>
+                </div>
+                <div class="flex justify-between items-center text-xs text-gray-600">
+                    <span class="font-medium">{{ $planInfo['used_contacts'] }} / {{ $planInfo['max_contacts'] }} Contacts</span>
+                    <span>Expires: {{ \Carbon\Carbon::parse($planInfo['expires_at'])->format('M d') }}</span>
+                </div>
+                 @if($planInfo['is_expiring_soon'])
+                    <div class="flex items-center text-red-500 text-xs font-medium mt-1">
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Expiring Soon!
+                    </div>
+                @endif
+                <div class="pt-1">
+                     <a href="{{ route('buyer.plans') }}" class="text-xs text-primary hover:text-emerald-700 font-semibold flex items-center">
+                        Upgrade Plan <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    </a>
+                </div>
+            </div>
+        @else
+            <div class="flex flex-col gap-2">
+                <p class="text-sm text-gray-500">Upgrade to view more contacts.</p>
+                <a href="{{ route('buyer.plans') }}" class="text-sm text-primary hover:text-emerald-700 font-bold flex items-center">
+                    Browse Plans &rarr;
+                </a>
+            </div>
+        @endif
+    </div>
 </div>
 
 <!-- Recent Activity -->
