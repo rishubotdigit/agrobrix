@@ -75,7 +75,7 @@ class SearchController extends Controller
                 }
             })
             ->where('status', 'approved')
-            ->paginate(10);
+            ->paginate(12);
 
         // Add wishlist and contact viewed status for authenticated buyers
         if (Auth::check() && Auth::user()->role === 'buyer') {
@@ -141,7 +141,7 @@ class SearchController extends Controller
             $query->where('land_type', $category);
         }
 
-        $properties = $query->where('status', 'approved')->paginate(10);
+        $properties = $query->where('status', 'approved')->paginate(12);
 
         // Get user's wishlist and viewed contact property IDs
         $wishlistPropertyIds = Wishlist::where('user_id', $user->id)->pluck('property_id')->toArray();

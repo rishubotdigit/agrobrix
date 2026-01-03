@@ -354,7 +354,7 @@
                                     <!-- View Details Button -->
                                     <a href="{{ route('properties.show', $property) }}"
                                        class="block w-full bg-blue-600 text-white text-center font-semibold py-2.5 rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                                        View All
+                                        View Details
                                     </a>
                                 </div>
                             </div>
@@ -473,7 +473,7 @@
                                             <div class="mt-4">
                                                 <a href="{{ route('properties.show', $property) }}"
                                                    class="inline-flex items-center justify-center w-full sm:w-auto bg-blue-600 text-white font-medium py-2.5 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                                                    <span>View All</span>
+                                                    <span>View Details</span>
                                                     <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                                     </svg>
