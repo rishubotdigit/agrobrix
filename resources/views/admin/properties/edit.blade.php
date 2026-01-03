@@ -11,7 +11,7 @@
 
 <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-900 mb-2">Edit Property</h1>
-    <p class="text-gray-600">Update property listing information.</p>
+    
 </div>
 
 <!-- Multi-Step Form -->

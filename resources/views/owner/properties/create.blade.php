@@ -137,7 +137,7 @@
 </style>
 <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-900 mb-2">Add New Property</h1>
-    <p class="text-gray-600">Create a new property listing in 3 easy steps.</p>
+    
 </div>
 
 <!-- Usage Stats -->

@@ -5,7 +5,7 @@
 @section('content')
 <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-900 mb-2">Leads Management</h1>
-    <p class="text-gray-600">View and manage all your leads and potential clients.</p>
+
 </div>
 
 <!-- Leads Table -->

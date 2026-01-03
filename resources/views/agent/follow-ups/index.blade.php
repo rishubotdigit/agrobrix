@@ -5,7 +5,7 @@
 @section('content')
 <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-900 mb-2">Follow-Ups Management</h1>
-    <p class="text-gray-600">Schedule and manage follow-up calls/messages for your leads.</p>
+
 </div>
 
 <!-- Follow-Ups Table -->

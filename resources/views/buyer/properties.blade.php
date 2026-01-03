@@ -10,7 +10,7 @@
     <div class="container mx-auto p-4">
         <header class="bg-white shadow-md rounded-lg p-6 mb-6">
             <h1 class="text-3xl font-bold text-gray-800">Available Properties</h1>
-            <p class="text-gray-600 mt-2">Browse and view contact details for properties.</p>
+            
             <div class="mt-4">
                 <a href="{{ route('buyer.dashboard') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                     Back to Dashboard

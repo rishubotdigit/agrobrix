@@ -7,7 +7,7 @@
     <div class="flex justify-between items-center">
         <div>
             <h1 class="text-3xl font-bold text-gray-900 mb-2">Properties Management</h1>
-            <p class="text-gray-600">Manage all properties in the system.</p>
+            
         </div>
         <div class="flex items-center space-x-3">
             <a href="{{ route('admin.properties.export') }}" class="bg-gray-100 text-gray-700 px-4 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors inline-flex items-center">

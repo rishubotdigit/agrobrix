@@ -5,7 +5,7 @@
 @section('content')
 <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-900 mb-2">Who Viewed My Contact</h1>
-    <p class="text-gray-600">See which buyers have viewed your property contacts.</p>
+    
 </div>
 
 <!-- Viewed Contacts Table -->

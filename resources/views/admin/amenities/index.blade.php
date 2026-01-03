@@ -6,7 +6,7 @@
 <div class="mb-6 flex justify-between items-center">
     <div>
         <h1 class="text-2xl font-bold text-gray-900">Amenities Management</h1>
-        <p class="text-gray-600">Manage property amenities and their categories.</p>
+        
     </div>
     <button onclick="openModal('createAmenityModal')" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition">
         Add New Amenity

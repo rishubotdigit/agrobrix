@@ -15,7 +15,7 @@
 
 <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-900 mb-2">Saved Properties</h1>
-    <p class="text-gray-600">Your saved properties for easy access.</p>
+    
 </div>
 
 @if($properties && count($properties) > 0)
