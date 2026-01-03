@@ -109,4 +109,63 @@
         </button>
     </div>
 </form>
+
+<!-- Delete Account Section -->
+<div class="mt-8 bg-white p-6 rounded-xl shadow-sm border border-red-200">
+    <h3 class="text-lg font-medium text-red-600 mb-4">Danger Zone</h3>
+    <div class="flex items-center justify-between">
+        <div>
+            <p class="text-gray-700 font-medium">Delete Account</p>
+            <p class="text-sm text-gray-500">Permanently delete your account and all associated data.</p>
+        </div>
+        <button type="button" onclick="openDeleteModal()" class="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors">
+            Delete Account
+        </button>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-xl">
+        <div class="text-center">
+            <div class="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+                <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Delete Account</h3>
+            <p class="text-gray-600 mb-2">Are you sure you want to delete your account?</p>
+            <p class="text-sm text-gray-500 mb-6">Your account will be marked for deletion. If you don't log in within <strong>24 hours</strong>, your account will be permanently deleted. You can cancel this by logging back in.</p>
+            
+            <div class="flex space-x-3">
+                <button type="button" onclick="closeDeleteModal()" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                    Cancel
+                </button>
+                <form action="{{ route('buyer.profile.delete') }}" method="POST" class="flex-1">
+                    @csrf
+                    <button type="submit" class="w-full px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors">
+                        Yes, Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+}
+
+// Close modal when clicking outside
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDeleteModal();
+    }
+});
+</script>
 @endsection

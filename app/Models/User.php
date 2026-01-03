@@ -33,6 +33,7 @@ class User extends Authenticatable
         'address',
         'google_id',
         'facebook_id',
+        'deletion_requested_at',
     ];
 
     /**
@@ -57,6 +58,7 @@ class User extends Authenticatable
             'otp_expiry' => 'datetime',
             'last_otp_resend_at' => 'datetime',
             'verified_at' => 'datetime',
+            'deletion_requested_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
@@ -74,6 +76,21 @@ class User extends Authenticatable
     public function isVerified(): bool
     {
         return !is_null($this->verified_at);
+    }
+
+    public function isPendingDeletion(): bool
+    {
+        return !is_null($this->deletion_requested_at);
+    }
+
+    public function requestDeletion(): void
+    {
+        $this->update(['deletion_requested_at' => now()]);
+    }
+
+    public function cancelDeletionRequest(): void
+    {
+        $this->update(['deletion_requested_at' => null]);
     }
 
 

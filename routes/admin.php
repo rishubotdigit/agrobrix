@@ -27,6 +27,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     // Profile
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('admin.profile.edit');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('admin.profile.update');
+    Route::post('/profile/delete', [ProfileController::class, 'requestDeletion'])->name('admin.profile.delete');
 
     // Users
     Route::resource('users', UserController::class, ['except' => ['create', 'store']])->names('admin.users');

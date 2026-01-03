@@ -19,6 +19,7 @@ Route::prefix('buyer')->middleware(['auth', 'role:buyer'])->group(function () {
     // Profile
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('buyer.profile.edit');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('buyer.profile.update');
+    Route::post('/profile/delete', [ProfileController::class, 'requestDeletion'])->name('buyer.profile.delete');
 
     Route::get('/properties', [SearchController::class, 'properties'])->name('buyer.properties');
     Route::get('/api/properties', [SearchController::class, 'getPropertiesApi'])->name('buyer.api.properties');

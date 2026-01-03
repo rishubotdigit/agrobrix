@@ -28,7 +28,20 @@ class LoginController extends Controller
                 Auth::logout();
                 return back()->withErrors(['email' => 'Please verify your account first.']);
             }
+            
+            // Check if user had a pending deletion request and cancel it
+            $deletionCancelled = false;
+            if ($user->isPendingDeletion()) {
+                $user->cancelDeletionRequest();
+                $deletionCancelled = true;
+            }
+            
             $intended = session('url.intended', $this->getRedirectUrl($user));
+            
+            if ($deletionCancelled) {
+                return redirect($intended)->with('success', 'Welcome back! Your account deletion request has been cancelled and your account is now active.');
+            }
+            
             return redirect($intended)->with('success', 'Login successful! Welcome back.');
         }
         return back()->withErrors(['email' => 'Invalid credentials']);

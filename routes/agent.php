@@ -16,6 +16,7 @@ Route::prefix('agent')->middleware(['auth', 'role:agent'])->group(function () {
     // Profile
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('agent.profile.edit');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('agent.profile.update');
+    Route::post('/profile/delete', [ProfileController::class, 'requestDeletion'])->name('agent.profile.delete');
 
     // Leads
     Route::get('/leads', [LeadController::class, 'index'])->name('agent.leads.index');

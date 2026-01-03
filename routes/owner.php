@@ -14,6 +14,7 @@ Route::prefix('owner')->middleware(['auth', 'role:owner'])->group(function () {
     // Profile
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('owner.profile.edit');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('owner.profile.update');
+    Route::post('/profile/delete', [ProfileController::class, 'requestDeletion'])->name('owner.profile.delete');
 
     // Property CRUD routes
     Route::get('/properties', [MyPropertyController::class, 'index'])->name('owner.properties.index');

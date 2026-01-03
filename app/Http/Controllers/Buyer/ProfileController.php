@@ -52,4 +52,16 @@ class ProfileController extends Controller
 
         return back()->with('success', 'Profile updated successfully.');
     }
+
+    public function requestDeletion(Request $request)
+    {
+        $user = auth()->user();
+        $user->requestDeletion();
+        
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/')->with('success', 'Your account has been marked for deletion. If you don\'t log in within 24 hours, your account will be permanently deleted.');
+    }
 }

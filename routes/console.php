@@ -11,3 +11,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('plans:deactivate-expired')->daily();
 Schedule::command('process:email-queue')->everyFiveMinutes();
+Schedule::command('users:delete-pending')->hourly();
