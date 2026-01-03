@@ -88,8 +88,16 @@ class PropertyController extends Controller
             $property->is_in_wishlist = Wishlist::where('user_id', Auth::id())
                 ->where('property_id', $property->id)
                 ->exists();
+            $hasContacted = \App\Models\ViewedContact::where('buyer_id', Auth::id())
+                ->where('property_id', $property->id)
+                ->exists();
+        } else {
+            $hasContacted = false;
         }
+        
+        // Eager load analytics
+        $property->load('analytics');
 
-        return view('properties.show', compact('property'));
+        return view('properties.show', compact('property', 'hasContacted'));
     }
 }

@@ -66,6 +66,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/properties/{property}/contact', [\App\Http\Controllers\InquiryController::class, 'viewContact'])->name('properties.contact');
     Route::post('/wishlist/add', [\App\Http\Controllers\WishlistController::class, 'add'])->name('wishlist.add');
     Route::delete('/wishlist/remove/{propertyId}', [\App\Http\Controllers\WishlistController::class, 'remove'])->name('wishlist.remove');
+    Route::post('/properties/{property}/report', [\App\Http\Controllers\PropertyReportController::class, 'store'])->name('properties.report');
 });
 
 require __DIR__.'/auth.php';

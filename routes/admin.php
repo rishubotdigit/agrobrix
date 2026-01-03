@@ -63,6 +63,11 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('versions/{version}/diff', [PropertyController::class, 'diff'])->name('admin.versions.diff');
     Route::post('properties/{property}/toggle-featured', [PropertyController::class, 'toggleFeatured'])->name('admin.properties.toggle-featured');
 
+    // Property Reports
+    Route::get('reports', [\App\Http\Controllers\Admin\PropertyReportController::class, 'index'])->name('admin.reports.index');
+    Route::get('reports/{report}', [\App\Http\Controllers\Admin\PropertyReportController::class, 'show'])->name('admin.reports.show');
+
+
     // Categories Management
     Route::get('categories', [CategoryController::class, 'index'])->name('admin.categories.index');
     Route::post('categories', [CategoryController::class, 'store'])->name('admin.categories.store');

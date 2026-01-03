@@ -292,76 +292,92 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- CONTACT OWNER SECTION -->
-                    @if($property->owner)
-                    <div class="bg-white rounded-2xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] p-6 border border-gray-100 overflow-hidden relative">
-                        <!-- Decorative top accent -->
-                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-emerald-600"></div>
-                        
-                        <div class="text-center space-y-4 pt-2">
-                            
-                            <!-- Owner Profile Image -->
-                            <div class="flex justify-center">
-                                <div class="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center overflow-hidden ring-4 ring-emerald-50/50">
-                                    @if($property->owner->profile_photo && $property->owner->role !== 'admin')
-                                        <img src="{{ asset('storage/' . $property->owner->profile_photo) }}" alt="Owner Profile" class="w-full h-full object-cover">
-                                    @else
-                                        <span class="text-2xl font-bold text-emerald-600">
-                                            {{ substr($property->owner->name ?? 'A', 0, 1) }}
-                                        </span>
-                                    @endif
-                                </div>
-                            </div>
 
-                            <!-- Owner Name -->
-                            <div>
-                                <p class="text-gray-900 text-lg font-bold tracking-tight">
-                                    {{ $property->owner->role === 'admin' ? 'Agrobrix Team' : ($property->owner->name ?? 'Property Owner') }}
-                                </p>
-                                @if($property->owner->role !== 'admin')
-                                    <p class="text-emerald-600 font-medium text-xs uppercase tracking-wider mt-1">Property Owner</p>
+                    <!-- Property Highlights & Actions Card -->
+                    <div class="bg-white rounded-2xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] p-6 border border-gray-100 relative overflow-hidden text-center">
+                         <!-- Decorative top accent -->
+                         <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-emerald-600"></div>
+
+                        <!-- Owner/Agent Info -->
+                        <div class="flex flex-col items-center justify-center mb-5">
+                            <div class="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center overflow-hidden ring-4 ring-emerald-50/50 mb-3">
+                                @if($property->owner && $property->owner->profile_photo && $property->owner->role !== 'admin')
+                                    <img src="{{ asset('storage/' . $property->owner->profile_photo) }}" alt="Owner Profile" class="w-full h-full object-cover">
+                                @else
+                                    <span class="text-2xl font-bold text-emerald-600">
+                                        {{ substr($property->owner->name ?? 'A', 0, 1) }}
+                                    </span>
                                 @endif
                             </div>
+                            <h3 class="text-gray-900 text-lg font-bold tracking-tight">
+                                {{ $property->owner->role === 'admin' ? 'Agrobrix Team' : ($property->owner->name ?? 'Property Owner') }}
+                            </h3>
+                            @if($property->owner && $property->owner->role !== 'admin')
+                                <p class="text-emerald-600 font-medium text-xs uppercase tracking-wider">Property Owner</p>
+                            @endif
+                        </div>
 
-                            <!-- Divider -->
-                            <div class="border-t border-gray-100 pt-5 mt-2 space-y-3">
-                                <h3 class="text-base font-semibold text-gray-900 mb-2">Interested in this property?</h3>
-                                
-                                <button id="viewContactBtn" onclick="handleContactClick('{{ $property->slug }}', '{{ $property->owner_id }}', '{{ $property->agent_id }}')" class="w-full group bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 px-6 rounded-xl transition-all duration-300 shadow-lg shadow-emerald-600/20 hover:shadow-xl hover:shadow-emerald-600/30 transform hover:-translate-y-0.5">
-                                    <span class="flex items-center justify-center gap-2.5">
-                                        <svg class="w-5 h-5 transition-transform group-hover:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                                        </svg>
-                                        View Contact Details
-                                    </span>
-                                </button>
+                        <!-- Summary Section -->
+                        <div class="mb-5 px-2">
+                            <p class="text-gray-600 text-sm leading-relaxed">
+                                {{ \Illuminate\Support\Str::limit($property->description, 120) }}
+                            </p>
+                        </div>
 
-                                <!-- Save Property Button -->
-                                @auth
-                                    <form action="{{ route('wishlist.add') }}" method="POST" id="wishlistForm-{{ $property->id }}">
-                                        @csrf
-                                        <input type="hidden" name="property_id" value="{{ $property->id }}">
-                                        <button type="submit" class="w-full group bg-white hover:bg-gray-50 text-gray-700 hover:text-rose-600 font-semibold py-3 px-6 rounded-xl border border-gray-200 hover:border-rose-200 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
-                                            <svg class="w-5 h-5 transition-transform group-hover:scale-110 {{ $property->is_in_wishlist ? 'text-rose-500 fill-current' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                                            </svg>
-                                            {{ $property->is_in_wishlist ? 'Saved to Wishlist' : 'Save Property' }}
-                                        </button>
-                                    </form>
-                                @else
-                                    <a href="{{ route('login') }}" class="w-full group bg-white hover:bg-gray-50 text-gray-700 hover:text-rose-600 font-semibold py-3 px-6 rounded-xl border border-gray-200 hover:border-rose-200 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
-                                        <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <!-- View Count -->
+                        <div class="flex items-center justify-center gap-2 text-gray-500 text-sm font-medium mb-6 bg-gray-50 py-2 rounded-lg mx-auto w-max px-4">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            <span>{{ $property->analytics->total_clicks ?? 0 }} Views</span>
+                        </div>
+
+                        <!-- Actions Buttons (Single Row) -->
+                        <div class="flex items-center gap-3 mb-4">
+                            <!-- View Contact Button -->
+                             <button id="viewContactBtn" onclick="handleContactClick('{{ $property->slug }}', '{{ $property->owner_id }}', '{{ $property->agent_id }}')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-2 rounded-xl transition-all duration-300 shadow-lg shadow-emerald-600/20 hover:shadow-xl hover:shadow-emerald-600/30 text-sm flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                </svg>
+                                Contact
+                            </button>
+
+                            <!-- Save Button -->
+                            @auth
+                                <form action="{{ route('wishlist.add') }}" method="POST" id="wishlistForm-{{ $property->id }}" class="flex-1">
+                                    @csrf
+                                    <input type="hidden" name="property_id" value="{{ $property->id }}">
+                                    <button type="submit" class="w-full bg-white hover:bg-gray-50 text-gray-700 hover:text-rose-600 font-semibold py-3 px-2 rounded-xl border border-gray-200 hover:border-rose-200 transition-all duration-300 text-sm flex items-center justify-center gap-2">
+                                        <svg class="w-4 h-4 {{ $property->is_in_wishlist ? 'text-rose-500 fill-current' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                                         </svg>
-                                        Save Property
-                                    </a>
-                                @endauth
-                            </div>
-
+                                        {{ $property->is_in_wishlist ? 'Saved' : 'Save' }}
+                                    </button>
+                                </form>
+                            @else
+                                <a href="{{ route('login') }}" class="flex-1 bg-white hover:bg-gray-50 text-gray-700 hover:text-rose-600 font-semibold py-3 px-2 rounded-xl border border-gray-200 hover:border-rose-200 transition-all duration-300 text-sm flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                    </svg>
+                                    Save
+                                </a>
+                            @endauth
                         </div>
+
+                        <!-- Report Option -->
+                        @if($hasContacted)
+                            <div class="mt-4 border-t border-gray-100 pt-3">
+                                <button onclick="openReportModal()" class="text-xs text-gray-400 hover:text-red-500 transition-colors flex items-center justify-center gap-1 mx-auto">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                    </svg>
+                                    Report this Property
+                                </button>
+                            </div>
+                        @endif
+
                     </div>
-                    @endif
 
                 </div>
             </div>
@@ -372,6 +388,74 @@
 </div>
 
 @include('components.contact-inquiry-modal', ['propertyId' => $property->slug])
+
+<!-- Report Modal -->
+<div id="reportModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeReportModal()"></div>
+
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+            <form action="{{ route('properties.report', $property->slug) }}" method="POST">
+                @csrf
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                Report Property
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500 mb-4">
+                                    Please let us know why you are reporting this property. We will investigate the issue.
+                                </p>
+                                
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+                                        <select name="reason" required class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm rounded-md">
+                                            <option value="">Select a reason</option>
+                                            <option value="Sold Out">Sold Out</option>
+                                            <option value="Incorrect Information">Incorrect Information</option>
+                                            <option value="Owner Contact Incorrect">Owner Contact Incorrect</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Details (Optional)</label>
+                                        <textarea name="details" rows="3" class="shadow-sm focus:ring-emerald-500 focus:border-emerald-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Provide more details..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Submit Report
+                    </button>
+                    <button type="button" onclick="closeReportModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openReportModal() {
+        document.getElementById('reportModal').classList.remove('hidden');
+    }
+
+    function closeReportModal() {
+        document.getElementById('reportModal').classList.add('hidden');
+    }
+</script>
 
 
 @endsection

@@ -198,4 +198,8 @@ class Property extends Model
             'data' => $data,
         ]);
     }
+    public function reports()
+    {
+        return $this->hasMany(PropertyReport::class);
+    }
 }
