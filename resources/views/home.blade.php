@@ -64,14 +64,14 @@
                 </p>
 
                 <!-- Search Form -->
-                <div class="bg-white p-4 md:p-6 rounded-2xl shadow-xl max-w-6xl mx-auto -mt-6 relative z-20 border border-gray-100">
+                <div class="bg-white p-4 md:p-6 rounded-2xl shadow-xl max-w-7xl mx-auto -mt-6 relative z-20 border border-gray-100">
                     <form action="{{ route('search.advanced') }}" method="GET" id="search-form">
-                        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 items-end">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 items-end">
                             <!-- State -->
                             <div class="flex flex-col">
                                 <label class="text-xs font-bold text-gray-500 mb-1.5 ml-1 uppercase tracking-wider">State</label>
                                 <select name="state_id" id="state_filter" class="search-dropdown w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-primary focus:ring-0 focus:bg-white transition-all cursor-pointer text-gray-700">
-                                    <option value="">Select State</option>
+                                    <option value="">All States</option>
                                     @foreach(\App\Models\State::orderBy('name')->get() as $state)
                                         <option value="{{ $state->id }}">{{ $state->name }}</option>
                                     @endforeach
@@ -81,14 +81,14 @@
                             <div class="flex flex-col">
                                 <label class="text-xs font-bold text-gray-500 mb-1.5 ml-1 uppercase tracking-wider">District</label>
                                 <select name="district_id" id="district_filter" class="search-dropdown w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-primary focus:ring-0 focus:bg-white transition-all cursor-pointer text-gray-700">
-                                    <option value="">Select District</option>
+                                    <option value="">All Districts</option>
                                 </select>
                             </div>
                             <!-- Amenities (Main) -->
                             <div class="flex flex-col">
                                 <label class="text-xs font-bold text-gray-500 mb-1.5 ml-1 uppercase tracking-wider">Categories</label>
                                 <select name="category_id" id="category_filter" class="search-dropdown w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-primary focus:ring-0 focus:bg-white transition-all cursor-pointer text-gray-700">
-                                    <option value="">Select Categories</option>
+                                    <option value="">All Categorie</option>
                                     @foreach($categories as $category)
                                         <option value="{{ $category->id }}">{{ $category->name }}</option>
                                     @endforeach
@@ -98,7 +98,7 @@
                             <div class="flex flex-col">
                                 <label class="text-xs font-bold text-gray-500 mb-1.5 ml-1 uppercase tracking-wider">Land Area</label>
                                 <select name="area_range" id="area_filter" class="search-dropdown w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-primary focus:ring-0 focus:bg-white transition-all cursor-pointer text-gray-700">
-                                    <option value="">Select Area</option>
+                                    <option value="">All Areas</option>
                                     <option value="0-1">Under 1 Acre</option>
                                     <option value="1-5">1 - 5 Acres</option>
                                     <option value="5-10">5 - 10 Acres</option>
@@ -110,7 +110,7 @@
                             <div class="flex flex-col">
                                 <label class="text-xs font-bold text-gray-500 mb-1.5 ml-1 uppercase tracking-wider">Price Range</label>
                                 <select name="price_range" id="price_filter" class="search-dropdown w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-primary focus:ring-0 focus:bg-white transition-all cursor-pointer text-gray-700">
-                                    <option value="">Select Price</option>
+                                    <option value="">All Prices</option>
                                     <option value="0-1000000">Under 10L</option>
                                     <option value="1000000-5000000">10L - 50L</option>
                                     <option value="5000000-10000000">50L - 1Cr</option>
@@ -148,7 +148,7 @@
             // Dynamic district loading
             stateSelect.addEventListener('change', function() {
                 const stateId = this.value;
-                districtSelect.innerHTML = '<option value="">Select District</option>';
+                districtSelect.innerHTML = '<option value="">All Districts</option>';
                 
                 if (stateId) {
                     fetch(`/api/districts/${stateId}`)
