@@ -100,7 +100,9 @@ class HomeController extends Controller
             ->limit(8)
             ->get();
 
-        return view('home', compact('plans', 'featuredProperties', 'latestProperties', 'currentPlanId', 'currentPlanPrice', 'statePropertiesCollection', 'stateSummary', 'categorySummary'));
+        $categories = \App\Models\Category::orderBy('name')->get()->unique('name');
+
+        return view('home', compact('plans', 'featuredProperties', 'latestProperties', 'currentPlanId', 'currentPlanPrice', 'statePropertiesCollection', 'stateSummary', 'categorySummary', 'categories'));
     }
 
     public function about()

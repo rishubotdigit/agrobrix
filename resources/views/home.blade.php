@@ -36,6 +36,18 @@
         box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
         transform: translateY(-2px);
     }
+    .search-dropdown {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 1.25rem;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .search-dropdown:hover {
+        border-color: #10b981;
+        background-color: #f0fdf4;
+    }
 </style>
 
     <!-- Hero Section -->
@@ -52,35 +64,72 @@
                 </p>
 
                 <!-- Search Form -->
-                <div class="bg-white p-4 rounded-2xl shadow-xl max-w-4xl mx-auto">
-                    <form action="{{ route('search.advanced') }}" method="GET">
-                        <div class="flex flex-col md:flex-row gap-4 items-center">
-                            <div class="w-full md:w-5/12">
-                                <div class="relative">
-                                    <svg class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                    </svg>
-                                    <input type="text" name="q" placeholder="Search by location, type..." class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-primary focus:ring-0 focus:bg-white transition-colors" required>
-                                </div>
-                            </div>
-                            <div class="w-full md:w-2/12">
-                                <select name="state_id" id="state_filter" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-primary focus:ring-0 focus:bg-white transition-colors cursor-pointer">
-                                    <option value="">State</option>
+                <div class="bg-white p-4 md:p-6 rounded-2xl shadow-xl max-w-6xl mx-auto -mt-6 relative z-20 border border-gray-100">
+                    <form action="{{ route('search.advanced') }}" method="GET" id="search-form">
+                        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 items-end">
+                            <!-- State -->
+                            <div class="flex flex-col">
+                                <label class="text-xs font-bold text-gray-500 mb-1.5 ml-1 uppercase tracking-wider">State</label>
+                                <select name="state_id" id="state_filter" class="search-dropdown w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-primary focus:ring-0 focus:bg-white transition-all cursor-pointer text-gray-700">
+                                    <option value="">Select State</option>
                                     @foreach(\App\Models\State::orderBy('name')->get() as $state)
                                         <option value="{{ $state->id }}">{{ $state->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="w-full md:w-3/12">
-                                <select name="district_id" id="district_filter" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-primary focus:ring-0 focus:bg-white transition-colors cursor-pointer">
-                                    <option value="">District</option>
+                            <!-- District -->
+                            <div class="flex flex-col">
+                                <label class="text-xs font-bold text-gray-500 mb-1.5 ml-1 uppercase tracking-wider">District</label>
+                                <select name="district_id" id="district_filter" class="search-dropdown w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-primary focus:ring-0 focus:bg-white transition-all cursor-pointer text-gray-700">
+                                    <option value="">Select District</option>
                                 </select>
                             </div>
-                            <div class="w-full md:w-2/12">
-                                <button type="submit" class="w-full bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition shadow-md">
+                            <!-- Amenities (Main) -->
+                            <div class="flex flex-col">
+                                <label class="text-xs font-bold text-gray-500 mb-1.5 ml-1 uppercase tracking-wider">Categories</label>
+                                <select name="category_id" id="category_filter" class="search-dropdown w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-primary focus:ring-0 focus:bg-white transition-all cursor-pointer text-gray-700">
+                                    <option value="">Select Categories</option>
+                                    @foreach($categories as $category)
+                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <!-- Land Area -->
+                            <div class="flex flex-col">
+                                <label class="text-xs font-bold text-gray-500 mb-1.5 ml-1 uppercase tracking-wider">Land Area</label>
+                                <select name="area_range" id="area_filter" class="search-dropdown w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-primary focus:ring-0 focus:bg-white transition-all cursor-pointer text-gray-700">
+                                    <option value="">Select Area</option>
+                                    <option value="0-1">Under 1 Acre</option>
+                                    <option value="1-5">1 - 5 Acres</option>
+                                    <option value="5-10">5 - 10 Acres</option>
+                                    <option value="10-20">10 - 20 Acres</option>
+                                    <option value="20-plus">20+ Acres</option>
+                                </select>
+                            </div>
+                            <!-- Price -->
+                            <div class="flex flex-col">
+                                <label class="text-xs font-bold text-gray-500 mb-1.5 ml-1 uppercase tracking-wider">Price Range</label>
+                                <select name="price_range" id="price_filter" class="search-dropdown w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-primary focus:ring-0 focus:bg-white transition-all cursor-pointer text-gray-700">
+                                    <option value="">Select Price</option>
+                                    <option value="0-1000000">Under 10L</option>
+                                    <option value="1000000-5000000">10L - 50L</option>
+                                    <option value="5000000-10000000">50L - 1Cr</option>
+                                    <option value="10000000-50000000">1Cr - 5Cr</option>
+                                    <option value="50000000-plus">5Cr+</option>
+                                </select>
+                            </div>
+                            <!-- Search Button -->
+                            <div class="flex flex-col">
+                                <button type="submit" class="w-full bg-primary text-white px-2 py-3 rounded-xl font-bold hover:bg-primary-dark transition-all shadow-lg hover:shadow-primary/30 flex items-center justify-center gap-2 h-[52px]">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                    </svg>
                                     Search
                                 </button>
                             </div>
+                        </div>
+                        <div id="search-error" class="hidden mt-4 text-sm bg-red-50 text-red-600 px-4 py-2 rounded-lg border border-red-100 text-center font-medium animate-pulse">
+                            Please select at least one filter to begin your search.
                         </div>
                     </form>
                 </div>
@@ -89,26 +138,74 @@
     </section>
 
     <script>
-        // Dynamic district loading
-        document.getElementById('state_filter').addEventListener('change', function() {
-            const stateId = this.value;
+        document.addEventListener('DOMContentLoaded', function() {
+            const stateSelect = document.getElementById('state_filter');
             const districtSelect = document.getElementById('district_filter');
-            
-            districtSelect.innerHTML = '<option value="">District</option>';
-            
-            if (stateId) {
-                fetch(`/api/districts/${stateId}`)
-                    .then(response => response.json())
-                    .then(districts => {
-                        districts.forEach(district => {
-                            const option = document.createElement('option');
-                            option.value = district.id;
-                            option.textContent = district.name;
-                            districtSelect.appendChild(option);
-                        });
-                    })
-                    .catch(error => console.error('Error loading districts:', error));
+            const searchForm = document.getElementById('search-form');
+            const searchError = document.getElementById('search-error');
+            const allDropdowns = document.querySelectorAll('.search-dropdown');
+
+            // Dynamic district loading
+            stateSelect.addEventListener('change', function() {
+                const stateId = this.value;
+                districtSelect.innerHTML = '<option value="">Select District</option>';
+                
+                if (stateId) {
+                    fetch(`/api/districts/${stateId}`)
+                        .then(response => response.json())
+                        .then(districts => {
+                            districts.forEach(district => {
+                                const option = document.createElement('option');
+                                option.value = district.id;
+                                option.textContent = district.name;
+                                districtSelect.appendChild(option);
+                            });
+                            // Update visual for district select as it resets
+                            updateVisuals(districtSelect);
+                        })
+                        .catch(error => console.error('Error loading districts:', error));
+                }
+            });
+
+            // Visual feedback on selection
+            function updateVisuals(el) {
+                if (el.value) {
+                    el.classList.add('!bg-emerald-50', '!border-emerald-300', '!text-emerald-700', 'font-semibold');
+                    el.classList.remove('bg-gray-50', 'border-gray-200');
+                } else {
+                    el.classList.remove('!bg-emerald-50', '!border-emerald-300', '!text-emerald-700', 'font-semibold');
+                    el.classList.add('bg-gray-50', 'border-gray-200');
+                }
             }
+
+            allDropdowns.forEach(dropdown => {
+                // Initialize visuals (for back button/refresh)
+                updateVisuals(dropdown);
+                
+                dropdown.addEventListener('change', () => {
+                    updateVisuals(dropdown);
+                    searchError.classList.add('hidden');
+                });
+            });
+
+            // Validation
+            searchForm.addEventListener('submit', function(e) {
+                let selectedCount = 0;
+                allDropdowns.forEach(dropdown => {
+                    if (dropdown.value) selectedCount++;
+                });
+
+                if (selectedCount === 0) {
+                    e.preventDefault();
+                    searchError.classList.remove('hidden');
+                    searchError.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    
+                    // Hide message after 5 seconds
+                    setTimeout(() => {
+                        searchError.classList.add('hidden');
+                    }, 5000);
+                }
+            });
         });
     </script>
 

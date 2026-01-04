@@ -34,12 +34,36 @@ class SearchController extends Controller
     public function advanced(Request $request)
     {
         $query = $request->get('q', '');
+        $stateId = $request->get('state_id');
+        $districtId = $request->get('district_id');
+        $categoryId = $request->get('category_id');
+        $areaRange = $request->get('area_range');
+        $priceRange = $request->get('price_range');
+        
         $minPrice = $request->get('min_price', '');
         $maxPrice = $request->get('max_price', '');
         $landType = $request->get('land_type', '');
         $minArea = $request->get('min_area', '');
         $maxArea = $request->get('max_area', '');
         $amenities = $request->get('amenities', []);
+
+        // Handle Price Range Dropdown
+        if ($priceRange) {
+            $parts = explode('-', $priceRange);
+            if (count($parts) == 2) {
+                $minPrice = $parts[0];
+                $maxPrice = $parts[1] === 'plus' ? null : $parts[1];
+            }
+        }
+
+        // Handle Area Range Dropdown
+        if ($areaRange) {
+            $parts = explode('-', $areaRange);
+            if (count($parts) == 2) {
+                $minArea = $parts[0];
+                $maxArea = $parts[1] === 'plus' ? null : $parts[1];
+            }
+        }
 
         $properties = Property::with(['owner', 'amenities', 'district.state'])
             ->when($query, function ($q) use ($query) {
@@ -51,6 +75,23 @@ class SearchController extends Controller
                             $stateQuery->where('name', 'like', "%{$query}%");
                         });
                 });
+            })
+            ->when($stateId, function ($q) use ($stateId) {
+                $q->whereHas('district', function ($dq) use ($stateId) {
+                    $dq->where('state_id', $stateId);
+                });
+            })
+            ->when($districtId, function ($q) use ($districtId) {
+                $q->where('district_id', $districtId);
+            })
+            ->when($categoryId, function ($q) use ($categoryId) {
+                $category = \App\Models\Category::find($categoryId);
+                if ($category) {
+                    $categoryIds = \App\Models\Category::where('name', $category->name)->pluck('id');
+                    $q->whereHas('amenities.subcategory', function ($sq) use ($categoryIds) {
+                        $sq->whereIn('category_id', $categoryIds);
+                    });
+                }
             })
             ->when($minPrice, function ($q) use ($minPrice) {
                 $q->where('price', '>=', $minPrice);
@@ -91,7 +132,7 @@ class SearchController extends Controller
         // Get filter options
         $states = \App\Models\State::orderBy('name')->get();
         $landTypes = Property::distinct()->pluck('land_type')->filter()->sort();
-        $categoriesWithAmenities = \App\Models\Category::with('amenities')->get();
+        $categoriesWithAmenities = \App\Models\Category::with('amenities')->get()->unique('name');
 
         return view('search.advanced', compact(
             'properties',
