@@ -110,7 +110,11 @@
     </div>
 </form>
 
+
+<x-auth-status :user="$user" />
+
 <!-- Delete Account Section -->
+
 <div class="mt-8 bg-white p-6 rounded-xl shadow-sm border border-red-200">
     <h3 class="text-lg font-medium text-red-600 mb-4">Danger Zone</h3>
     <div class="flex items-center justify-between">
